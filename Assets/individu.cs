@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SimulationFourmiliere
+namespace individu
 {
     public static class Utils
     {

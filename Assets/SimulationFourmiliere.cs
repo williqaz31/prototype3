@@ -1,10 +1,34 @@
-﻿namespace SimulationFourmiliere
-{
-   using System;
+﻿using Unity.VisualScripting;
+
+//namespace SimulationFourmiliere
+//{ 
+using System;
 using System.Collections.Generic;
+using individu;
+
 
 namespace SimulationFourmiliere
 {
+    public class SimulationState
+    {
+        public int stockNourriture;
+        public Colonie colonie;
+        public List<Oeuf> oeufs;
+        public int jour;
+        public  List<int> historiquePopulation;   
+
+        public SimulationState(int stockInitial)
+        {
+            stockNourriture = stockInitial;
+            colonie = new Colonie(4);
+            oeufs = new List<Oeuf>();
+            jour = 0;
+            historiquePopulation = new List<int>();
+            historiquePopulation.Add(colonie.Pop());    
+          
+        }
+
+    }
     public enum Saison
     {
         HIVER,
@@ -13,56 +37,7 @@ namespace SimulationFourmiliere
         AUTOMNE
     }
 
-    public class Fourmi
-    {
-        public int joursSansManger = 0;
-        public int age = 0;
-        public int ageMax = 365;
 
-        public void Manger()
-        {
-            joursSansManger = 0;
-        }
-
-        public Fourmi Affamer()
-        {
-            joursSansManger++;
-            if (joursSansManger >= 7)
-                return this;
-            return null;
-        }
-
-        public Fourmi Vieillir()
-        {
-            age++;
-            if (age >= ageMax)
-                return this;
-            return null;
-        }
-    }
-
-    public class Oeuf
-    {
-        int age = 0;
-        int dureeEclosion = 21;
-
-        public bool Vieillir()
-        {
-            age++;
-            return age >= dureeEclosion;
-        }
-    }
-
-    public class Reine : Fourmi
-    {
-        public new Fourmi Vieillir()
-        {
-            age++;
-            if (age >= 3650)
-                return this;
-            return null;
-        }
-    }
 
     public class Colonie
     {
@@ -163,7 +138,7 @@ namespace SimulationFourmiliere
 
             foreach (var oeuf in oeufs)
             {
-                if (oeuf.Vieillir())
+                if (oeuf.Vieillir() != null)
                     colonie.Naissance();
                 else
                     nouveaux.Add(oeuf);
@@ -172,58 +147,54 @@ namespace SimulationFourmiliere
             return nouveaux;
         }
 
-        static void Main(string[] args)
+        public static void CalculSimulation(SimulationState state)
         {
+          /*  
             int stockNourriture = 50;
             Colonie colonie = new Colonie(4);
-            List<Oeuf> oeufs = new List<Oeuf>();
-
-            int[] P = new int[jours + 1];
-            P[0] = colonie.Pop();
-
-            for (int t = 0; t < jours; t++)
+            List<Oeuf> oeufs = new List<Oeuf>();                  */
+          
+            Saison saison = SaisonActuelle(state.jour);
+            
+            var decision = DecisionApport(saison);
+            int apport = decision.apport;
+            int consoParFourmi = decision.conso;
+            
+            int nourritureTotale = state.stockNourriture + apport;
+            
+            double f_espace = Math.Max(0, 1.0 - (double)state.colonie.Pop() / k);
+            
+            if (state.colonie.reine != null)
             {
-                Saison saison = SaisonActuelle(t);
-
-                var decision = DecisionApport(saison);
-                int apport = decision.apport;
-                int consoParFourmi = decision.conso;
-
-                int nourritureTotale = stockNourriture + apport;
-
-                double f_espace = Math.Max(0, 1.0 - (double)colonie.Pop() / k);
-
-                if (colonie.reine != null)
-                {
-                    oeufs = Ponte(oeufs, colonie, f_espace, saison);
-                }
-
-                int consommationPossible = nourritureTotale / consoParFourmi;
-
-                if (consommationPossible >= colonie.Pop())
-                {
-                    stockNourriture = nourritureTotale - (colonie.Pop() * consoParFourmi);
-
-                    foreach (var fourmi in colonie.population)
-                        fourmi.Manger();
-                }
-                else
-                {
-                    stockNourriture = 0;
-                }
-
-                // Mortalité naturelle
-                colonie.population.RemoveAll(f =>
-                {
-                    return f.Vieillir() != null;
-                });
-
-                P[t + 1] = colonie.Pop();
+                state.oeufs = Ponte(state.oeufs, state.colonie, f_espace, saison);
             }
-
-            Console.WriteLine("Simulation terminée.");
-            Console.WriteLine("Population finale : " + colonie.Pop());
+            
+            int consommationPossible = nourritureTotale / consoParFourmi;
+            
+            if (consommationPossible >= state.colonie.Pop())
+            {
+                state.stockNourriture = nourritureTotale - (state.colonie.Pop() * consoParFourmi);
+            
+                foreach (var fourmi in state.colonie.population)
+                    fourmi.Manger();
+            }
+            else
+            {
+                state.stockNourriture = 0;
+            }
+            
+            // Mortalité naturelle
+            state.colonie.population.RemoveAll(f =>
+            {
+                return f.Vieillir() != null;
+            });
+            
+            state.historiquePopulation.Add(state.colonie.Pop());
+            
+           
+           
+            state.jour++; 
         }
     }
 }
-}
+//}
