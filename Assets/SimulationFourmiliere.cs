@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using individu;
+using UnityEngine;
 
 
 namespace SimulationFourmiliere
@@ -15,7 +16,7 @@ namespace SimulationFourmiliere
         public Colonie colonie;
         public List<Oeuf> oeufs;
         public int jour;
-        public  List<int> historiquePopulation;   
+        public List<int> historiquePopulation;
 
         public SimulationState(int stockInitial)
         {
@@ -24,11 +25,10 @@ namespace SimulationFourmiliere
             oeufs = new List<Oeuf>();
             jour = 0;
             historiquePopulation = new List<int>();
-            historiquePopulation.Add(colonie.Pop());    
-          
+            historiquePopulation.Add(colonie.Pop());
         }
-
     }
+
     public enum Saison
     {
         HIVER,
@@ -38,15 +38,20 @@ namespace SimulationFourmiliere
     }
 
 
-
     public class Colonie
     {
-        public List<Fourmi> population = new List<Fourmi>();
-        public List<Fourmi> fourmisMortes = new List<Fourmi>();
-        public Reine reine = new Reine();
+        public List<Fourmi> population;
+        public List<Fourmi> fourmisMortes;
+        public Reine reine;
+
 
         public Colonie(int nbFourmisDebut)
+
         {
+            population = new List<Fourmi>();
+            fourmisMortes = new List<Fourmi>();
+            reine = new Reine();
+
             for (int i = 0; i < nbFourmisDebut; i++)
                 population.Add(new Fourmi());
         }
@@ -54,7 +59,7 @@ namespace SimulationFourmiliere
         public void Naissance()
         {
             population.Add(new Fourmi());
-            Console.WriteLine("Naissance");
+            Debug.Log("Naissance" + this.Pop());
         }
 
         public void Mort()
@@ -63,6 +68,8 @@ namespace SimulationFourmiliere
             {
                 fourmisMortes.Add(population[0]);
                 population.RemoveAt(0);
+
+                Debug.Log("Mort");
             }
         }
 
@@ -84,13 +91,14 @@ namespace SimulationFourmiliere
         const int DUREE_PRINTEMPS = 91;
         const int DUREE_ETE = 91;
         const int DUREE_AUTOMNE = 90;
+        private const int CONSO_HIVER = 2;
 
         const int ANNEE = DUREE_HIVER + DUREE_PRINTEMPS + DUREE_ETE + DUREE_AUTOMNE;
         const int DECALAGE_ANNEE = -183;
 
         static int k = 10000;
         static int E_max = 10;
-        static int jours = 6000;
+
 
         static Saison SaisonActuelle(int jour)
         {
@@ -111,7 +119,7 @@ namespace SimulationFourmiliere
         static (int apport, int conso) DecisionApport(Saison saison)
         {
             if (saison == Saison.HIVER)
-                return (10, 1);
+                return (10, CONSO_HIVER);
             else
                 return (150, 2);
         }
@@ -149,51 +157,101 @@ namespace SimulationFourmiliere
 
         public static void CalculSimulation(SimulationState state)
         {
-          /*  
-            int stockNourriture = 50;
-            Colonie colonie = new Colonie(4);
-            List<Oeuf> oeufs = new List<Oeuf>();                  */
-          
+            /*
+              int stockNourriture = 50;
+              Colonie colonie = new Colonie(4);
+              List<Oeuf> oeufs = new List<Oeuf>();
+                             */
+
+
             Saison saison = SaisonActuelle(state.jour);
-            
+
             var decision = DecisionApport(saison);
             int apport = decision.apport;
             int consoParFourmi = decision.conso;
-            
+
             int nourritureTotale = state.stockNourriture + apport;
-            
+
+            int consommationHiver = DUREE_HIVER * (CONSO_HIVER * (state.colonie.Pop() + state.oeufs.Count));
+
             double f_espace = Math.Max(0, 1.0 - (double)state.colonie.Pop() / k);
-            
+            //# Vérifie si la reine est encore en vie pour pondre les oeufs et ne pond pas d'oeuf si elle est affamé
             if (state.colonie.reine != null)
             {
-                state.oeufs = Ponte(state.oeufs, state.colonie, f_espace, saison);
+                if (state.colonie.reine.Vieillir() is null && state.colonie.reine.joursSansManger == 0)
+                {
+                    // # Si la colonie à asser en réserve pour pouvoir survivre a l'hiver sans apport quotidien alors on peut pondre sionon non
+                    if (state.stockNourriture >= consommationHiver)
+                    {
+                        state.oeufs = Ponte(state.oeufs, state.colonie, f_espace, saison);
+                    }
+                }
             }
-            
+            else
+            {
+                state.colonie.ReineMorte();
+            }
+
+            //   # -----------------------------------------------GESTION DE NOURRITURE-----------------------------------------------------------------
             int consommationPossible = nourritureTotale / consoParFourmi;
-            
+
             if (consommationPossible >= state.colonie.Pop())
             {
                 state.stockNourriture = nourritureTotale - (state.colonie.Pop() * consoParFourmi);
-            
+
                 foreach (var fourmi in state.colonie.population)
                     fourmi.Manger();
             }
             else
             {
+                int fourmiNourries = consommationPossible;
+
                 state.stockNourriture = 0;
+                state.colonie.population.Sort((f1, f2) => f2.joursSansManger.CompareTo(f1.joursSansManger));
+                // # Fait manger les fourmis affamées en commencent par la reine
+                if (state.colonie.reine != null)
+                {
+                    if (consommationPossible >= 1)
+                    {
+                        state.colonie.reine.Manger();
+                        fourmiNourries--;
+                        for (int i = 0; i < fourmiNourries; i++)
+                        {
+                            state.colonie.population[i].Manger();
+                        }
+                    }
+                    else
+                    {
+                        state.colonie.reine.Affamer();
+                    }
+
+                    // # Gestion des fourmies mortes
+                    List<Fourmi> mortes = new List<Fourmi>();
+
+                    for (int i = fourmiNourries; i <= state.colonie.Pop() - 1; i++)
+                    {
+                        Fourmi morte = state.colonie.population[i].Affamer();
+                        if (morte != null)
+                        {
+                            mortes.Add(morte);
+                        }
+                    }
+
+                    //  # Tue les fourmis affamées depuis 7 jours
+                    foreach (Fourmi morte in mortes)
+                    {
+                        state.colonie.population.Remove(morte);
+                    }
+                }
             }
-            
+
             // Mortalité naturelle
-            state.colonie.population.RemoveAll(f =>
-            {
-                return f.Vieillir() != null;
-            });
-            
+            state.colonie.population.RemoveAll(f => { return f.Vieillir() != null; });
+
             state.historiquePopulation.Add(state.colonie.Pop());
-            
-           
-           
-            state.jour++; 
+
+
+            state.jour++;
         }
     }
 }

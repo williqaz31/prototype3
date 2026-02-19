@@ -11,6 +11,7 @@ public class clockManager : MonoBehaviour
     private float multiplier = 1.0f;
     public popCounter popCounter;
     private float timeInADay = 86400f;
+    public int day = 0;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -22,7 +23,7 @@ public class clockManager : MonoBehaviour
     void Update()
     {
         elapsedTime += Time.deltaTime *  multiplier;
-        elapsedTime %= timeInADay;
+     
         UpdateClockUI();
 
     }
@@ -30,13 +31,19 @@ public class clockManager : MonoBehaviour
     void UpdateClockUI()
     {
         int days = Mathf.FloorToInt(elapsedTime / timeInADay);
+        if (days > day)
+        {
+            day = days;
+            popCounter.NoveauJour();
+        }
+       
+       
         int hours = Mathf.FloorToInt(((elapsedTime - (days * 24f) * 3600f) / 3600f));
        
         
-        int minutes = Mathf.FloorToInt((elapsedTime- hours *3600f)/ 60f);
-        int seconds = Mathf.FloorToInt((elapsedTime -hours *3600f) - (minutes * 60f));
-       // hours -= days * 24;
-        
+        int minutes = Mathf.FloorToInt((elapsedTime - (days * 24f + hours )*3600f)/ 60f);
+        int seconds = Mathf.FloorToInt((elapsedTime -(days * 24f + hours )*3600f) - (minutes * 60f));
+
         
         string clockString = string.Format("{0:00}:{1:00}:{2:00}:{3:00}", days, hours, minutes, seconds);
         clock.text = clockString;

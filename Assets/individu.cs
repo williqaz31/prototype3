@@ -65,6 +65,8 @@ namespace individu
             else
                 return null;
         }
+
+   
     }
 
     public class Reine : Fourmi
