@@ -46,7 +46,7 @@ public class clockManager : MonoBehaviour
 
         
        // string clockString = string.Format("{0:00}:{1:00}:{2:00}:{3:00}", days, hours, minutes, seconds);
-        string clockString = string.Format("{0:00}",days);
+        string clockString = string.Format("{0:0000}",days);
         clock.text = clockString;
         
         
