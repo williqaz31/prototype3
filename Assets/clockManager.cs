@@ -20,6 +20,7 @@ public class clockManager : MonoBehaviour
     private int month;
     private bool newWeek;
     private bool newMonth;
+  
     
     
 
@@ -50,12 +51,15 @@ public class clockManager : MonoBehaviour
         {
             week++;
             newWeek = true;
+            pausePlay.PopUp.Titre =  "Bilan hebdomadaire";
         }
         
         else if (days != 0 && days % 30 == 0  && days/30 != month)
         {
             month++;
             newMonth = true;
+            pausePlay.PopUp.Titre = "Bilan mensuel";
+
         }
         else
         {
@@ -67,6 +71,8 @@ public class clockManager : MonoBehaviour
         if (days % UpdateCycle.gestionPauseAuto == 0 && (newWeek || newMonth))
         {
             pausePlay.Toggle();
+            
+            
         }
        
        
