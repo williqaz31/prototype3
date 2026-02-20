@@ -52,15 +52,22 @@ public class popCounter : MonoBehaviour
 
     public string EndWeek()
     {
+        
+        int croissance;
         int durer = 0;
         
         string famine;
         int popEndWeek = state.colonie.Pop();
         // Gestion de l'affichage de la croissance de la popualtion----------------------------------------
-        int croissance = ((popEndWeek - popStartWeek) / popStartWeek * 100);
+        if (popStartWeek > 0)
+        {
+            croissance = ((popEndWeek - popStartWeek) / popStartWeek * 100);
+        }
+        else croissance = 0;
+
         string typeCroissance = croissance switch
         {
-            0 => "<color=\"black\"></color>",
+            0 => "<color=\"white\">Population stable</color>",
             < 0 => $"<color=\"red\">Décroissance: {croissance}</color>",
             > 0 => $"<color=\"white\">Croissance: {croissance}</color>",
 
@@ -76,40 +83,32 @@ public class popCounter : MonoBehaviour
                 durer = (int)(state.FinFamine - state.DebutFamine);
             } 
        
-            famine = $"""
-                      <color="red">
-                      -----------MANQUE DE NOURRITURE----------------
-                      Durée: {durer}
-                      Score de famine: {state.score}
+            famine = $"<color=\"red\">\n-----------MANQUE DE NOURRITURE----------------\nDurée: {durer} \nScore de famine: {state.score}</color >";
+                          
 
-
-                      </color>
-                      """;
-            
         }
-        else famine = "Félicitation Il n'y à pas eu de famine";
-        
-        
-        
+        else famine = "<color=\"green\">Félicitation Il n'y à pas eu de famine</color >";
+
+
+        int morts_naturels = popStartWeek - popEndWeek - state.naissance - state.MortsAffame;
+        int morts = popStartWeek - popEndWeek;
+        if (morts < 0)
+        {
+            morts = 0;
+        }
+        if (morts_naturels < 0)
+        {
+            morts_naturels = 0;
+        }
         
         //Affichage Final----------------------------------------
-        string info = $"""
-                       -----------POPULATION--------------
-                       Au début de la semaine:  {popStartWeek}
-                       À la fin de la semaine:  {popEndWeek}
-                       {typeCroissance}
-                       -------------MORTS-----------------
-                       Famine: {state.MortsAffame}
-                       Naturel: {popEndWeek - popStartWeek - state.naissance - state.MortsAffame}
-                       Total: {popEndWeek - popStartWeek}
-                       {famine}
-                       -----------NOURRITURE--------------
-                       Stock: {stockNourriture}
+        string info =
+            $"-----------POPULATION--------------\nAu début de la semaine:  {popStartWeek}\nÀ la fin de la semaine:  {popEndWeek}\n{typeCroissance} \n-------------MORTS-----------------\nFamine: {state.MortsAffame}\nNaturel: {morts_naturels }\nTotal: {morts}\n{famine}\n-----------NOURRITURE--------------\nStock: {stockNourriture}";
+
+
                        
-
-
-                       """;
         return info;
+        
 
     }
 

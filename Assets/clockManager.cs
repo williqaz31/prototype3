@@ -60,8 +60,11 @@ public class clockManager : MonoBehaviour
             {
                 week++;
                 newWeek = true;
+                // Update le titre pour avoir la bonne semaine
+                //UpdateAutoPause("Hebdomadaire");
                 string info = popCounter.EndWeek();
                 pausePlay.PopUp.Information = info;
+                popCounter.NouvelleSemaine();
                 /* if (pausePlay.PopUp.Titre == "Bilan hebdomadaire")
                  {
                      pausePlay.TogglePopUp();
@@ -75,7 +78,8 @@ public class clockManager : MonoBehaviour
             {
                 month++;
                 newMonth = true;
-                
+                pausePlay.PopUp.Information = $"{month}";
+
             } 
             else newMonth = false;
             
@@ -87,6 +91,7 @@ public class clockManager : MonoBehaviour
         if (intervalPauseAuto != null && days % intervalPauseAuto== 0 && (newWeek || newMonth))
         {
             pausePlay.TogglePopUp();
+           
             
         }
        
@@ -111,12 +116,14 @@ public class clockManager : MonoBehaviour
         switch (name)
         {
             case "Mensuel":
-                pausePlay.PopUp.Titre = $"Bilan du {month} mois";
+                pausePlay.PopUp.Titre = $"Bilan du  mois";
                 intervalPauseAuto = MONTHLY_PAUSE;
+                
                 break;
             case "Hebdomadaire":
-                pausePlay.PopUp.Titre =  $"Bilan de la semaine {week}";
+                pausePlay.PopUp.Titre =  $"Bilan de la semaine ";
                 intervalPauseAuto = WEEKLY_PAUSE;
+                
                 break;
            case "None":
                 intervalPauseAuto = null;
