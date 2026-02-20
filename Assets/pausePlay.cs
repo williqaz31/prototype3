@@ -26,9 +26,7 @@ public class pausePlay : MonoBehaviour
         {
             buttonImage.sprite = playSprite;
             Time.timeScale = 0;
-          
             
-
         }
         else
         {

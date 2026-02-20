@@ -19,8 +19,8 @@ public class clockManager : MonoBehaviour
     
     private const float SECONDS_IN_DAY = 86400f;
     public int day = 0;
-    private int week;
-    private int month;
+    private int week = 0;
+    private int month = 0;
     private bool newWeek;
     private bool newMonth;
 
@@ -60,10 +60,12 @@ public class clockManager : MonoBehaviour
             {
                 week++;
                 newWeek = true;
-               /* if (pausePlay.PopUp.Titre == "Bilan hebdomadaire")
-                {
-                    pausePlay.TogglePopUp();
-                }*/
+                string info = popCounter.EndWeek();
+                pausePlay.PopUp.Information = info;
+                /* if (pausePlay.PopUp.Titre == "Bilan hebdomadaire")
+                 {
+                     pausePlay.TogglePopUp();
+                 }*/
 
 
             }
@@ -109,11 +111,11 @@ public class clockManager : MonoBehaviour
         switch (name)
         {
             case "Mensuel":
-                pausePlay.PopUp.Titre =  "Bilan mensuel";
+                pausePlay.PopUp.Titre = $"Bilan du {month} mois";
                 intervalPauseAuto = MONTHLY_PAUSE;
                 break;
             case "Hebdomadaire":
-                pausePlay.PopUp.Titre =  "Bilan hebdomadaire";
+                pausePlay.PopUp.Titre =  $"Bilan de la semaine {week}";
                 intervalPauseAuto = WEEKLY_PAUSE;
                 break;
            case "None":
