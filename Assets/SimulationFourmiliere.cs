@@ -62,20 +62,20 @@ namespace SimulationFourmiliere
             
         }
 
-        public void Mort()
-        {
-            if (population.Count > 0)
-            {
-                fourmisMortes.Add(population[0]);
-                population.RemoveAt(0);
+       
+       
+  
+  
+  
+  
 
-                Debug.Log("Mort");
-            }
-        }
+       
+       
+       
 
         public void ReineMorte()
         {
-            Debug.Log("ReineMorte" + this.Pop());
+           // Debug.Log("ReineMorte" + this.Pop());
             reine = null;
         }
 
@@ -164,7 +164,7 @@ namespace SimulationFourmiliere
             
             
             int E_t = (int)Math.Round(PONTE_MAX * f_espace * a);
-            Debug.Log(E_t);
+           // Debug.Log(E_t);
             List<Oeuf> nouveaux = new List<Oeuf>();
 
             for (int i = 0; i < E_t; i++)
@@ -175,7 +175,7 @@ namespace SimulationFourmiliere
                 if (oeuf.Vieillir() != null)
                 {
                     colonie.Naissance();
-                    Debug.Log("Naissance jour: " + jour);
+                   // Debug.Log("Naissance jour: " + jour);
                 }
                 
                 else
@@ -287,7 +287,7 @@ namespace SimulationFourmiliere
                      }
                      catch (Exception e)
                      {
-                         Debug.Log("" + b + " " + (state.colonie.Pop() - 1));
+                        
                          Debug.Log(e.Message );
                         
                      }
