@@ -1,4 +1,5 @@
 using TMPro;
+using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.UI;
@@ -14,15 +15,20 @@ public class clockManager : MonoBehaviour
     
     private float multiplier = 1.0f;
     public popCounter popCounter;
-    private float timeInADay = 86400f;
+    
+    
+    private const float SECONDS_IN_DAY = 86400f;
     public int day = 0;
     private int week;
     private int month;
     private bool newWeek;
     private bool newMonth;
-  
-    
-    
+
+
+    private int? intervalPauseAuto;
+    const int WEEKLY_PAUSE = 7;
+    const int MONTHLY_PAUSE = 30;
+        
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -41,37 +47,44 @@ public class clockManager : MonoBehaviour
 
     void UpdateClockUI()
     {
-        int days = Mathf.FloorToInt(elapsedTime / timeInADay);
+        int days = Mathf.FloorToInt(elapsedTime / SECONDS_IN_DAY);
         if (days > day)
         {
             day = days;
             popCounter.NoveauJour();
         }
-        if (days !=0 && days %7 == 0 && days/7 != week)
-        {
-            week++;
-            newWeek = true;
-            pausePlay.PopUp.Titre =  "Bilan hebdomadaire";
-        }
-        
-        else if (days != 0 && days % 30 == 0  && days/30 != month)
-        {
-            month++;
-            newMonth = true;
-            pausePlay.PopUp.Titre = "Bilan mensuel";
 
-        }
-        else
+        if (days != 0)
         {
-            newMonth = false;
-            newWeek = false;
-        }
-        
+            if (days % 7 == 0 && days / 7 != week)
+            {
+                week++;
+                newWeek = true;
+               /* if (pausePlay.PopUp.Titre == "Bilan hebdomadaire")
+                {
+                    pausePlay.TogglePopUp();
+                }*/
 
-        if (days % UpdateCycle.gestionPauseAuto == 0 && (newWeek || newMonth))
-        {
-            pausePlay.Toggle();
+
+            }
+            else newWeek = false;
             
+            if (days % 30 == 0 && days / 30 != month)
+            {
+                month++;
+                newMonth = true;
+                
+            } 
+            else newMonth = false;
+            
+            
+        }
+       
+        
+
+        if (intervalPauseAuto != null && days % intervalPauseAuto== 0 && (newWeek || newMonth))
+        {
+            pausePlay.TogglePopUp();
             
         }
        
@@ -90,9 +103,29 @@ public class clockManager : MonoBehaviour
         
     }
 
+    public void UpdateAutoPause(string name)
+    
+    {
+        switch (name)
+        {
+            case "Mensuel":
+                pausePlay.PopUp.Titre =  "Bilan mensuel";
+                intervalPauseAuto = MONTHLY_PAUSE;
+                break;
+            case "Hebdomadaire":
+                pausePlay.PopUp.Titre =  "Bilan hebdomadaire";
+                intervalPauseAuto = WEEKLY_PAUSE;
+                break;
+           case "None":
+                intervalPauseAuto = null;
+                break;
+        }
+        
+    }
+
     public void OnSliderValueChanged()
     {
-        multiplier = slider.value;
+       if (slider.value > 0) multiplier = slider.value;
         
     }
 }

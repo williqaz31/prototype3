@@ -26,18 +26,26 @@ public class pausePlay : MonoBehaviour
         {
             buttonImage.sprite = playSprite;
             Time.timeScale = 0;
-            PopUp.ToggleMenu();
+          
             
 
         }
         else
         {
             buttonImage.sprite = pauseSprite;
-            PopUp.ToggleMenu();
+           
             Time.timeScale = 1;
-            
+            PopUp.ToggleOff();
+
         }
         isPlaying = !isPlaying;
+    }
+
+    public void TogglePopUp()
+    {
+        Toggle();
+        PopUp.ToggleMenu();
+        
     }
 
     // Update is called once per frame

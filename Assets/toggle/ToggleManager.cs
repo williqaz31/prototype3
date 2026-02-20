@@ -1,51 +1,65 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class ToggleManager : MonoBehaviour
 {
-    [Header("weakly toggle")] 
-    [SerializeField] public Toggle Weekly;
-    [Header("monthly toggle")] 
-    [SerializeField] public Toggle Mensuel;
+    [SerializeField] public ToggleGroup myToggleGroup;
+   
+    
+    public clockManager clockManager;
+    
 
-    public int gestionPauseAuto = 7;
+   
+   // public string selectedOption;
 
-    private const int WEEKLY = 7;
-    private const int MONTHLY = 30;
+    
     
     // Start is called once before the first execution of Update after the MonoBehaviour is created
 
-    public void OnToggleValueChanged(bool newValue)
+    /*public void OnToggleValueChanged(Toggle toggle)
+    
     {
-        if (newValue)
+        if (toggle.isOn)
         {
-            
+            selectedOption = toggle.name;
         }
-    }
+    }*/
     void Start()
     {
-        Weekly.isOn = true;
-        Mensuel.isOn = false;
-        Weekly.onValueChanged.AddListener((isOn) => OnWeeklyChanged(isOn));
-        Mensuel.onValueChanged.AddListener((isOn) => OnMonthlyChanged(isOn));
-        
-    }
+        Toggle[] toggles = myToggleGroup.gameObject.GetComponentsInChildren<Toggle>(true);
+        if (toggles != null) 
+        { 
+            foreach (Toggle toggle in toggles) 
+            {
+                Toggle currentToggle = toggle;
+                //Lorsqu'un toggle change d'état
+                currentToggle.onValueChanged.AddListener((isOn) =>
+                {
+                    if (isOn) OnToggleSelected(currentToggle);
+                    else 
+                        OnToggleSelected(null);
+                });
+                // Si sélectionner par défaut
+                if (currentToggle.isOn) OnToggleSelected(currentToggle);
+                
+                    
+                
 
-    public void OnWeeklyChanged(bool isOn)
-    {
-        if (isOn)
-        {
-            gestionPauseAuto = WEEKLY;
+            } 
         }
     }
 
-    public void OnMonthlyChanged(bool isOn)
+    void OnToggleSelected(Toggle activeToggle)
     {
-        if (isOn)
+        if (activeToggle is null)
         {
-            gestionPauseAuto = MONTHLY;
-        }
+            clockManager.UpdateAutoPause("None");
+            
+        } else clockManager.UpdateAutoPause(activeToggle.name);
     }
+
+   
 
     // Update is called once per frame
     void Update()
