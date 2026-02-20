@@ -1,4 +1,5 @@
-﻿using System;
+﻿using UnityEngine;
+using Random = System.Random;
 
 namespace individu
 {
@@ -17,14 +18,14 @@ namespace individu
             double outsideProp = 0.3;
 
             if (random.NextDouble() < outsideProp)
-                return random.Next(lowOutside, highOutside + 1);
+                return random.Next(lowOutside, highOutside );
             else
-                return random.Next(low, high + 1);
+                return random.Next(low, high );
         }
 
         public static int RandomRange(int min, int max)
         {
-            return random.Next(min, max + 1);
+            return random.Next(min, max);
         }
     }
 
@@ -37,6 +38,7 @@ namespace individu
         public Fourmi()
         {
             dureeDeVie = Utils.DureeDeVie();
+          
             age = 0;
             joursSansManger = 0;
         }
@@ -48,6 +50,7 @@ namespace individu
 
         public Fourmi Affamer()
         {
+            Debug.Log(this+ " Affamé depuis: " + joursSansManger);
             joursSansManger++;
 
             if (joursSansManger >= 7)

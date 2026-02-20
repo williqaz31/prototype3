@@ -45,7 +45,8 @@ public class clockManager : MonoBehaviour
         int seconds = Mathf.FloorToInt((elapsedTime -(days * 24f + hours )*3600f) - (minutes * 60f));
 
         
-        string clockString = string.Format("{0:00}:{1:00}:{2:00}:{3:00}", days, hours, minutes, seconds);
+       // string clockString = string.Format("{0:00}:{1:00}:{2:00}:{3:00}", days, hours, minutes, seconds);
+        string clockString = string.Format("{0:00}",days);
         clock.text = clockString;
         
         
@@ -54,6 +55,6 @@ public class clockManager : MonoBehaviour
     public void OnSliderValueChanged()
     {
         multiplier = slider.value;
-        UpdateClockUI();
+        
     }
 }
