@@ -101,14 +101,16 @@ public class popCounter : MonoBehaviour
     }
     private string getInfo(int popEnd,int popStart)
     {
-        int croissance;
+        float croissance;
         string typeCroissance;
         int durer = 0;
         string famine;
         // Gestion de l'affichage de la croissance de la popualtion----------------------------------------
         if (popStart> 0)
         {
-            croissance = Mathf.RoundToInt((popEnd - popStart) / popStart * 100);
+            
+            croissance = ((float)(popEnd - popStart) / popStart) * 100;
+          
         }
         else croissance = 0;
 

@@ -65,11 +65,12 @@ public class clockManager : MonoBehaviour
                 week++;
                 newWeek = true;
               
-                weeklyInfo = popCounter.EndWeek();
+             
              
                 if (intervalPauseAuto == WEEKLY_PAUSE)
                 {
                     isWeekly = true;
+                    weeklyInfo = popCounter.EndWeek();
                 }
                 else
                 {
@@ -86,10 +87,11 @@ public class clockManager : MonoBehaviour
             {
                 month++;
                 newMonth = true;
-                monthInfo = popCounter.EndMonth();
+                
                 if (intervalPauseAuto == MONTHLY_PAUSE)
                 {
                     isWeekly = false;
+                    monthInfo = popCounter.EndMonth();
                 }
                 else
                 {

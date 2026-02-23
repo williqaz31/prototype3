@@ -132,6 +132,8 @@ namespace SimulationFourmiliere
             Famine = false;
             FinFamine = null;
             DebutFamine = null;
+            NourritureConsomer = 0;
+            NourritureTrouver = 0;
 
 
         }
@@ -369,13 +371,14 @@ namespace SimulationFourmiliere
                 {
                     fourmi.Manger();
                     state.StockNourriture -= consoParFourmi;
+                    state.NourritureConsomer += consoParFourmi;
                    
                 }
             }
             else
             {  //On ne peut pas nourrir tout les fourmis
                 
-                Debug.Log("Famine");
+               
                 
                 int fourmiNourries = consommationPossible;
                 state.StockNourriture = 0;
@@ -392,6 +395,7 @@ namespace SimulationFourmiliere
                     if (consommationPossible >= 1)
                     {
                         state.Colonie.Reine.Manger();
+                        state.NourritureConsomer += consoParFourmi;
                     }
                     else
                     {
@@ -406,6 +410,7 @@ namespace SimulationFourmiliere
                 for (int i = 0; i <= fourmiNourries-consoParFourmi; i++) 
                 {
                         state.Colonie.Population[i].Manger();
+                        state.NourritureConsomer += consoParFourmi;
                 }
 
                  // # Gestion des fourmies mortes
