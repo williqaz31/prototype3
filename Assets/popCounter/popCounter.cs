@@ -34,7 +34,7 @@ public class popCounter : MonoBehaviour
         try
         {
             Program.CalculSimulation(state);
-            populationCounter.text = string.Format("{0:00000}", state.colonie.Pop());
+            populationCounter.text = string.Format("{0:00000}", state.Colonie.Pop());
         }
         catch (System.Exception e)
         {
@@ -43,37 +43,94 @@ public class popCounter : MonoBehaviour
     }
     
 
-    public void NouvelleSemaine()
+    public void NouvelleSemaine(bool isWeekly)
     {
         
-        popStartWeek = state.colonie.Pop();
-        state.ResetCounters();
+        popStartWeek = state.Colonie.Pop();
+        if (isWeekly)
+        { 
+            state.ResetCounters();
+            
+        }
     }
 
     public string EndWeek()
     {
         
-        int croissance;
-        int durer = 0;
+       
+        int popEndWeek = state.Colonie.Pop();
         
-        string famine;
-        int popEndWeek = state.colonie.Pop();
-        // Gestion de l'affichage de la croissance de la popualtion----------------------------------------
-        if (popStartWeek > 0)
+        string details = getInfo(popEndWeek,popStartWeek);
+
+        
+        //Affichage Final----------------------------------------
+        string info =
+            $"-----------POPULATION--------------\nAu début de la semaine:  {popStartWeek}\nÀ la fin de la semaine:  {popEndWeek}{details}";
+        
+        return info;
+        
+
+    }
+    
+    public void NouveauMois(bool isWeekly)
+    {
+        popStartMonth = state.Colonie.Pop();
+        if (!isWeekly)
         {
-            croissance = ((popEndWeek - popStartWeek) / popStartWeek * 100);
+            state.ResetCounters();
+        }
+        
+    }
+
+    public string EndMonth()
+    {
+      
+        int popEndMonth = state.Colonie.Pop();
+      
+        string details =  getInfo(popEndMonth, popStartMonth);
+    
+        
+          
+        //Affichage Final----------------------------------------
+        string info =
+            $"-----------POPULATION--------------\nAu début du mois:  {popStartMonth}\nÀ la fin du mois :  {popEndMonth}{details}";
+
+        return info;
+
+
+    }
+    private string getInfo(int popEnd,int popStart)
+    {
+        int croissance;
+        string typeCroissance;
+        int durer = 0;
+        string famine;
+        // Gestion de l'affichage de la croissance de la popualtion----------------------------------------
+        if (popStart> 0)
+        {
+            croissance = Mathf.RoundToInt((popEnd - popStart) / popStart * 100);
         }
         else croissance = 0;
 
-        string typeCroissance = croissance switch
+        switch(croissance)
         {
-            0 => "<color=\"white\">Population stable</color>",
-            < 0 => $"<color=\"red\">Décroissance: {croissance}</color>",
-            > 0 => $"<color=\"white\">Croissance: {croissance}</color>",
+            case < 0:
+                
+                typeCroissance = $"<color=\"red\">Décroissance: {croissance}%</color>";
+                break;
+                
+            case 0: 
+                typeCroissance =  "<color=\"white\">Population stable</color>";
+                break;
+            case > 0:
+                typeCroissance = $"<color=\"white\">Croissance: {croissance}%</color>";
+                break;
+            default: 
+                typeCroissance =  "<color=\"white\">Population stable</color>";
+                break;
 
-        };
-        
-       
+        }
+
         
         // Affichage Famine ----------------------------------------
         if (state.Famine)
@@ -83,15 +140,15 @@ public class popCounter : MonoBehaviour
                 durer = (int)(state.FinFamine - state.DebutFamine);
             } 
        
-            famine = $"<color=\"red\">\n-----------MANQUE DE NOURRITURE----------------\nDurée: {durer} \nScore de famine: {state.score}</color >";
+            famine = $"<color=\"red\">\n-----------MANQUE DE NOURRITURE----------------\nDurée: {durer}\nNombre de fourmi affamées: {state.Affamer}\nScore de famine: {state.Score}</color >";
                           
 
         }
-        else famine = "<color=\"green\">Félicitation Il n'y à pas eu de famine</color >";
+        else famine = $"<color=\"green\">Félicitation Il n'y à pas eu de famine\nScore de famine: {state.Score}</color >";
 
 
-        int morts_naturels = popStartWeek - popEndWeek - state.naissance - state.MortsAffame;
-        int morts = popStartWeek - popEndWeek;
+        int morts_naturels = popStart- popEnd - state.Naissance - state.MortsAffame;
+        int morts = popStart- popEnd;
         if (morts < 0)
         {
             morts = 0;
@@ -100,22 +157,8 @@ public class popCounter : MonoBehaviour
         {
             morts_naturels = 0;
         }
+        return $"\n{typeCroissance}\nNaissance: {state.Naissance}\n-------------MORTS-----------------\nFamine: {state.MortsAffame}\nNaturel: {morts_naturels }\nTotal: {morts}\n{famine}\n-----------NOURRITURE--------------\nStock: {state.StockNourriture}\nNourriture trouvé: {state.NourritureTrouver}\nNourriture consommer: {state.NourritureConsomer}";
         
-        //Affichage Final----------------------------------------
-        string info =
-            $"-----------POPULATION--------------\nAu début de la semaine:  {popStartWeek}\nÀ la fin de la semaine:  {popEndWeek}\n{typeCroissance} \n-------------MORTS-----------------\nFamine: {state.MortsAffame}\nNaturel: {morts_naturels }\nTotal: {morts}\n{famine}\n-----------NOURRITURE--------------\nStock: {stockNourriture}";
-
-
-                       
-        return info;
-        
-
-    }
-
-    public void NouveauMois()
-    {
-        popStartMonth = state.colonie.Pop();
-        state.ResetCounters();
     }
 
     // Update is called once per frame

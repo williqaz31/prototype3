@@ -1292,7 +1292,7 @@ GameObject:
   - component: {fileID: 625238461}
   - component: {fileID: 625238462}
   m_Layer: 5
-  m_Name: Weekly
+  m_Name: Hebdomadaire
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1420,7 +1420,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2fafe2cfe61f6974895a912c3755e8f1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.ToggleGroup
-  m_AllowSwitchOff: 0
+  m_AllowSwitchOff: 1
 --- !u!114 &685938353
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1479,9 +1479,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: af04dacf4b23d0b42a0d7df3bdcb83f3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ToggleManager
-  Weekly: {fileID: 625238462}
-  Mensuel: {fileID: 1219232438}
-  gestionPauseAuto: 7
+  myToggleGroup: {fileID: 685938352}
+  clockManager: {fileID: 2046638064}
 --- !u!1 &698901183
 GameObject:
   m_ObjectHideFlags: 0
@@ -1568,7 +1567,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 337512866}
   m_Direction: 0
   m_MinValue: 1
-  m_MaxValue: 150000
+  m_MaxValue: 1500000
   m_WholeNumbers: 1
   m_Value: 1
   m_OnValueChanged:
@@ -1672,6 +1671,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::popCounter
   populationCounter: {fileID: 721883911}
   stockNourriture: 50
+  info: {fileID: 0}
 --- !u!114 &721883911
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2417,7 +2417,7 @@ GameObject:
   - component: {fileID: 1338071081}
   - component: {fileID: 1338071085}
   m_Layer: 5
-  m_Name: Canvas
+  m_Name: clockCanvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2939,7 +2939,7 @@ GameObject:
   - component: {fileID: 2038035357}
   - component: {fileID: 2038035361}
   m_Layer: 5
-  m_Name: PopUp
+  m_Name: PopUpCanvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

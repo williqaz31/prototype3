@@ -28,6 +28,10 @@ public class clockManager : MonoBehaviour
     private int? intervalPauseAuto;
     const int WEEKLY_PAUSE = 7;
     const int MONTHLY_PAUSE = 30;
+
+    private string weeklyInfo;
+    private string monthInfo;
+    private bool isWeekly;
         
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -60,15 +64,19 @@ public class clockManager : MonoBehaviour
             {
                 week++;
                 newWeek = true;
-                // Update le titre pour avoir la bonne semaine
-                //UpdateAutoPause("Hebdomadaire");
-                string info = popCounter.EndWeek();
-                pausePlay.PopUp.Information = info;
-                popCounter.NouvelleSemaine();
-                /* if (pausePlay.PopUp.Titre == "Bilan hebdomadaire")
-                 {
-                     pausePlay.TogglePopUp();
-                 }*/
+              
+                weeklyInfo = popCounter.EndWeek();
+             
+                if (intervalPauseAuto == WEEKLY_PAUSE)
+                {
+                    isWeekly = true;
+                }
+                else
+                {
+                    isWeekly = false;
+                }
+                popCounter.NouvelleSemaine(isWeekly);
+                
 
 
             }
@@ -78,7 +86,17 @@ public class clockManager : MonoBehaviour
             {
                 month++;
                 newMonth = true;
-                pausePlay.PopUp.Information = $"{month}";
+                monthInfo = popCounter.EndMonth();
+                if (intervalPauseAuto == MONTHLY_PAUSE)
+                {
+                    isWeekly = false;
+                }
+                else
+                {
+                    isWeekly = true;
+                }
+                popCounter.NouveauMois(isWeekly);
+                
 
             } 
             else newMonth = false;
@@ -87,9 +105,18 @@ public class clockManager : MonoBehaviour
         }
        
         
-
         if (intervalPauseAuto != null && days % intervalPauseAuto== 0 && (newWeek || newMonth))
         {
+            switch (intervalPauseAuto)
+            {
+                case WEEKLY_PAUSE:
+                    pausePlay.PopUp.Information = weeklyInfo;
+                    break;
+                case MONTHLY_PAUSE:
+                    pausePlay.PopUp.Information = monthInfo;
+                    break;
+            }
+            
             pausePlay.TogglePopUp();
            
             
