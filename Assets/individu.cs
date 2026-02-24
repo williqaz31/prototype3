@@ -50,7 +50,7 @@ namespace individu
 
         public Fourmi Affamer()
         {
-            Debug.Log(this+ " Affamé depuis: " + joursSansManger);
+           
             joursSansManger++;
 
             if (joursSansManger >= 14)
@@ -77,8 +77,11 @@ namespace individu
         public Reine() : base()
         {
             // Entre 10 et 20 ans (3650 à 7300 jours)
-            dureeDeVie = Utils.RandomRange(3650, 7300);
+           dureeDeVie = Utils.RandomRange(3650, 7300);
+          
         }
+
+     
     }
 
     public class Oeuf

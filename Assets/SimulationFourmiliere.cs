@@ -175,7 +175,7 @@ namespace SimulationFourmiliere
     {
         public List<Fourmi> Population;
         public List<Fourmi> FourmisMortes;
-        public Reine Reine;
+        public Reine reine;
 
 
         public Colonie(int nbFourmisDebut)
@@ -183,7 +183,7 @@ namespace SimulationFourmiliere
         {
             Population = new List<Fourmi>();
             FourmisMortes = new List<Fourmi>();
-            Reine = new Reine();
+            reine = new Reine();
 
             for (int i = 0; i < nbFourmisDebut; i++)
                 Population.Add(new Fourmi());
@@ -200,13 +200,18 @@ namespace SimulationFourmiliere
 
         public void ReineMorte()
         {
-           // Debug.Log("ReineMorte" + this.Pop());
-            Reine = null;
+           
+            reine = null;
+            
         }
 
         public int Pop()
         {
-            return Population.Count + (Reine != null ? 1 : 0);
+            if (reine != null)
+            {
+                return Population.Count + 1;
+            }
+            return Population.Count;
         }
     }
 
@@ -360,9 +365,9 @@ namespace SimulationFourmiliere
             
             //# Vérifie si la reine est encore en vie pour pondre les oeufs et ne pond pas d'oeuf si elle est affamé
             
-            if (state.Colonie.Reine != null)
+            if (state.Colonie.reine != null)
             {
-                if (state.Colonie.Reine.Vieillir() is null && state.Colonie.Reine.joursSansManger == 0)
+                if (state.Colonie.reine.Vieillir() is null && state.Colonie.reine.joursSansManger == 0)
                 {
                    
                     if( apport > ((state.Colonie.Pop() + state.Oeufs.Count) * consoParFourmi))
@@ -386,12 +391,13 @@ namespace SimulationFourmiliere
                         
                     }
                 }
-            }
-            else
-            {
+                else
+                {
              
-                state.Colonie.ReineMorte();
+                    state.Colonie.ReineMorte();
+                }
             }
+          
 
             //   # -----------------------------------------------GESTION DE NOURRITURE-----------------------------------------------------------------
             int consommationPossible = (int)(state.StockNourriture / consoParFourmi);
@@ -428,16 +434,16 @@ namespace SimulationFourmiliere
                
                 state.Colonie.Population.Sort((f1, f2) => f2.joursSansManger.CompareTo(f1.joursSansManger));
                 // # Fait manger les fourmis affamées en commencent par la reine
-                if (state.Colonie.Reine != null)
+                if (state.Colonie.reine != null)
                 {
                     if (consommationPossible >= 1)
                     {
-                        state.Colonie.Reine.Manger();
+                        state.Colonie.reine.Manger();
                         state.NourritureConsomer +=(int) consoParFourmi;
                     }
                     else
                     {
-                        if (state.Colonie.Reine.Affamer() is null)
+                        if (state.Colonie.reine.Affamer() is null)
                         {
                             state.Colonie.ReineMorte();
                         }
