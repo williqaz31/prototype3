@@ -53,7 +53,7 @@ namespace individu
             Debug.Log(this+ " Affamé depuis: " + joursSansManger);
             joursSansManger++;
 
-            if (joursSansManger >= 7)
+            if (joursSansManger >= 14)
                 return this;
 
             return null;

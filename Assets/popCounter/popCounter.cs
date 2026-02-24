@@ -10,6 +10,9 @@ public class popCounter : MonoBehaviour
 {
     [SerializeField] private TMP_Text populationCounter;
     [SerializeField] private int stockNourriture = 50;
+    [SerializeField] private graphPop _graphPop;
+    [SerializeField] private graphBouff _graphBouff;
+ 
     private SimulationState state;
 
     private int popStartWeek;
@@ -20,7 +23,7 @@ public class popCounter : MonoBehaviour
 
   
 
-    private int jourActuelle;
+    //private int jourActuelle;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -35,11 +38,23 @@ public class popCounter : MonoBehaviour
         {
             Program.CalculSimulation(state);
             populationCounter.text = string.Format("{0:00000}", state.Colonie.Pop());
+            string x = state.Jour.ToString();
+            
+            
+            _graphPop.chart.AddXAxisData(x);
+            _graphPop.chart.AddData("population", state.Colonie.Pop());
+            _graphBouff.chart.AddXAxisData(x);
+            _graphBouff.chart.AddData("nourriture", state.StockNourriture);
+           
+           
+
         }
         catch (System.Exception e)
         {
             Debug.Log(e.Message);
         }
+      
+        
     }
     
 
@@ -140,7 +155,11 @@ public class popCounter : MonoBehaviour
             if (state.FinFamine != null && state.DebutFamine != null)
             {
                 durer = (int)(state.FinFamine - state.DebutFamine);
-            } 
+            } else if (state.DebutFamine != null)
+            {
+                durer = (int)(state.Jour - state.DebutFamine);
+            }
+            
        
             famine = $"<color=\"red\">\n-----------MANQUE DE NOURRITURE----------------\nDurée: {durer}\nNombre de fourmi affamées: {state.Affamer}\nScore de famine: {state.Score}</color >";
                           
