@@ -12,6 +12,7 @@ public class MapLoader : MonoBehaviour
     public string filePath = "/Tiles/Maps.txt";
 
     public Camera mainCamera;
+
     void Start()
     {
         LoadMap();
@@ -23,57 +24,59 @@ public class MapLoader : MonoBehaviour
 
         string[] lines = File.ReadAllLines(Application.dataPath + filePath);
 
-        // Dynamic width and height
-        int width = 0;
+        int mapWidth = 0;
         for (int i = 0; i < lines.Length; i++)
         {
-            if (lines[i].Length > width)
-                width = lines[i].Length;
+            if (lines[i].Length > mapWidth)
+                mapWidth = lines[i].Length;
         }
-        int height = lines.Length;
+        int mapHeight = lines.Length;
 
-        // Center offset
-        Vector3Int centerOffset = new Vector3Int(width / 2, -height / 2, 0);
+        int tilesX = 20;
+        int tilesY = 20;
 
-        // Place Tiles
-        for (int y = 0; y < height; y++)
+        int startX = (tilesX - mapWidth) / 2;
+        int startY = (tilesY - mapHeight) / 2;
+
+        for (int y = 0; y < tilesY; y++)
         {
-            for (int x = 0; x < width; x++)
+            for (int x = 0; x < tilesX; x++)
             {
-                TileBase tile = null;
+                TileBase tile = DarkDirt; // dark dirt partout par défaut
 
-                if (x < lines[y].Length)
+                int mapX = x - startX;
+                int mapY = y - startY;
+
+                if (mapX >= 0 && mapX < mapWidth && mapY >= 0 && mapY < mapHeight)
                 {
-                    char currentChar = lines[y][x];
-
-                    switch (currentChar)
+                    if (mapX < lines[mapY].Length)
                     {
-                        case '1':
-                            tile = DarkDirt;
-                            break;
-                        case '0':
-                            tile = Dirt;
-                            break;
+                        char currentChar = lines[mapY][mapX];
+
+                        switch (currentChar)
+                        {
+                            case '1':
+                                tile = DarkDirt;
+                                break;
+                            case '0':
+                                tile = Dirt;
+                                break;
+                        }
                     }
                 }
 
-                if (tile != null)
-                {
-                    Vector3Int verticalOffset = new Vector3Int(0, -1, 0); // move 1 tile down
-                    Vector3Int pos = new Vector3Int(x, -y, 0) - centerOffset + verticalOffset;
-
-                    tilemap.SetTile(pos, tile);
-                }
+                Vector3Int centerOffset = new Vector3Int(tilesX / 2, -tilesY / 2, 0);
+                Vector3Int verticalOffset = new Vector3Int(0, -1, 0);
+                Vector3Int pos = new Vector3Int(x, -y, 0) - centerOffset + verticalOffset;
+                tilemap.SetTile(pos, tile);
             }
         }
-        // Adjust camera
+
         tilemap.CompressBounds();
         Bounds mapBounds = tilemap.localBounds;
 
         if (mainCamera != null)
         {
-
-
             float padding = 1f;
             float sizeByHeight = mapBounds.size.y / 2f + padding;
             float sizeByWidth = (mapBounds.size.x / 2f + padding) / mainCamera.aspect;

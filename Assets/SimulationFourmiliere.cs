@@ -9,6 +9,7 @@ using UnityEngine;
 
 
 
+
 namespace SimulationFourmiliere
 {
     public class SimulationState
@@ -511,5 +512,6 @@ namespace SimulationFourmiliere
             state.UpdateScore();
             state.Jour++;
         }
+        
     }
 }
