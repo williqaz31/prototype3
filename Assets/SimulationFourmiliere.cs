@@ -12,7 +12,7 @@ using UnityEngine;
 
 namespace SimulationFourmiliere
 {
-    public class SimulationState
+    public class SimulationState 
     {
         public int StockNourriture
         {
@@ -39,6 +39,8 @@ namespace SimulationFourmiliere
         public int JoursSansFamine = 0;
         public int NourritureTrouver = 0;
         public int NourritureConsomer = 0;
+        
+        public MapLoader mapLoader;
         
 
         public SimulationState(int stockInitial)
@@ -145,6 +147,15 @@ namespace SimulationFourmiliere
         {
             Colonie.Naissance();
             Naissance++;
+            
+            //if (Naissance > 0 && Naissance % 3 == 0)
+           // {
+           //     if (mapLoader != null)
+           //     {
+            //        mapLoader.CreuserUnBloc();
+           //         mapLoader.RefreshTilemap(); 
+             //   }
+           // }
         }
 
         public void NouvMorts(Fourmi morte)
