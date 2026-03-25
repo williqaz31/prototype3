@@ -18,6 +18,11 @@ public class MapLoader : MonoBehaviour
 
     public TileBase Dirt;     // Le '0' (Galerie creusée)
 
+    public TileBase Sky;//3
+    public TileBase DarkGrass;// 2 Surface non creusé
+    public TileBase Grass; // 4 Surface creusé
+    public TileBase Rock; // 5
+    public TileBase Food; // 6
 
 
     public string filePath = "/Tiles/Maps.txt";
@@ -26,7 +31,7 @@ public class MapLoader : MonoBehaviour
 
 
 
-    private char[,] mapData; // Matrice en mémoire pour manipuler les 0 et 1
+    private char[,] mapData; // Matrice en mémoire pour manipuler les différents char
 
     private int rows;
 
@@ -224,7 +229,37 @@ public class MapLoader : MonoBehaviour
 
                 Vector3Int pos = new Vector3Int(x - cols / 2, -y + rows / 2, 0);
 
-                tilemap.SetTile(pos, mapData[y, x] == '0' ? Dirt : DarkDirt);
+                switch (mapData[y, x])
+                {
+                    case '0':
+                        tilemap.SetTile(pos, Dirt);
+                        break;
+                    
+                    case '1':
+                        tilemap.SetTile(pos, DarkDirt);
+                        break;
+                    case '2':
+                        tilemap.SetTile(pos, DarkGrass);
+                        break;
+                    case '3': 
+                        tilemap.SetTile(pos, Sky);
+                        break;
+                    case '4':
+                        tilemap.SetTile(pos, Grass);
+                        break;
+                    case '5':
+                        tilemap.SetTile(pos, Rock);
+                        break;
+                    case '6':
+                        tilemap.SetTile(pos, Food);
+                        break;
+                    
+                }
+                
+                    
+                
+
+                
 
             }
 
