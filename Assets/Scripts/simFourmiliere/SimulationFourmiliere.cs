@@ -13,6 +13,8 @@ namespace SimulationFourmiliere
 {
     public class SimulationState 
     {
+     
+
         public int StockNourriture
         {
             get => _stockNourriture;
@@ -20,7 +22,18 @@ namespace SimulationFourmiliere
         }
 
         public int DebutSaison;
-        public Saison saison;
+        private Saison _saison;
+
+        public Saison saison
+        {
+            get => _saison;
+            set
+            {
+                _saison = value;
+                OnSeasonChanged?.Invoke(_saison);
+            }
+        }
+
         private int _stockNourriture;
         public Colonie Colonie;
         public List<Oeuf> Oeufs;
@@ -38,7 +51,7 @@ namespace SimulationFourmiliere
         public int JoursSansFamine = 0;
         public int NourritureTrouver = 0;
         public int NourritureConsomer = 0;
-        
+        public static event Action<Saison> OnSeasonChanged; 
         public MapLoader mapLoader;
         
 

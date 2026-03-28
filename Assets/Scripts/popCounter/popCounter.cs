@@ -12,13 +12,14 @@ public class popCounter : MonoBehaviour
     [SerializeField] private int stockNourriture = 50;
     [SerializeField] private graphPop _graphPop;
     [SerializeField] private graphBouff _graphBouff;
- 
+    
     private SimulationState state;
 
     private int popStartWeek;
     private int popStartMonth;
-
-    public TextMeshProUGUI info;
+    
+ 
+ 
     
 
   
@@ -28,7 +29,7 @@ public class popCounter : MonoBehaviour
     void Start()
     {
         state = new SimulationState(stockNourriture);
-
+   
     }
 
     public void NoveauJour()
@@ -39,6 +40,9 @@ public class popCounter : MonoBehaviour
             Program.CalculSimulation(state);
             populationCounter.text = string.Format("{0:00000}", state.Colonie.Pop());
             string x = state.Jour.ToString();
+
+
+         
             
             
             _graphPop.chart.AddXAxisData(x);
@@ -178,7 +182,7 @@ public class popCounter : MonoBehaviour
         {
             morts_naturels = 0;
         }
-        return $"\n{typeCroissance}\nNaissance: {state.Naissance}\n-------------MORTS-----------------\nFamine: {state.MortsAffame}\nNaturel: {morts_naturels }\nTotal: {morts}\n{famine}\n-----------NOURRITURE--------------\nStock: {state.StockNourriture}\nNourriture trouvé: {state.NourritureTrouver}\nNourriture consommer: {state.NourritureConsomer}";
+        return $"\n{typeCroissance}\nNaissance: {state.Naissance}\n-------------MORTS-----------------\nFamine: {state.MortsAffame}\nNaturel: {morts_naturels }\nTotal: {morts}\n{famine}\n-----------NOURRITURE--------------\nStock: {state.StockNourriture}\nNourriture trouvée: {state.NourritureTrouver}\nNourriture consommée: {state.NourritureConsomer}";
         
     }
 
