@@ -17,12 +17,15 @@ public class popCounter : MonoBehaviour
 
     private int popStartWeek;
     private int popStartMonth;
-    
- 
- 
-    
 
-  
+    public SimulationState GetState()
+    {
+        return state;
+    }
+
+
+
+
 
     //private int jourActuelle;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
