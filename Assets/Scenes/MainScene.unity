@@ -149,7 +149,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 14da8c1b304312d428d70bf8fe1ba503, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::afficherFormule
-  afficherText: {fileID: 0}
 --- !u!224 &8199180
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2484,7 +2483,7 @@ MonoBehaviour:
   onValueChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_IsOn: 1
+  m_IsOn: 0
 --- !u!1 &642112738
 GameObject:
   m_ObjectHideFlags: 0
