@@ -50,12 +50,12 @@ public class Loading : MonoBehaviour
         audioSource.Stop();
         loadingScreen.SetActive(false);
         informationSup.SetActive(true);
-        tout.SetActive(true);
+        //tout.SetActive(true);
     }
 
     public void BackToNormal()
     {
-       
+        tout.SetActive(true);
         informationSup.SetActive(false);
         loadButton.interactable = true;
         Time.timeScale = 1;
