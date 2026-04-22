@@ -10,8 +10,10 @@ public class Loading : MonoBehaviour
     public Slider progressBar;
     public Button loadButton;
     public AudioSource audioSource;
+    
+    public GameObject informationSup;
 
-    public string scenToLoad;
+   
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -28,13 +30,14 @@ public class Loading : MonoBehaviour
     {
         loadButton.interactable = false;
         StartCoroutine(LoadRoutine());
+        
         tout.SetActive(false);
     }
 
     IEnumerator LoadRoutine()
     {
         loadingScreen.SetActive(true);
-        float duration = 30f;
+        float duration = 5f;
         audioSource.Play();
         float time = 0f;
         while (time < duration)
@@ -43,9 +46,18 @@ public class Loading : MonoBehaviour
             progressBar.value = time/duration;
             yield return null;
         }
+        Time.timeScale = 0;
         audioSource.Stop();
+        loadingScreen.SetActive(false);
+        informationSup.SetActive(true);
         tout.SetActive(true);
+    }
+
+    public void BackToNormal()
+    {
+       
+        informationSup.SetActive(false);
         loadButton.interactable = true;
-        SceneManager.LoadScene(scenToLoad);
+        Time.timeScale = 1;
     }
 }
