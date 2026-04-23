@@ -1,0 +1,46 @@
+{
+    "version": 1,
+    "name": "pause",
+    "maps": [
+        {
+            "name": "UI",
+            "id": "092c5174-ecee-49d1-baf4-f22052cef5fd",
+            "actions": [
+                {
+                    "name": "Pause",
+                    "type": "Button",
+                    "id": "93adb1f9-7103-449d-bc1d-f243ce0d27ca",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "b5a08f80-04fd-463d-bd23-fdf1c099b244",
+                    "path": "",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Pause",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b747685d-85c4-4168-b6cc-18f4bf81c859",
+                    "path": "<Keyboard>/space",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Pause",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}

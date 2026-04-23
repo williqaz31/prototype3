@@ -1,5 +1,6 @@
  using UnityEngine;
-using UnityEngine.UI;
+ using UnityEngine.InputSystem;
+ using UnityEngine.UI;
 
 public class PausePlay : MonoBehaviour
 {
@@ -20,6 +21,15 @@ public class PausePlay : MonoBehaviour
         
         buttonImage.sprite = buttonImage.sprite;
         
+    }
+
+    // Pour pouvoir faire pause avec la barre d'espace
+    public void OnPause(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+        {
+            Toggle();
+        }
     }
 
     public void Toggle()

@@ -1358,8 +1358,9 @@ GameObject:
   - component: {fileID: 320320026}
   - component: {fileID: 320320025}
   - component: {fileID: 320320024}
+  - component: {fileID: 320320029}
   m_Layer: 5
-  m_Name: Button
+  m_Name: PauseButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1514,6 +1515,52 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 320320022}
   m_CullTransparentMesh: 1
+--- !u!114 &320320029
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 320320022}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62899f850307741f2a39c98a8b639597, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.PlayerInput
+  m_Actions: {fileID: -944628639613478452, guid: d1c79c811aab1584eb086b28bd319912, type: 3}
+  m_NotificationBehavior: 2
+  m_UIInputModule: {fileID: 0}
+  m_DeviceLostEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_DeviceRegainedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_ControlsChangedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_ActionEvents:
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 320320024}
+        m_TargetAssemblyTypeName: PausePlay, Assembly-CSharp
+        m_MethodName: OnPause
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 93adb1f9-7103-449d-bc1d-f243ce0d27ca
+    m_ActionName: 'UI/Pause[/Keyboard/space]'
+  m_NeverAutoSwitchControlSchemes: 0
+  m_DefaultControlScheme: 
+  m_DefaultActionMap: UI
+  m_SplitScreenIndex: -1
+  m_Camera: {fileID: 0}
 --- !u!1 &337512865
 GameObject:
   m_ObjectHideFlags: 0
@@ -4819,12 +4866,12 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_text: "Dans cette simulation vous aller avoir le privil\xE8ge d'observer le comportement
-    des fourmis \xE0 m\xEAme leur fourmili\xE8re. Au cours de la simulation vous aurez
-    la possibilit\xE9 d'ajouter ou de retirer de la nourriture ce qui pourrait changer
-    la grosseur de votre colonie. Toutefois, faites attention puisque vous ne voulez
-    pas mener \xE0 l'extinction votre fourmili\xE8re.\nPour embarquer dans l'aventure
-    il ne vous reste qu'\xE0 cliquer sur le bouton en bas a gauche.\nBonne chance,
-    mon ami!\n"
+    des fourmis \xE0 m\xEAme leur fourmili\xE8re. Au cours de la simulation vous
+    aurez la possibilit\xE9 d'ajouter ou de retirer de la nourriture ce qui pourrait
+    changer la grosseur de votre colonie. Toutefois, faites attention puisque vous
+    ne voulez pas mener \xE0 l'extinction votre fourmili\xE8re.\nPour embarquer dans
+    l'aventure il ne vous reste qu'\xE0 cliquer sur le bouton en bas a gauche.\nBonne
+    chance, mon ami!\n"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
