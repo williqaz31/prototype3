@@ -7,7 +7,7 @@ public class ToggleManager : MonoBehaviour
     [SerializeField] public ToggleGroup myToggleGroup;
    
     
-    public clockManager clockManager;
+    public ClockManager clockManager;
     
 
    

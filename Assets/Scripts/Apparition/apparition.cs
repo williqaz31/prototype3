@@ -8,12 +8,12 @@ public class apparition : MonoBehaviour
     public CanvasGroup canvasGroup;
 
     private float temps;
-    private int load;
+   
 
     public void Start()
     {
         StartCoroutine(Debut());
-        load = 1;
+       
     }
     
     

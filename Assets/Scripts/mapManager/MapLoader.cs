@@ -37,10 +37,13 @@ public class MapLoader : MonoBehaviour
     public Vector2Int queenPos;
     public bool queenFound;
     public List<DigJob> jobs = new List<DigJob>();
+    
+    public bool fromLoad = false;
 
     void Start()
     {
-        InitializeMap();
+       
+        
         UpdateOddsMap();
         RefreshTilemap();
         AdjustCamera();
@@ -64,7 +67,8 @@ public class MapLoader : MonoBehaviour
             timer = 0f;
         }
     }
-    void InitializeMap()
+
+    public void LoadDefault()
     {
         string path = Application.dataPath + mapFile;
 
@@ -78,19 +82,23 @@ public class MapLoader : MonoBehaviour
 
         rows = lines.Length;
         cols = lines[0].Length;
-
         mapData = new char[rows, cols];
         oddsGrid = new int[rows, cols];
 
         for (int y = 0; y < rows; y++)
-            for (int x = 0; x < cols; x++)
-                mapData[y, x] = lines[y][x];
+        for (int x = 0; x < cols; x++)
+            mapData[y, x] = lines[y][x];
+        InitializeMap(rows, cols);
+    }
 
+
+    public void InitializeMap(int rows,int cols)
+    {
         for (int y = 0; y < rows; y++)
         {
             for (int x = 0; x < cols; x++)
                 if (mapData[y, x] == '9')
-                {
+                                 {
                     queenPos = new Vector2Int(x, y);
                     queenFound = true;
                     Debug.Log(queenFound);
@@ -348,7 +356,7 @@ public class MapLoader : MonoBehaviour
         if (queenFound)
         {
             if (left) queenPos.x += 1;
-            Debug.Log("Shifted" + queenPos);
+          //  Debug.Log("Shifted" + queenPos);
         }
 
         mapData = newMap;
@@ -437,5 +445,72 @@ public class MapLoader : MonoBehaviour
     public int Cols
     {
         get { return cols; }
+    }
+
+
+    public char[] ExportMap()
+    {
+        char[] data = new char[rows *  cols];
+        int[] odds = new int[rows * cols];
+
+        for (int y = 0; y < rows; y++)
+        {
+            for (int x = 0; x < cols; x++)
+            {
+                data[y*cols + x] = mapData[y, x];
+                odds[y*cols + x] = oddsGrid[y,x];
+            }
+        }
+        return data;
+        
+    }
+    public int[] ExportOdds()
+    {
+      
+        int[] odds = new int[rows * cols];
+
+        for (int y = 0; y < rows; y++)
+        {
+            for (int x = 0; x < cols; x++)
+            {
+              
+                odds[y*cols + x] = oddsGrid[y,x];
+            }
+        }
+        return odds;
+        
+    }
+
+    public void LoadMap(char[] data, int rows, int cols)
+    {
+        this.rows = rows;
+        this.cols = cols;
+        mapData = new char[rows, cols];
+        for (int y = 0; y < rows; y++)
+        {
+            for (int x = 0; x < cols; x++)
+            {
+                mapData[y, x] = data[y * cols + x];
+            }
+        }
+        InitializeMap(rows, cols);
+      
+       
+    }
+    
+    public void LoadOdds(int[] odds, int rows, int cols)
+    {
+        this.rows = rows;
+        this.cols = cols;
+        oddsGrid = new int[rows, cols];
+        for (int y = 0; y < rows; y++)
+        {
+            for (int x = 0; x < cols; x++)
+            { oddsGrid[y, x] = odds[y * cols + x];
+            }
+        }
+      
+        UpdateOddsMap();
+       
     }
 }

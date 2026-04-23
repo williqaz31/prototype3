@@ -28,10 +28,11 @@ public class Loading : MonoBehaviour
 
     public void StartLoading()
     {
+        Debug.Log("StartLoading");
         loadButton.interactable = false;
         StartCoroutine(LoadRoutine());
         
-        tout.SetActive(false);
+       // tout.SetActive(false);
     }
 
     IEnumerator LoadRoutine()
