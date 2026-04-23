@@ -2543,7 +2543,7 @@ MonoBehaviour:
   onValueChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_IsOn: 1
+  m_IsOn: 0
 --- !u!114 &625238463
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4819,12 +4819,12 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_text: "Dans cette simulation vous aller avoir le privil\xE8ge d'observer le comportement
-    des fourmis \xE0 m\xEAme leur fourmili\xE8re. Au cours de la simulation vous
-    aurez la possibilit\xE9 d'ajouter ou de retirer de la nourriture ce qui pourrait
-    changer la grosseur de votre colonie. Toutefois, faites attention puisque vous
-    ne voulez pas mener \xE0 l'extinction votre fourmili\xE8re.\nPour embarquer dans
-    l'aventure il ne vous reste qu'\xE0 cliquer sur le bouton en bas a gauche.\nBonne
-    chance, mon ami!\n"
+    des fourmis \xE0 m\xEAme leur fourmili\xE8re. Au cours de la simulation vous aurez
+    la possibilit\xE9 d'ajouter ou de retirer de la nourriture ce qui pourrait changer
+    la grosseur de votre colonie. Toutefois, faites attention puisque vous ne voulez
+    pas mener \xE0 l'extinction votre fourmili\xE8re.\nPour embarquer dans l'aventure
+    il ne vous reste qu'\xE0 cliquer sur le bouton en bas a gauche.\nBonne chance,
+    mon ami!\n"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
