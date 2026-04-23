@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using SimulationFourmiliere;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -25,8 +26,10 @@ public class AntManager : MonoBehaviour
     private Vector2Int queenPos;
 
     private Dictionary<int, AntState> antStates = new Dictionary<int, AntState>();
+    
+  
 
-    [SerializeField] public popCounter popCounter;
+    [SerializeField] public PopCounter popCounter;
     enum AntState
     {
         Idle,
@@ -36,18 +39,38 @@ public class AntManager : MonoBehaviour
 
     void Start()
     {
+        
         simulation = popCounter.GetState();
 
         if (!mapLoader.queenFound)
         {
-            Debug.LogError("Queen not loaded yet!");
-            return;
+            Debug.Log("Queen not loaded yet!");
+            mapLoader.LoadDefault();
         }
 
         queenPos = mapLoader.queenPos;
         //SpawnAnts(0);
         DrawAnts();
     }
+    void Update()
+    {
+        
+        SyncAntCount();
+        AssignJobs();
+        UpdateAnts();
+
+        ForceIdleRecheck();
+
+        if (simulation == null)
+        {
+            Debug.Log("NO SIMULATION");
+            return;
+        }
+
+        //Debug.Log("ANTS TARGET POP: " + simulation.Colonie.Pop());
+    }
+
+    
 
     void RemoveAnt()
     {
@@ -69,7 +92,7 @@ public class AntManager : MonoBehaviour
             //ants.Add(queenPos);
             antStates[i] = AntState.Idle;
             antMoveTimers[i] = 0f;
-            Debug.Log("ant added at" + queenPos);
+          //  Debug.Log("ant added at" + queenPos);
         }
     }
 
@@ -97,7 +120,7 @@ public class AntManager : MonoBehaviour
 
         antStates[id] = AntState.Idle;
         antMoveTimers[id] = 0f;
-        Debug.Log("ant added at" + queenPos);
+        //Debug.Log("ant added at" + queenPos);
     }
     Vector2Int? GetNearestExitAdjacent(Vector2Int from)
     {
@@ -272,22 +295,7 @@ public class AntManager : MonoBehaviour
         }
         return -1;
     }
-    void Update()
-    {
-        SyncAntCount();
-        AssignJobs();
-        UpdateAnts();
-
-        ForceIdleRecheck();
-
-        if (simulation == null)
-        {
-            Debug.Log("NO SIMULATION");
-            return;
-        }
-
-        //Debug.Log("ANTS TARGET POP: " + simulation.Colonie.Pop());
-    }
+   
     void ForceIdleRecheck()
     {
         foreach (int id in antIds)

@@ -6,11 +6,12 @@ using System;
 using System.Collections.Generic;
 using individu;
 using UnityEngine;
-
+using System.Linq;
 
 
 namespace SimulationFourmiliere
 {
+    
     public class SimulationState 
     {
      
@@ -38,7 +39,8 @@ namespace SimulationFourmiliere
         public Colonie Colonie;
         public List<Oeuf> Oeufs;
         public int Jour;
-        public List<int> HistoriquePopulation;
+        public List<float> HistoriquePopulation;
+        public List<float> HistoriqueNourriture;
         public int MortsAffame;
         public int Naissance;
         public int Affamer;
@@ -61,8 +63,22 @@ namespace SimulationFourmiliere
             Colonie = new Colonie(4);
             Oeufs = new List<Oeuf>();
             Jour = 0;
-            HistoriquePopulation = new List<int>();
+            HistoriquePopulation = new List<float>();
+            HistoriqueNourriture = new List<float>();
+            HistoriqueNourriture.Add(_stockNourriture);
             HistoriquePopulation.Add(Colonie.Pop());
+            ResetCounters();
+        }
+
+        public SimulationState(State etat)
+        {
+            _stockNourriture = (int)etat.graphBouff.Last();
+            Colonie = new Colonie((int)etat.graphPop.Last());
+            Oeufs = new List<Oeuf>();
+            Jour = etat.gameTime;
+            HistoriquePopulation = etat.graphPop;
+            HistoriqueNourriture = etat.graphBouff;
+       
             ResetCounters();
         }
 
@@ -531,6 +547,7 @@ namespace SimulationFourmiliere
             state.Colonie.Population.RemoveAll(f => { return f.Vieillir() != null; });
 
             state.HistoriquePopulation.Add(state.Colonie.Pop());
+            state.HistoriqueNourriture.Add(state.StockNourriture);
 
             state.UpdateScore();
             state.Jour++;

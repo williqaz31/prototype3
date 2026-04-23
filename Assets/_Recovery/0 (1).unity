@@ -154,7 +154,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.000011444092, y: -0.0000038146973}
+  m_AnchoredPosition: {x: 0.0000076293945, y: -0.0000038146973}
   m_SizeDelta: {x: 0.000015259, y: -0.0000019073}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &104132038
@@ -438,16 +438,16 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 256073768}
-        m_TargetAssemblyTypeName: StartButton, Assembly-CSharp
-        m_MethodName: OnClick
-        m_Mode: 1
+      - m_Target: {fileID: 1321733733}
+        m_TargetAssemblyTypeName: SceneLoader, Assembly-CSharp
+        m_MethodName: LoadScene
+        m_Mode: 5
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: 
+          m_StringArgument: MainScene
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &256073766
@@ -500,7 +500,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4893fbbff905eb42a4a416f9338ce4c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  nameInput: {fileID: 644331420}
+  nameInput: {fileID: 0}
 --- !u!1 &364409785
 GameObject:
   m_ObjectHideFlags: 0
@@ -1050,54 +1050,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.RectMask2D
   m_Padding: {x: -8, y: -5, z: -8, w: -5}
   m_Softness: {x: 0, y: 0}
---- !u!1 &1207736043
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1207736045}
-  - component: {fileID: 1207736044}
-  m_Layer: 0
-  m_Name: SystemSave
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1207736044
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1207736043}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a088a4cd6ecd3844999d4d37207363ed, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::systemSave
-  mapManager: {fileID: 0}
-  clockManager: {fileID: 0}
-  popCounter: {fileID: 0}
-  currentSaveName: 
---- !u!4 &1207736045
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1207736043}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 729.5569, y: 284.29575, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1321733731
 GameObject:
   m_ObjectHideFlags: 0
@@ -1702,4 +1654,3 @@ SceneRoots:
   - {fileID: 623969720}
   - {fileID: 594177556}
   - {fileID: 1321733734}
-  - {fileID: 1207736045}

@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class StartButton : MonoBehaviour
 {
@@ -17,8 +18,10 @@ public class StartButton : MonoBehaviour
         
     }
     public void OnClick(){
-        string state = nameInput.text;
-        
-        
+        string saveName = nameInput.text;
+        SaveSystem.Instance.currentSaveName = saveName;
+        SceneManager.LoadScene("MainScene");
+
+
     }
 }

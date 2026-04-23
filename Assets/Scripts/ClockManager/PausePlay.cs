@@ -1,7 +1,7 @@
  using UnityEngine;
 using UnityEngine.UI;
 
-public class pausePlay : MonoBehaviour
+public class PausePlay : MonoBehaviour
 {
     [SerializeField] public Sprite playSprite;
     [SerializeField] public Sprite pauseSprite;
@@ -10,6 +10,9 @@ public class pausePlay : MonoBehaviour
     [SerializeField] public PopUpManager PopUp;
 
     private bool isPlaying = true;
+
+   
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
