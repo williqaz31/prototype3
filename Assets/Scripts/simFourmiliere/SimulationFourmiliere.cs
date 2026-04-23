@@ -73,11 +73,14 @@ namespace SimulationFourmiliere
         public SimulationState(State etat)
         {
             _stockNourriture = (int)etat.graphBouff.Last();
-            Colonie = new Colonie((int)etat.graphPop.Last());
+            
             Oeufs = new List<Oeuf>();
             Jour = etat.gameTime;
             HistoriquePopulation = etat.graphPop;
             HistoriqueNourriture = etat.graphBouff;
+            Colonie = new Colonie((int)etat.graphPop.Last(),new Reine(etat.ageReine,etat.dureeDeVieReine));
+            
+            
        
             ResetCounters();
         }
@@ -224,6 +227,16 @@ namespace SimulationFourmiliere
             Population = new List<Fourmi>();
             FourmisMortes = new List<Fourmi>();
             reine = new Reine();
+
+            for (int i = 0; i < nbFourmisDebut; i++)
+                Population.Add(new Fourmi());
+        }
+
+        public Colonie(int nbFourmisDebut, Reine Reine)
+        {
+            Population = new List<Fourmi>();
+            FourmisMortes = new List<Fourmi>();
+            reine = Reine;
 
             for (int i = 0; i < nbFourmisDebut; i++)
                 Population.Add(new Fourmi());

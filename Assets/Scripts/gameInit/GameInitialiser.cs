@@ -1,6 +1,7 @@
 
 using UnityEngine;
 using System.Collections;
+using System.ComponentModel;
 using System.IO;
 using System.Net;
 using SimulationFourmiliere;
@@ -14,6 +15,7 @@ public class GameInitialiser : MonoBehaviour
     [SerializeField] public MapLoader mapLoader;
     [SerializeField] public CanvasGroup intro;
     [SerializeField] public GameObject tout;
+    [SerializeField] public Canvas gameOverCanvas;
    // [SerializeField] public CanvasGroup gameOver;
 
    public SimulationState simState;
@@ -22,7 +24,7 @@ public class GameInitialiser : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        StartCoroutine(Debut());
+        
         
       
         saveName = SaveSystem.Instance.currentSaveName;
@@ -31,21 +33,32 @@ public class GameInitialiser : MonoBehaviour
 
         if (etat != null)
         {
-            simState = new SimulationState(etat);
-            popCounter.simState = simState;
-            clockManager.fromLoad = true;
-            clockManager.day = etat.gameTime;
-            
-            // Load la map d'enregistrer
-          
-            mapLoader.LoadMap(etat.mapData,etat.rows,etat.cols);
-            mapLoader.LoadOdds(etat.odds,etat.rows,etat.cols);
-            
-           
+            //Si la partie à terminée nous la gardons ainsi
+            if (etat.gameOver)
+            {
+               
+               AfficherFinDePartie(); 
+            }
+            else
+            {
+                StartCoroutine(Debut());
+                simState = new SimulationState(etat);
+                popCounter.simState = simState;
+                clockManager.fromLoad = true;
+                clockManager.day = etat.gameTime;
+
+                // Load la map d'enregistrer
+
+                mapLoader.LoadMap(etat.mapData, etat.rows, etat.cols);
+                mapLoader.LoadOdds(etat.odds, etat.rows, etat.cols);
+            }
+
+
 
         }
         else
         {
+            StartCoroutine(Debut());
             Debug.Log("Nouvelle partie");
             simState = new SimulationState(100); //valeur initiale
             popCounter.simState = simState;
@@ -53,12 +66,42 @@ public class GameInitialiser : MonoBehaviour
             mapLoader.LoadDefault();
            
         }
-        
+
+       
+
+    }
+
+    void OnEnable()
+    {
+        popCounter.GameOver += FinDePartie;
+    }
+
+    void OnDisable()
+    {
+        popCounter.GameOver -= FinDePartie;
+    }
+
+    public void FinDePartie()
+    {
+        State state = new State();
+        state.gameOver = true;
+        SaveSystem.Save(saveName, state);
+        AfficherFinDePartie();
+       
         
     }
 
-    public void Quit()
+    void AfficherFinDePartie()
     {
+        tout.SetActive(false);
+        gameOverCanvas.gameObject.SetActive(true);
+    }
+
+    
+    public void Quit()
+    { 
+        gameOverCanvas.gameObject.SetActive(false);
+        
         Time.timeScale = 1f;
         if (isGameSaved())
         {
@@ -118,10 +161,10 @@ public class GameInitialiser : MonoBehaviour
     {
         float temps = 0f;
 
-        while (temps <= 3f)
+        while (temps <= 2f)
         {
             temps += Time.deltaTime;
-            intro.alpha = (temps/3f);
+            intro.alpha = (temps/2f);
             yield return null;
         }
     }
@@ -129,10 +172,10 @@ public class GameInitialiser : MonoBehaviour
     {
         float temps = 0f;
 
-        while (temps <= 3f)
+        while (temps <= 1.5f)
         {
             temps += Time.deltaTime;
-            intro.alpha = 1 - (temps/3f);
+            intro.alpha = 1 - (temps/1.5f);
             yield return null;
         }
     }

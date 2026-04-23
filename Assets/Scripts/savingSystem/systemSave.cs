@@ -23,7 +23,7 @@ public class SaveSystem : MonoBehaviour
     
     public static SaveSystem Instance;
 
-    public string mapFileName;
+    
 
     void Start()
     {
@@ -58,7 +58,7 @@ public class SaveSystem : MonoBehaviour
         }
     }
 
-    void AutoSave()
+    public void AutoSave()
     {
         State state = CreateSaveState();
         if (currentSaveName != null || currentSaveName != "")
@@ -79,7 +79,7 @@ public class SaveSystem : MonoBehaviour
         simulation = popCounter.simState;
 
         state.name = currentSaveName;
-        
+        state.gameOver = false;
         
         state.rows = mapManager.Rows;
         state.cols = mapManager.Cols;
@@ -87,7 +87,19 @@ public class SaveSystem : MonoBehaviour
         state.odds = mapManager.ExportOdds();
         
         state.gameTime = clockManager.day;
-       
+        state.dureeDeVieReine = simulation.Colonie.reine.dureeDeVie;
+        if (simulation.Colonie.reine != null)
+        {
+          
+            state.ageReine =simulation.Colonie.reine.age;
+            
+        }
+        else
+        {
+          
+            state.ageReine = simulation.Colonie.reine.dureeDeVie;
+            
+        }
         
         state.graphPop = simulation.HistoriquePopulation;
         state.graphBouff = simulation.HistoriqueNourriture;
@@ -124,11 +136,29 @@ public class SaveSystem : MonoBehaviour
 
     public static string[] GetAllSaves()
     {
-        if(!Directory.Exists(saveFolder))
+        if (!Directory.Exists(saveFolder))
+        {
+       
             return new string[0];
+        }
+
         return Directory.GetFiles(saveFolder,"*.json")
             .Select(Path.GetFileNameWithoutExtension)
             .ToArray();
+    }
+
+    public void DeleteSave(string saveName)
+    {
+        string path = saveFolder + saveName + ".json";
+        if (File.Exists(path))
+        {
+            File.Delete(path);
+         
+        }
+        else
+        {
+            Debug.Log("Save file doesn't exist");
+        }
     }
 
    

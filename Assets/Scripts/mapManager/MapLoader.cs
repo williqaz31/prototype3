@@ -98,10 +98,10 @@ public class MapLoader : MonoBehaviour
         {
             for (int x = 0; x < cols; x++)
                 if (mapData[y, x] == '9')
-                                 {
+                {
                     queenPos = new Vector2Int(x, y);
                     queenFound = true;
-                    Debug.Log(queenFound);
+                  
                 }
         }
     }

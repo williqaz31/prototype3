@@ -9,6 +9,9 @@ using UnityEngine.Rendering;
 [System.Serializable]
 public class State
 {
+    public bool gameOver;
+    public int ageReine;
+    public int dureeDeVieReine;
     public string name;
     public char[] mapData;
     public int rows;

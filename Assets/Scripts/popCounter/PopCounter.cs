@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using individu;
 using JetBrains.Annotations;
@@ -12,7 +13,7 @@ public class PopCounter : MonoBehaviour
     [SerializeField] private int stockNourriture = 50;
     [SerializeField] private graphPop _graphPop;
     [SerializeField] private graphBouff _graphBouff;
-    
+    public event Action GameOver;
     public SimulationState simState;
     private int popStartWeek;
     private int popStartMonth;
@@ -49,6 +50,10 @@ public class PopCounter : MonoBehaviour
             }
             Program.CalculSimulation(simState);
             populationCounter.text = string.Format("{0:00000}", simState.Colonie.Pop());
+            if (simState.Colonie.Pop() == 0)
+            {
+               GameOver?.Invoke();
+            }
             string x = simState.Jour.ToString();
 
 

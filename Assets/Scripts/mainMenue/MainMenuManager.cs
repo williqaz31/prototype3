@@ -9,9 +9,12 @@ public class MainMenuManager : MonoBehaviour
 
     [SerializeField] private TMP_Text buttonText;
 
+    
+    public dropdownUI dropdownUI;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        dropdown.onValueChanged.AddListener(SaveSelection);
         
     }
 
@@ -23,7 +26,8 @@ public class MainMenuManager : MonoBehaviour
     
     public void SaveSelection(int index)
     {
-        if (index == 0)
+       
+        if (index == 0 )
         {
             inputField.interactable = true;
             buttonText.text = "Nouvelle partie";
@@ -32,8 +36,29 @@ public class MainMenuManager : MonoBehaviour
         
         { 
             inputField.interactable = false;
-            buttonText.text = "Charger " +  dropdown.options[index].text;
+            string saveName = dropdown.options[index].text;
+            buttonText.text = "Charger " + saveName;
+            SaveSystem.Instance.currentSaveName = saveName;
+
+        }
+    }
+
+    public void DeleteSelection()
+    {
+        
+        string saveName = dropdown.options[dropdown.value].text;
+       
+        if (saveName == null || saveName == ""||saveName == "Aucune Sauvegarde")
+        {
             
         }
+        else
+        {
+            SaveSystem.Instance.DeleteSave(saveName);
+           
+        }
+      
+
+        dropdownUI.RefreshDropdown();
     }
 }
