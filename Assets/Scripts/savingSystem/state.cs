@@ -9,6 +9,7 @@ using UnityEngine.Rendering;
 [System.Serializable]
 public class State
 {
+    public int appartParJour;
     public bool gameOver;
     public int ageReine;
     public int dureeDeVieReine;

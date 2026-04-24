@@ -16,6 +16,11 @@ public class GameInitialiser : MonoBehaviour
     [SerializeField] public CanvasGroup intro;
     [SerializeField] public GameObject tout;
     [SerializeField] public Canvas gameOverCanvas;
+    
+    [SerializeField] public Canvas aucunApportWarning;
+    
+    [SerializeField] public GestionNourriture gestionNourriture;
+    [SerializeField] public GameObject panelBouff;
    // [SerializeField] public CanvasGroup gameOver;
 
    public SimulationState simState;
@@ -44,8 +49,10 @@ public class GameInitialiser : MonoBehaviour
                 StartCoroutine(Debut());
                 simState = new SimulationState(etat);
                 popCounter.simState = simState;
+                gestionNourriture.setApport(etat.appartParJour);
                 clockManager.fromLoad = true;
                 clockManager.day = etat.gameTime;
+                
 
                 // Load la map d'enregistrer
 
@@ -60,7 +67,8 @@ public class GameInitialiser : MonoBehaviour
         {
             StartCoroutine(Debut());
             Debug.Log("Nouvelle partie");
-            simState = new SimulationState(100); //valeur initiale
+            simState = new SimulationState(100); //valeur initiale du stock de nourriture
+            gestionNourriture.setApport(150); // Quantité initial par défaut, l'affiche visuellement
             popCounter.simState = simState;
             clockManager.fromLoad = false;
             mapLoader.LoadDefault();
@@ -71,17 +79,43 @@ public class GameInitialiser : MonoBehaviour
 
     }
 
+   
+
     void OnEnable()
     {
         popCounter.GameOver += FinDePartie;
+        gestionNourriture.onChangementApport += ChangerApport;
+       
+        
+       
+        
+       
     }
 
     void OnDisable()
     {
         popCounter.GameOver -= FinDePartie;
+        gestionNourriture.onChangementApport -= ChangerApport;
+       
+        popCounter.simState.AucunApport -= AucunApport;
+        
+        
     }
 
-    public void FinDePartie()
+    void AucunApport()
+    {
+        Time.timeScale = 0f;
+        aucunApportWarning.gameObject.SetActive(true);
+     
+    }
+
+    public void CloseWarning()
+    {
+        Time.timeScale = 1f;
+        aucunApportWarning.gameObject.SetActive(false);
+    }
+
+    private void FinDePartie()
     {
         State state = new State();
         state.gameOver = true;
@@ -89,6 +123,20 @@ public class GameInitialiser : MonoBehaviour
         AfficherFinDePartie();
        
         
+    }
+
+    private void ChangerApport(int newApport)
+    {
+      
+        if (popCounter.simState != null)
+        {
+            popCounter.simState.AucunApport += AucunApport;
+            popCounter.simState.apport = newApport;
+        }
+        else
+        {
+            Debug.Log("popcounter na pas de simulation");
+        }
     }
 
     void AfficherFinDePartie()
@@ -103,7 +151,7 @@ public class GameInitialiser : MonoBehaviour
         gameOverCanvas.gameObject.SetActive(false);
         
         Time.timeScale = 1f;
-        if (isGameSaved())
+        if (IsGameSaved())
         {
             
             SceneManager.LoadScene("MaiMenue");
@@ -120,7 +168,7 @@ public class GameInitialiser : MonoBehaviour
       
     }
 
-    private bool isGameSaved()
+    private bool IsGameSaved()
     {
         string[] saves = SaveSystem.GetAllSaves();
 
@@ -142,11 +190,6 @@ public class GameInitialiser : MonoBehaviour
         SaveSystem.Save(saveName, etat);
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 
     public void GameStart()
     {
@@ -178,5 +221,10 @@ public class GameInitialiser : MonoBehaviour
             intro.alpha = 1 - (temps/1.5f);
             yield return null;
         }
+    }
+
+    public void BouffPanelToggle()
+    {
+        panelBouff.SetActive(!panelBouff.activeSelf);
     }
 }

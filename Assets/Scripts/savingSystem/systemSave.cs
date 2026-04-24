@@ -78,6 +78,8 @@ public class SaveSystem : MonoBehaviour
         State state = new State();
         simulation = popCounter.simState;
 
+        state.appartParJour = popCounter.simState.apport;
+
         state.name = currentSaveName;
         state.gameOver = false;
         
