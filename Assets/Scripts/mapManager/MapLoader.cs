@@ -9,14 +9,14 @@ public class MapLoader : MonoBehaviour
     public Tilemap groundTilemap;
     public Camera mainCamera;
 
-    public TileBase DarkDirt; // 1
-    public TileBase Dirt;     // 0
-    public TileBase Sky;      // 3
-    public TileBase DarkGrass;// 2
-    public TileBase Grass;    // 4
-    public TileBase Rock;     // 5
-    public TileBase Food;     // 6
-    public TileBase Queen;    // 9
+    public TileBase DarkDirt;
+    public TileBase Dirt;
+    public TileBase Sky;
+    public TileBase DarkGrass;
+    public TileBase Grass;
+    public TileBase Rock;
+    public TileBase Food;
+    public TileBase Queen;
 
     public string mapFile = "/Tiles/Maps.txt";
     public string expOddsFile = "/Tiles/ExpansionOdds.txt";
@@ -42,12 +42,9 @@ public class MapLoader : MonoBehaviour
 
     void Start()
     {
-       
-        
         UpdateOddsMap();
         RefreshTilemap();
         AdjustCamera();
-        Debug.Log("Queen found at: " + queenPos);
     }
 
     void Update()
@@ -61,7 +58,6 @@ public class MapLoader : MonoBehaviour
                 UpdateOddsMap();
                 ExpandMapIfNeeded();
                 RefreshTilemap();
-                //FindFirstObjectByType<AntManager>().DrawAnts();
             }
 
             timer = 0f;
@@ -91,7 +87,6 @@ public class MapLoader : MonoBehaviour
         InitializeMap(rows, cols);
     }
 
-
     public void InitializeMap(int rows,int cols)
     {
         for (int y = 0; y < rows; y++)
@@ -101,10 +96,10 @@ public class MapLoader : MonoBehaviour
                 {
                     queenPos = new Vector2Int(x, y);
                     queenFound = true;
-                  
                 }
         }
     }
+
     void UpdateOddsMap()
     {
         for (int y = 0; y < rows; y++)
@@ -128,10 +123,12 @@ public class MapLoader : MonoBehaviour
         if (debugMode)
             WriteOddsToFile();
     }
+
     public Vector3Int MapToTilePos(Vector2Int p)
     {
         return new Vector3Int(p.x - cols / 2, -p.y + rows / 2, 0);
     }
+
     int GetBaseOdds(int zeroNeighbors)
     {
         if (zeroNeighbors == 1) return 80;
@@ -163,6 +160,7 @@ public class MapLoader : MonoBehaviour
 
         File.WriteAllText(Application.dataPath + expOddsFile, sb.ToString());
     }
+
     bool DigWeightedTile()
     {
         var frontTiles = GetTunnelFront();
@@ -189,6 +187,7 @@ public class MapLoader : MonoBehaviour
         jobs.Add(new DigJob(chosen));
         return true;
     }
+
     public void UpdateOddsAround(int cx, int cy, int radius = 3)
     {
         for (int y = cy - radius; y <= cy + radius; y++)
@@ -211,6 +210,7 @@ public class MapLoader : MonoBehaviour
             }
         }
     }
+
     void TryAddCandidate(Vector2Int origin, int dir, List<Vector2Int> candidates, List<int> weights)
     {
         int nx = origin.x + dx[dir];
@@ -250,6 +250,7 @@ public class MapLoader : MonoBehaviour
 
         return 0;
     }
+
     List<Vector2Int> GetTunnelFront()
     {
         var front = new List<Vector2Int>();
@@ -318,6 +319,7 @@ public class MapLoader : MonoBehaviour
     {
         return x >= 0 && x < cols && y >= 0 && y < rows;
     }
+
     void ExpandMapIfNeeded()
     {
         bool left = false, right = false, bottom = false;
@@ -340,8 +342,15 @@ public class MapLoader : MonoBehaviour
         var newOdds = new int[newRows, newCols];
 
         for (int y = 0; y < newRows; y++)
+        {
             for (int x = 0; x < newCols; x++)
-                newMap[y, x] = '1';
+            {
+                if (Random.Range(0, 20) == 0)
+                    newMap[y, x] = '5';
+                else
+                    newMap[y, x] = '1';
+            }
+        }
 
         for (int y = 0; y < rows; y++)
         {
@@ -356,7 +365,6 @@ public class MapLoader : MonoBehaviour
         if (queenFound)
         {
             if (left) queenPos.x += 1;
-          //  Debug.Log("Shifted" + queenPos);
         }
 
         mapData = newMap;
@@ -364,10 +372,7 @@ public class MapLoader : MonoBehaviour
         rows = newRows;
         cols = newCols;
 
-        Vector2Int shift = new Vector2Int(
-    left ? 1 : 0,
-    0
-);
+        Vector2Int shift = new Vector2Int(left ? 1 : 0, 0);
 
         if (shift != Vector2Int.zero)
         {
@@ -406,6 +411,7 @@ public class MapLoader : MonoBehaviour
             default: return null;
         }
     }
+
     public class DigJob
     {
         public Vector2Int target;
@@ -417,6 +423,7 @@ public class MapLoader : MonoBehaviour
             taken = false;
         }
     }
+
     void AdjustCamera()
     {
         groundTilemap.CompressBounds();
@@ -437,48 +444,25 @@ public class MapLoader : MonoBehaviour
         return mapData;
     }
 
-    public int Rows
-    {
-        get { return rows; }
-    }
-
-    public int Cols
-    {
-        get { return cols; }
-    }
-
+    public int Rows => rows;
+    public int Cols => cols;
 
     public char[] ExportMap()
     {
-        char[] data = new char[rows *  cols];
-        int[] odds = new int[rows * cols];
-
+        char[] data = new char[rows * cols];
         for (int y = 0; y < rows; y++)
-        {
             for (int x = 0; x < cols; x++)
-            {
-                data[y*cols + x] = mapData[y, x];
-                odds[y*cols + x] = oddsGrid[y,x];
-            }
-        }
+                data[y * cols + x] = mapData[y, x];
         return data;
-        
     }
+
     public int[] ExportOdds()
     {
-      
         int[] odds = new int[rows * cols];
-
         for (int y = 0; y < rows; y++)
-        {
             for (int x = 0; x < cols; x++)
-            {
-              
-                odds[y*cols + x] = oddsGrid[y,x];
-            }
-        }
+                odds[y * cols + x] = oddsGrid[y, x];
         return odds;
-        
     }
 
     public void LoadMap(char[] data, int rows, int cols)
@@ -487,15 +471,9 @@ public class MapLoader : MonoBehaviour
         this.cols = cols;
         mapData = new char[rows, cols];
         for (int y = 0; y < rows; y++)
-        {
             for (int x = 0; x < cols; x++)
-            {
                 mapData[y, x] = data[y * cols + x];
-            }
-        }
         InitializeMap(rows, cols);
-      
-       
     }
     
     public void LoadOdds(int[] odds, int rows, int cols)
@@ -504,13 +482,8 @@ public class MapLoader : MonoBehaviour
         this.cols = cols;
         oddsGrid = new int[rows, cols];
         for (int y = 0; y < rows; y++)
-        {
             for (int x = 0; x < cols; x++)
-            { oddsGrid[y, x] = odds[y * cols + x];
-            }
-        }
-      
+                odds[y * cols + x] = odds[y * cols + x];
         UpdateOddsMap();
-       
     }
 }
