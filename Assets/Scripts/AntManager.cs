@@ -262,7 +262,7 @@ public class AntManager : MonoBehaviour
             AntColonie.SetTile(pos, tileToUse);
 
             // Debug (safe + readable)
-            //Debug.Log($"ANT {id} pos={gridPos} carrying={isCarrying} state={state}");
+            Debug.Log($"ANT {id} pos={gridPos} carrying={isCarrying} state={state}");
         }
     }
     public List<Vector2Int> FindPathPublic(Vector2Int start, Vector2Int goal)
@@ -659,5 +659,7 @@ public class AntManager : MonoBehaviour
         }
         foreach (var job in mapLoader.jobs)
             job.target += delta;
+
+        FindObjectOfType<ForagerManager>()?.ResetForagersToExit();
     }
 }

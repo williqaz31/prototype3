@@ -35,17 +35,20 @@ public class ForagerManager : MonoBehaviour
         Distributing
     }
 
-IEnumerator Start()
-{
-    Debug.Log("ForagerManager Start");
+    IEnumerator Start()
+    {
+        Debug.Log("ForagerManager Start");
 
-    while (antManager == null || antManager.simulation == null)
-        yield return null;
+        yield return new WaitUntil(() =>
+            antManager != null &&
+            antManager.simulation != null &&
+            antManager.antIds.Count > 0
+        );
 
-    simulation = antManager.simulation;
+        simulation = antManager.simulation;
 
-    Debug.Log("ForagerManager linked simulation OK");
-}
+        Debug.Log("ForagerManager linked simulation OK");
+    }
 
     void Update()
     {
@@ -196,6 +199,7 @@ IEnumerator Start()
 
                         antManager.SetCarrying(id, true, food);
 
+                        // NEW: unhide ant when returning
                         antManager.hiddenAnts.Remove(id);
 
                         states[id] = ForagerState.ReturningToColony;
@@ -313,6 +317,36 @@ IEnumerator Start()
         }
     }
 
+    public void ResetForagersToExit()
+    {
+        foreach (int id in antManager.antIds)
+        {
+            if (!antManager.roles.TryGetValue(id, out var role))
+                continue;
+
+            if (role != AntManager.AntRole.Forager)
+                continue;
+
+            var exit = FindExitTile();
+            if (exit == null) continue;
+
+            // TELEPORT to exit
+            antManager.ants[id] = exit.Value;
+
+            // clear movement state
+            paths.Remove(id);
+            moveTimers[id] = 0f;
+
+            // restart state machine cleanly
+            states[id] = ForagerState.Outside;
+            returnTimers[id] = forageReturnDelay;
+
+            // optional: hide/unhide safety reset
+            antManager.hiddenAnts.Remove(id);
+
+            antManager.DrawAnts();
+        }
+    }
     void LogForagerStatus()
     {
         int currentForagers = 0;
