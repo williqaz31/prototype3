@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -8,6 +10,8 @@ public class MapLoader : MonoBehaviour
 {
     public Tilemap groundTilemap;
     public Camera mainCamera;
+    public GameObject textPrefab;
+    private Dictionary<Vector2Int, TMP_Text> textMap = new Dictionary<Vector2Int, TMP_Text>();
 
     public TileBase DarkDirt; // 1
     public TileBase Dirt;     // 0
@@ -24,8 +28,9 @@ public class MapLoader : MonoBehaviour
     public float updateInterval = 0.1f;
     public bool debugMode = false;
 
+    private char[,] plannedMap;
     private char[,] mapData;
-    private int[,] oddsGrid;
+    private float[,] oddsGrid;
     private int rows;
     private int cols;
 
@@ -38,12 +43,22 @@ public class MapLoader : MonoBehaviour
     public bool queenFound;
     public List<DigJob> jobs = new List<DigJob>();
 
+    private int currentHeading = 1;
+    private int headingStreak = 0;
+    public int minJobBuffer = 10;
+
+
     void Start()
     {
         InitializeMap();
+
+        // Hidden planner map uses old digging logic
+        plannedMap = (char[,])mapData.Clone();
+
         UpdateOddsMap();
         RefreshTilemap();
         AdjustCamera();
+
         Debug.Log("Queen found at: " + queenPos);
     }
 
@@ -53,14 +68,10 @@ public class MapLoader : MonoBehaviour
 
         if (timer >= updateInterval)
         {
-            if (DigWeightedTile())
-            {
-                UpdateOddsMap();
-                ExpandMapIfNeeded();
-                RefreshTilemap();
-                //FindFirstObjectByType<AntManager>().DrawAnts();
-            }
-
+            RefillJobQueue();
+            ExpandMapIfNeeded();
+            RefreshTilemap();
+            FindObjectOfType<AntManager>().AssignJobs();
             timer = 0f;
         }
     }
@@ -80,7 +91,7 @@ public class MapLoader : MonoBehaviour
         cols = lines[0].Length;
 
         mapData = new char[rows, cols];
-        oddsGrid = new int[rows, cols];
+        oddsGrid = new float[rows, cols];
 
         for (int y = 0; y < rows; y++)
             for (int x = 0; x < cols; x++)
@@ -110,7 +121,7 @@ public class MapLoader : MonoBehaviour
                 }
 
                 int zeroNeighbors = CountZeroNeighbors(x, y);
-                int baseOdds = GetBaseOdds(zeroNeighbors);
+                float baseOdds = GetBaseOdds(zeroNeighbors);
                 int nearby = CountNearbyZeros(x, y, 3);
 
                 oddsGrid[y, x] = ApplyTunnelPenalty(baseOdds, nearby);
@@ -124,7 +135,7 @@ public class MapLoader : MonoBehaviour
     {
         return new Vector3Int(p.x - cols / 2, -p.y + rows / 2, 0);
     }
-    int GetBaseOdds(int zeroNeighbors)
+    float GetBaseOdds(int zeroNeighbors)
     {
         if (zeroNeighbors == 1) return 80;
         if (zeroNeighbors == 2) return 40;
@@ -132,54 +143,373 @@ public class MapLoader : MonoBehaviour
         return 2;
     }
 
-    int ApplyTunnelPenalty(int baseOdds, int nearbyTunnels)
+    public void RefillJobQueue()
     {
-        float factor = 1f - 0.15f * nearbyTunnels;
-        factor = Mathf.Clamp(factor, 0.1f, 1f);
-        return Mathf.RoundToInt(baseOdds * factor);
+        int unjobbed = jobs.Count(j => !j.taken);
+
+        if (unjobbed >= minJobBuffer)
+            return;
+
+        // Run OLD tunnel generation on hidden planner map
+        DigWeightedTileOnPlannedMap();
+
+        // Convert planner differences into dig jobs
+        for (int y = 0; y < rows; y++)
+        {
+            for (int x = 0; x < cols; x++)
+            {
+                if (plannedMap[y, x] == '0' &&
+                    mapData[y, x] == '1')
+                {
+                    Vector2Int pos = new Vector2Int(x, y);
+
+                    if (!jobs.Exists(j => j.target == pos))
+                    {
+                        jobs.Add(new DigJob(pos));
+
+                        // VERY IMPORTANT:
+                        // only 1 new job per cycle
+                        // exactly like old DigWeightedTile()
+                        return;
+                    }
+                }
+            }
+        }
     }
 
-    void WriteOddsToFile()
+    void DigWeightedTileOnPlannedMap()
     {
-        StringBuilder sb = new StringBuilder();
+        List<Vector2Int> frontTiles = GetTunnelFrontFromPlanned();
+        List<Vector2Int> candidates = new List<Vector2Int>();
+        List<int> weights = new List<int>();
+
+        int[] localDx = { 0, 0, -1, 1 };
+        int[] localDy = { -1, 1, 0, 0 };
+
+        foreach (var front in frontTiles)
+        {
+            int[] dirWeights = { 10, 50, 20, 20 };
+            // up, down, left, right
+
+            int totalDirWeight = 0;
+            foreach (int w in dirWeights)
+                totalDirWeight += w;
+
+            int rand = Random.Range(0, totalDirWeight);
+
+            int chosenDir = 0;
+            int sum = 0;
+
+            for (int i = 0; i < 4; i++)
+            {
+                sum += dirWeights[i];
+
+                if (rand < sum)
+                {
+                    chosenDir = i;
+                    break;
+                }
+            }
+
+            int nx = front.x + localDx[chosenDir];
+            int ny = front.y + localDy[chosenDir];
+
+            if (IsInside(nx, ny))
+            {
+                if (plannedMap[ny, nx] == '1' &&
+                    CountZeroNeighborsPlanned(nx, ny) == 1)
+                {
+                    int nearbyTunnels = CountNearbyZerosPlanned(nx, ny, 2);
+
+                    float penaltyFactor = 1f - 0.15f * nearbyTunnels;
+                    penaltyFactor = Mathf.Clamp(penaltyFactor, 0.1f, 1f);
+
+                    int zeroNeighbors = CountZeroNeighborsPlanned(nx, ny);
+                    int baseOdds = 0;
+
+                    if (zeroNeighbors == 1) baseOdds = 80;
+                    else if (zeroNeighbors == 2) baseOdds = 40;
+                    else if (zeroNeighbors >= 3) baseOdds = 5;
+                    else baseOdds = 2;
+
+                    int adjustedOdds =
+                        Mathf.RoundToInt(baseOdds * penaltyFactor);
+
+                    candidates.Add(new Vector2Int(nx, ny));
+                    weights.Add(adjustedOdds);
+                }
+            }
+
+            // small branch chance EXACTLY like old code
+            if (Random.value < 0.1f)
+            {
+                int branchDir =
+                    (chosenDir + Random.Range(1, 4)) % 4;
+
+                int bx = front.x + localDx[branchDir];
+                int by = front.y + localDy[branchDir];
+
+                if (IsInside(bx, by))
+                {
+                    if (plannedMap[by, bx] == '1' &&
+                        CountZeroNeighborsPlanned(bx, by) == 1)
+                    {
+                        int nearbyTunnels =
+                            CountNearbyZerosPlanned(bx, by, 2);
+
+                        float penaltyFactor =
+                            1f - 0.15f * nearbyTunnels;
+
+                        penaltyFactor =
+                            Mathf.Clamp(penaltyFactor, 0.1f, 1f);
+
+                        int zeroNeighbors =
+                            CountZeroNeighborsPlanned(bx, by);
+
+                        int baseOdds = 0;
+
+                        if (zeroNeighbors == 1) baseOdds = 80;
+                        else if (zeroNeighbors == 2) baseOdds = 40;
+                        else if (zeroNeighbors >= 3) baseOdds = 5;
+                        else baseOdds = 2;
+
+                        int adjustedOdds =
+                            Mathf.RoundToInt(baseOdds * penaltyFactor);
+
+                        candidates.Add(new Vector2Int(bx, by));
+                        weights.Add(adjustedOdds);
+                    }
+                }
+            }
+        }
+
+        if (candidates.Count == 0)
+            return;
+
+        int totalWeight = 0;
+        foreach (int w in weights)
+            totalWeight += w;
+
+        int randomValue = Random.Range(0, totalWeight);
+        int sumWeight = 0;
+
+        for (int i = 0; i < candidates.Count; i++)
+        {
+            sumWeight += weights[i];
+
+            if (randomValue < sumWeight)
+            {
+                Vector2Int chosen = candidates[i];
+
+                // ONLY planner digs here
+                plannedMap[chosen.y, chosen.x] = '0';
+
+                break;
+            }
+        }
+    }
+
+    List<Vector2Int> GetTunnelFrontFromPlanned()
+    {
+        List<Vector2Int> front = new List<Vector2Int>();
 
         for (int y = 0; y < rows; y++)
         {
             for (int x = 0; x < cols; x++)
             {
-                int digit = Mathf.Clamp(oddsGrid[y, x] / 10, 0, 9);
-                sb.Append(digit);
+                if (plannedMap[y, x] != '0' &&
+                    plannedMap[y, x] != '9')
+                    continue;
+
+                int adjacentDirt = 0;
+
+                for (int i = 0; i < 4; i++)
+                {
+                    int nx = x + dx[i];
+                    int ny = y + dy[i];
+
+                    if (!IsInside(nx, ny))
+                        continue;
+
+                    if (plannedMap[ny, nx] == '1')
+                        adjacentDirt++;
+                }
+
+                if (adjacentDirt > 0)
+                    front.Add(new Vector2Int(x, y));
             }
-            sb.AppendLine();
         }
 
-        File.WriteAllText(Application.dataPath + expOddsFile, sb.ToString());
+        return front;
     }
-    bool DigWeightedTile()
+
+    int CountZeroNeighborsPlanned(int x, int y)
     {
-        var frontTiles = GetTunnelFront();
-        var candidates = new List<Vector2Int>();
+        int count = 0;
+
+        for (int i = 0; i < 4; i++)
+        {
+            int nx = x + dx[i];
+            int ny = y + dy[i];
+
+            if (IsInside(nx, ny) &&
+                (plannedMap[ny, nx] == '0' ||
+                 plannedMap[ny, nx] == '9'))
+            {
+                count++;
+            }
+        }
+
+        return count;
+    }
+
+    int CountNearbyZerosPlanned(int x, int y, int radius)
+    {
+        int count = 0;
+
+        for (int yy = -radius; yy <= radius; yy++)
+        {
+            for (int xx = -radius; xx <= radius; xx++)
+            {
+                int nx = x + xx;
+                int ny = y + yy;
+
+                if (IsInside(nx, ny) &&
+                    (plannedMap[ny, nx] == '0' ||
+                     plannedMap[ny, nx] == '9'))
+                {
+                    count++;
+                }
+            }
+        }
+
+        return count;
+    }
+
+    List<Vector2Int> GetTunnelFront()
+    {
+        List<Vector2Int> front = new List<Vector2Int>();
+
+        for (int y = 0; y < rows; y++)
+        {
+            for (int x = 0; x < cols; x++)
+            {
+                if (mapData[y, x] != '0' && mapData[y, x] != '9')
+                    continue;
+
+                int adjacentDirt = 0;
+
+                for (int i = 0; i < 4; i++)
+                {
+                    int nx = x + dx[i];
+                    int ny = y + dy[i];
+
+                    if (!IsInside(nx, ny)) continue;
+
+                    if (mapData[ny, nx] == '1')
+                        adjacentDirt++;
+                }
+
+                if (adjacentDirt > 0)
+                    front.Add(new Vector2Int(x, y));
+            }
+        }
+
+        return front;
+    }
+
+    Vector2Int GetTunnelTip()
+    {
+        // Prefer the deepest untaken job as the planning tip
+        DigJob deepest = null;
+        foreach (var j in jobs)
+        {
+            if (deepest == null || j.target.y > deepest.target.y)
+                deepest = j;
+        }
+        if (deepest != null) return deepest.target;
+
+        // Fall back to deepest open tile
+        Vector2Int tip = queenPos;
+        for (int y = 0; y < rows; y++)
+            for (int x = 0; x < cols; x++)
+                if ((mapData[y, x] == '0' || mapData[y, x] == '9') && y >= tip.y)
+                    tip = new Vector2Int(x, y);
+
+        return tip;
+    }
+
+    int GetWeightedDirectionFrom(Vector2Int from)
+    {
+        // Build candidates weighted by odds, same as old code
+        var candidates = new List<int>();
         var weights = new List<int>();
 
-        foreach (var front in frontTiles)
-        {
-            int dir = GetWeightedDirection();
-            TryAddCandidate(front, dir, candidates, weights);
+        int[] dirWeights = { 2, 70, 14, 14 }; // up, down, left, right
 
-            if (Random.value < 0.1f)
-            {
-                int branchDir = (dir + Random.Range(1, 4)) % 4;
-                TryAddCandidate(front, branchDir, candidates, weights);
-            }
+        for (int dir = 0; dir < 4; dir++)
+        {
+            int nx = from.x + dx[dir];
+            int ny = from.y + dy[dir];
+
+            if (!IsInside(nx, ny)) continue;
+            if (mapData[ny, nx] != '1') continue;
+            if (CountZeroNeighborsIncludingPending(nx, ny) != 1) continue;
+
+            int nearby = CountNearbyZeros(nx, ny, 2);
+            float penalty = Mathf.Clamp(1f - 0.15f * nearby, 0.1f, 1f);
+            int weight = Mathf.RoundToInt(dirWeights[dir] * penalty);
+
+            candidates.Add(dir);
+            weights.Add(weight);
         }
 
-        if (candidates.Count == 0) return false;
+        if (candidates.Count == 0) return currentHeading; // keep going same way if stuck
 
-        int chosenIndex = GetWeightedIndex(weights);
-        Vector2Int chosen = candidates[chosenIndex];
+        return candidates[GetWeightedIndex(weights)];
+    }
 
-        jobs.Add(new DigJob(chosen));
-        return true;
+    int CountZeroNeighborsIncludingPending(int x, int y)
+    {
+        int count = 0;
+        for (int i = 0; i < 4; i++)
+        {
+            int nx = x + dx[i];
+            int ny = y + dy[i];
+            if (!IsInside(nx, ny)) continue;
+
+            bool isOpen = mapData[ny, nx] == '0' || mapData[ny, nx] == '9';
+            bool isPending = jobs.Exists(j => j.target == new Vector2Int(nx, ny));
+
+            if (isOpen || isPending) count++;
+        }
+        return count;
+    }
+    float ApplyTunnelPenalty(float baseOdds, int nearbyTunnels)
+    {
+        float factor = 1f - 0.15f * nearbyTunnels;
+        factor = Mathf.Clamp(factor, 0.1f, 1f);
+        return baseOdds * factor;
+    }
+
+    void WriteOddsToFile()
+    {
+        if (debugMode)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            for (int y = 0; y < rows; y++)
+            {
+                for (int x = 0; x < cols; x++)
+                {
+                    float digit = Mathf.Clamp(oddsGrid[y, x] / 10, 0, 9);
+                    sb.Append(digit);
+                }
+                sb.AppendLine();
+            }
+
+            File.WriteAllText(Application.dataPath + expOddsFile, sb.ToString());
+        }
     }
     public void UpdateOddsAround(int cx, int cy, int radius = 3)
     {
@@ -196,33 +526,12 @@ public class MapLoader : MonoBehaviour
                 }
 
                 int zeroNeighbors = CountZeroNeighbors(x, y);
-                int baseOdds = GetBaseOdds(zeroNeighbors);
+                float baseOdds = GetBaseOdds(zeroNeighbors);
                 int nearby = CountNearbyZeros(x, y, 2);
 
                 oddsGrid[y, x] = ApplyTunnelPenalty(baseOdds, nearby);
             }
         }
-    }
-    void TryAddCandidate(Vector2Int origin, int dir, List<Vector2Int> candidates, List<int> weights)
-    {
-        int nx = origin.x + dx[dir];
-        int ny = origin.y + dy[dir];
-
-        if (!IsInside(nx, ny)) return;
-        if (mapData[ny, nx] != '1') return;
-        if (CountZeroNeighbors(nx, ny) != 1) return;
-
-        int nearby = CountNearbyZeros(nx, ny, 2);
-        int adjusted = ApplyTunnelPenalty(oddsGrid[ny, nx], nearby);
-
-        candidates.Add(new Vector2Int(nx, ny));
-        weights.Add(adjusted);
-    }
-
-    int GetWeightedDirection()
-    {
-        int[] weights = { 10, 50, 20, 20 };
-        return GetWeightedIndex(weights);
     }
 
     int GetWeightedIndex(IList<int> weights)
@@ -242,34 +551,6 @@ public class MapLoader : MonoBehaviour
 
         return 0;
     }
-    List<Vector2Int> GetTunnelFront()
-    {
-        var front = new List<Vector2Int>();
-
-        for (int y = 0; y < rows; y++)
-        {
-            for (int x = 0; x < cols; x++)
-            {
-                if (mapData[y, x] != '0') continue;
-
-                int adjacentDirt = 0;
-
-                for (int i = 0; i < 4; i++)
-                {
-                    int nx = x + dx[i];
-                    int ny = y + dy[i];
-
-                    if (IsInside(nx, ny) && mapData[ny, nx] == '1')
-                        adjacentDirt++;
-                }
-
-                if (adjacentDirt > 0)
-                    front.Add(new Vector2Int(x, y));
-            }
-        }
-
-        return front;
-    }
 
     int CountZeroNeighbors(int x, int y)
     {
@@ -280,7 +561,7 @@ public class MapLoader : MonoBehaviour
             int nx = x + dx[i];
             int ny = y + dy[i];
 
-            if (IsInside(nx, ny) && mapData[ny, nx] == '0')
+            if (IsInside(nx, ny) && (mapData[ny, nx] == '0' || mapData[ny, nx] == '9'))
                 count++;
         }
 
@@ -298,7 +579,7 @@ public class MapLoader : MonoBehaviour
                 int nx = x + dx;
                 int ny = y + dy;
 
-                if (IsInside(nx, ny) && mapData[ny, nx] == '0')
+                if (IsInside(nx, ny) && (mapData[ny, nx] == '0' || mapData[ny, nx] == '9'))
                     count++;
             }
         }
@@ -316,50 +597,71 @@ public class MapLoader : MonoBehaviour
 
         for (int y = 0; y < rows; y++)
         {
-            if (mapData[y, 0] == '0') left = true;
-            if (mapData[y, cols - 1] == '0') right = true;
+            if (mapData[y, 0] == '0' || mapData[y, 1] == '0')
+                left = true;
+
+            if (mapData[y, cols - 1] == '0' || mapData[y, cols - 2] == '0')
+                right = true;
         }
 
         for (int x = 0; x < cols; x++)
-            if (mapData[rows - 1, x] == '0') bottom = true;
+        {
+            if (mapData[rows - 1, x] == '0' ||
+                mapData[rows - 2, x] == '0')
+            {
+                bottom = true;
+            }
+        }
 
-        if (!left && !right && !bottom) return;
+        if (!left && !right && !bottom)
+            return;
 
         int newRows = rows + (bottom ? 1 : 0);
         int newCols = cols + (left ? 1 : 0) + (right ? 1 : 0);
 
-        var newMap = new char[newRows, newCols];
-        var newOdds = new int[newRows, newCols];
+        char[,] newMap = new char[newRows, newCols];
+        char[,] newPlannedMap = new char[newRows, newCols];
+        float[,] newOdds = new float[newRows, newCols];
 
+        // Fill defaults
         for (int y = 0; y < newRows; y++)
+        {
             for (int x = 0; x < newCols; x++)
+            {
                 newMap[y, x] = '1';
+                newPlannedMap[y, x] = '1';
+            }
+        }
 
+        // Copy old data
         for (int y = 0; y < rows; y++)
         {
             for (int x = 0; x < cols; x++)
             {
                 int nx = x + (left ? 1 : 0);
+
                 newMap[y, nx] = mapData[y, x];
+                newPlannedMap[y, nx] = plannedMap[y, x];
                 newOdds[y, nx] = oddsGrid[y, x];
             }
         }
 
         if (queenFound)
         {
-            if (left) queenPos.x += 1;
-            Debug.Log("Shifted" + queenPos);
+            if (left)
+                queenPos.x += 1;
+
+            FindObjectOfType<AntManager>().queenPos = queenPos;
         }
 
         mapData = newMap;
+        plannedMap = newPlannedMap;
         oddsGrid = newOdds;
+
         rows = newRows;
         cols = newCols;
 
-        Vector2Int shift = new Vector2Int(
-    left ? 1 : 0,
-    0
-);
+        Vector2Int shift = new Vector2Int(left ? 1 : 0, 0);
 
         if (shift != Vector2Int.zero)
         {
@@ -377,10 +679,54 @@ public class MapLoader : MonoBehaviour
         {
             for (int x = 0; x < cols; x++)
             {
-                Vector3Int pos = MapToTilePos(new Vector2Int(x, y));
-                groundTilemap.SetTile(pos, GetTile(mapData[y, x]));
+                Vector2Int gridPos = new Vector2Int(x, y);
+                Vector3Int tilePos = MapToTilePos(gridPos);
+
+                groundTilemap.SetTile(tilePos, GetTile(mapData[y, x]));
+
+                if (debugMode)
+                {
+                    UpdateTileText(gridPos, tilePos);
+                }
             }
         }
+    }
+
+    public void RemoveJobAt(Vector2Int target)
+    {
+        jobs.RemoveAll(j => j.target == target);
+    }
+
+    void UpdateTileText(Vector2Int gridPos, Vector3Int tilePos)
+    {
+        float odds = oddsGrid[gridPos.y, gridPos.x];
+
+        // Optional: hide zeros
+        if (odds == 0)
+        {
+            if (textMap.ContainsKey(gridPos))
+                textMap[gridPos].text = "";
+            return;
+        }
+
+        TMP_Text text;
+
+        if (!textMap.TryGetValue(gridPos, out text))
+        {
+            GameObject obj = Instantiate(textPrefab, groundTilemap.transform);
+            text = obj.GetComponent<TMP_Text>();
+
+            Renderer r = text.GetComponent<Renderer>();
+            r.sortingLayerName = "TileText";
+            r.sortingOrder = 20;
+
+            textMap[gridPos] = text;
+        }
+
+        Vector3 worldPos = groundTilemap.GetCellCenterWorld(tilePos);
+        text.transform.position = worldPos;
+
+        text.text = odds.ToString();
     }
 
     TileBase GetTile(char c)
