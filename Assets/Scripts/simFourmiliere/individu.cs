@@ -81,12 +81,6 @@ namespace individu
           
         }
 
-        public Reine(int Age, int DureeDeVie)
-        {
-            dureeDeVie = DureeDeVie;
-            age = Age;
-        }
-
      
     }
 

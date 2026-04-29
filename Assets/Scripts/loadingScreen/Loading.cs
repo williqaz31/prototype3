@@ -28,11 +28,10 @@ public class Loading : MonoBehaviour
 
     public void StartLoading()
     {
-        Debug.Log("StartLoading");
         loadButton.interactable = false;
         StartCoroutine(LoadRoutine());
         
-       // tout.SetActive(false);
+        tout.SetActive(false);
     }
 
     IEnumerator LoadRoutine()
@@ -51,12 +50,12 @@ public class Loading : MonoBehaviour
         audioSource.Stop();
         loadingScreen.SetActive(false);
         informationSup.SetActive(true);
-        //tout.SetActive(true);
+        tout.SetActive(true);
     }
 
     public void BackToNormal()
     {
-        tout.SetActive(true);
+       
         informationSup.SetActive(false);
         loadButton.interactable = true;
         Time.timeScale = 1;
