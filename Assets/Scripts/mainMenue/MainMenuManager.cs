@@ -61,4 +61,8 @@ public class MainMenuManager : MonoBehaviour
 
         dropdownUI.RefreshDropdown();
     }
+    public void QuitGame()
+    {
+        Application.Quit();
+    }
 }
