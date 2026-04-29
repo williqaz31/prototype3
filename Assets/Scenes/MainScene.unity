@@ -3042,6 +3042,67 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 721883908}
   m_CullTransparentMesh: 1
+--- !u!1 &801521553
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 801521554}
+  - component: {fileID: 801521556}
+  - component: {fileID: 801521555}
+  m_Layer: 0
+  m_Name: AntForagingSystem
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &801521554
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 801521553}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1834960701}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &801521555
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 801521553}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 77439567454361c43a80a23704456a95, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+--- !u!114 &801521556
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 801521553}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d1337e9faa00944d880fc7019375839, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  antManager: {fileID: 1731751991}
+  mapLoader: {fileID: 1957378114}
+  respawnDelayMin: 2
+  respawnDelayMax: 6
 --- !u!1 &887121786
 GameObject:
   m_ObjectHideFlags: 0
@@ -5645,6 +5706,8 @@ MonoBehaviour:
   mapLoader: {fileID: 1957378114}
   AntColonie: {fileID: 1076001596}
   AntTile: {fileID: 11400000, guid: f43f9becd731b474585c25c3549620fa, type: 2}
+  AntWithFoodTile: {fileID: 0}
+  antIds: 
   moveInterval: 0.2
   queenPos: {x: 0, y: 0}
   popCounter: {fileID: 721883910}
@@ -5856,6 +5919,7 @@ Transform:
   - {fileID: 1957378115}
   - {fileID: 1289303339}
   - {fileID: 1731751990}
+  - {fileID: 801521554}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1912680691
@@ -5941,6 +6005,7 @@ MonoBehaviour:
   debugMode: 0
   queenPos: {x: 0, y: 0}
   queenFound: 0
+  minJobBuffer: 10
 --- !u!4 &1957378115
 Transform:
   m_ObjectHideFlags: 0
