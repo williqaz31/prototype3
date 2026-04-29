@@ -6,15 +6,17 @@ using System;
 using System.Collections.Generic;
 using individu;
 using UnityEngine;
-
+using System.Linq;
 
 
 namespace SimulationFourmiliere
 {
-    public class SimulationState 
+    
+    public class SimulationState
     {
-     
 
+
+        public event Action AucunApport; 
         public int StockNourriture
         {
             get => _stockNourriture;
@@ -33,12 +35,35 @@ namespace SimulationFourmiliere
                 OnSeasonChanged?.Invoke(_saison);
             }
         }
+        public int apport
+        {
+            get => _apport;
+            set => _apport = value;
+        }
+        
+
+        private int _apport;
+        private int _nbJourSansApport = 0;
+
+        public int nbJourSansApport
+        {
+            get => _nbJourSansApport;
+            set
+            {
+                _nbJourSansApport = value;
+                if (nbJourSansApport == 10)
+                {
+                    AucunApport?.Invoke();
+                }
+            }
+        }
 
         private int _stockNourriture;
         public Colonie Colonie;
         public List<Oeuf> Oeufs;
         public int Jour;
-        public List<int> HistoriquePopulation;
+        public List<float> HistoriquePopulation;
+        public List<float> HistoriqueNourriture;
         public int MortsAffame;
         public int Naissance;
         public int Affamer;
@@ -52,7 +77,7 @@ namespace SimulationFourmiliere
         public int NourritureTrouver = 0;
         public int NourritureConsomer = 0;
         public static event Action<Saison> OnSeasonChanged; 
-        public MapLoader mapLoader;
+       
         
 
         public SimulationState(int stockInitial)
@@ -61,10 +86,30 @@ namespace SimulationFourmiliere
             Colonie = new Colonie(4);
             Oeufs = new List<Oeuf>();
             Jour = 0;
-            HistoriquePopulation = new List<int>();
+            apport = 150;
+            HistoriquePopulation = new List<float>();
+            HistoriqueNourriture = new List<float>();
+            HistoriqueNourriture.Add(_stockNourriture);
             HistoriquePopulation.Add(Colonie.Pop());
             ResetCounters();
         }
+
+        public SimulationState(State etat)
+        {
+            _stockNourriture = (int)etat.graphBouff.Last();
+            
+            Oeufs = new List<Oeuf>();
+            Jour = etat.gameTime;
+            apport = etat.appartParJour;
+            HistoriquePopulation = etat.graphPop;
+            HistoriqueNourriture = etat.graphBouff;
+            Colonie = new Colonie((int)etat.graphPop.Last(),new Reine(etat.ageReine,etat.dureeDeVieReine));
+            
+            ResetCounters();
+        }
+
+       
+         
 
         public void UpdateScore()
         {
@@ -213,6 +258,16 @@ namespace SimulationFourmiliere
                 Population.Add(new Fourmi());
         }
 
+        public Colonie(int nbFourmisDebut, Reine Reine)
+        {
+            Population = new List<Fourmi>();
+            FourmisMortes = new List<Fourmi>();
+            reine = Reine;
+
+            for (int i = 0; i < nbFourmisDebut; i++)
+                Population.Add(new Fourmi());
+        }
+
         public void Naissance()
         {
             Population.Add(new Fourmi());
@@ -286,16 +341,16 @@ namespace SimulationFourmiliere
           
         }
 
-        static (int apport, double conso) DecisionApport(Saison saison)
+        static  double DecisionConso(Saison saison)
         {
             if (saison == Saison.Hiver)
             {
 
 
-                return (100, ConsoHiver);
+                return ConsoHiver;
             }
 
-            return (150, 2);
+            return 2;
         }
 
         static double PonteParSaison(Saison saison)
@@ -336,6 +391,8 @@ namespace SimulationFourmiliere
             return nouveaux;
         }
 
+    
+
         public static void CalculSimulation(SimulationState state)
         {
             /*
@@ -357,15 +414,20 @@ namespace SimulationFourmiliere
 
 
 
-            var decision = DecisionApport(state.saison);
+            double decision = DecisionConso(state.saison);
+
+            int apport = state.apport;
+            if (apport==0)
+            {
+                state.nbJourSansApport++;
                 
-            int apport = decision.apport;
+            }
 
 
 
             state.NourritureTrouver += apport;
 
-            double consoParFourmi = decision.conso;
+            double consoParFourmi = decision;
             int consommationHiver;
             int apportHiver;
            
@@ -531,6 +593,7 @@ namespace SimulationFourmiliere
             state.Colonie.Population.RemoveAll(f => { return f.Vieillir() != null; });
 
             state.HistoriquePopulation.Add(state.Colonie.Pop());
+            state.HistoriqueNourriture.Add(state.StockNourriture);
 
             state.UpdateScore();
             state.Jour++;

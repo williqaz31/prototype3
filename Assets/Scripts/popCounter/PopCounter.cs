@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using individu;
 using JetBrains.Annotations;
@@ -6,22 +7,25 @@ using TMPro;
 using UnityEngine;
 //using UnityEngine.UI;
 
-public class popCounter : MonoBehaviour
+public class PopCounter : MonoBehaviour
 {
     [SerializeField] private TMP_Text populationCounter;
     [SerializeField] private int stockNourriture = 50;
     [SerializeField] private graphPop _graphPop;
     [SerializeField] private graphBouff _graphBouff;
-    
-    private SimulationState state;
-
+    public event Action GameOver;
+    public SimulationState simState;
     private int popStartWeek;
     private int popStartMonth;
+    
+    
 
     public SimulationState GetState()
     {
-        return state;
+        return simState;
     }
+
+ 
 
 
 
@@ -31,27 +35,37 @@ public class popCounter : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        state = new SimulationState(stockNourriture);
+       
    
     }
 
     public void NoveauJour()
+    
 
     {
         try
         {
-            Program.CalculSimulation(state);
-            populationCounter.text = string.Format("{0:00000}", state.Colonie.Pop());
-            string x = state.Jour.ToString();
+            if (simState == null)
+            {
+                Time.timeScale = 0;
+                Debug.Log("Aucune simulation popCounter ");
+            }
+            Program.CalculSimulation(simState);
+            populationCounter.text = string.Format("{0:00000}", simState.Colonie.Pop());
+            if (simState.Colonie.Pop() == 0)
+            {
+               GameOver?.Invoke();
+            }
+            string x = simState.Jour.ToString();
 
 
          
             
             
             _graphPop.chart.AddXAxisData(x);
-            _graphPop.chart.AddData("population", state.Colonie.Pop());
+            _graphPop.chart.AddData("population", simState.Colonie.Pop());
             _graphBouff.chart.AddXAxisData(x);
-            _graphBouff.chart.AddData("nourriture", state.StockNourriture);
+            _graphBouff.chart.AddData("nourriture", simState.StockNourriture);
            
            
 
@@ -68,19 +82,23 @@ public class popCounter : MonoBehaviour
     public void NouvelleSemaine(bool isWeekly)
     {
         
-        popStartWeek = state.Colonie.Pop();
+        popStartWeek = simState.Colonie.Pop();
         if (isWeekly)
         { 
-            state.ResetCounters();
+            simState.ResetCounters();
             
         }
     }
 
     public string EndWeek()
     {
-        
-       
-        int popEndWeek = state.Colonie.Pop();
+
+        if (simState == null)
+        {
+            Time.timeScale = 0;
+            Debug.Log("Aucune simulation popCounter ");
+        }
+        int popEndWeek = simState.Colonie.Pop();
         
         string details = getInfo(popEndWeek,popStartWeek);
 
@@ -96,10 +114,10 @@ public class popCounter : MonoBehaviour
     
     public void NouveauMois(bool isWeekly)
     {
-        popStartMonth = state.Colonie.Pop();
+        popStartMonth = simState.Colonie.Pop();
         if (!isWeekly)
         {
-            state.ResetCounters();
+            simState.ResetCounters();
         }
         
     }
@@ -107,7 +125,7 @@ public class popCounter : MonoBehaviour
     public string EndMonth()
     {
       
-        int popEndMonth = state.Colonie.Pop();
+        int popEndMonth = simState.Colonie.Pop();
       
         string details =  getInfo(popEndMonth, popStartMonth);
     
@@ -157,25 +175,25 @@ public class popCounter : MonoBehaviour
 
         
         // Affichage Famine ----------------------------------------
-        if (state.Famine)
+        if (simState.Famine)
         {
-            if (state.FinFamine != null && state.DebutFamine != null)
+            if (simState.FinFamine != null && simState.DebutFamine != null)
             {
-                durer = (int)(state.FinFamine - state.DebutFamine);
-            } else if (state.DebutFamine != null)
+                durer = (int)(simState.FinFamine - simState.DebutFamine);
+            } else if (simState.DebutFamine != null)
             {
-                durer = (int)(state.Jour - state.DebutFamine);
+                durer = (int)(simState.Jour - simState.DebutFamine);
             }
             
        
-            famine = $"<color=\"red\">\n-----------MANQUE DE NOURRITURE----------------\nDurée: {durer}\nNombre de fourmi affamées: {state.Affamer}\nScore de famine: {state.Score}</color >";
+            famine = $"<color=\"red\">\n-----------MANQUE DE NOURRITURE----------------\nDurée: {durer}\nNombre de fourmi affamées: {simState.Affamer}\nScore de famine: {simState.Score}</color >";
                           
 
         }
-        else famine = $"<color=\"green\">Félicitation Il n'y à pas eu de famine\nScore de famine: {state.Score}</color >";
+        else famine = $"<color=\"green\">Félicitation Il n'y à pas eu de famine\nScore de famine: {simState.Score}</color >";
 
 
-        int morts_naturels = popStart- popEnd - state.Naissance - state.MortsAffame;
+        int morts_naturels = popStart- popEnd - simState.Naissance - simState.MortsAffame;
         int morts = popStart- popEnd;
         if (morts < 0)
         {
@@ -185,7 +203,7 @@ public class popCounter : MonoBehaviour
         {
             morts_naturels = 0;
         }
-        return $"\n{typeCroissance}\nNaissance: {state.Naissance}\n-------------MORTS-----------------\nFamine: {state.MortsAffame}\nNaturel: {morts_naturels }\nTotal: {morts}\n{famine}\n-----------NOURRITURE--------------\nStock: {state.StockNourriture}\nNourriture trouvée: {state.NourritureTrouver}\nNourriture consommée: {state.NourritureConsomer}";
+        return $"\n{typeCroissance}\nNaissance: {simState.Naissance}\n-------------MORTS-----------------\nFamine: {simState.MortsAffame}\nNaturel: {morts_naturels }\nTotal: {morts}\n{famine}\n-----------NOURRITURE--------------\nStock: {simState.StockNourriture}\nNourriture trouvée: {simState.NourritureTrouver}\nNourriture consommée: {simState.NourritureConsomer}";
         
     }
 

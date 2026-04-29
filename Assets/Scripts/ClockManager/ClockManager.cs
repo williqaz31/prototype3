@@ -5,16 +5,18 @@ using UnityEngine;
 using UnityEngine.UI;
 
 
-public class clockManager : MonoBehaviour
+public class ClockManager : MonoBehaviour
 {
     [SerializeField] private TMP_Text clock;
-    private float elapsedTime;
+    public float elapsedTime;
     [SerializeField] private Slider slider;
-    [SerializeField] private pausePlay pausePlay;
+    [SerializeField] private PausePlay pausePlay;
     [SerializeField] private ToggleManager  UpdateCycle;
+
+    public bool fromLoad;
     
     private float multiplier = 1.0f;
-    public popCounter popCounter;
+    public PopCounter popCounter;
     
     
     private const float SECONDS_IN_DAY = 86400f;
@@ -37,7 +39,10 @@ public class clockManager : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        
+        if (fromLoad)
+        {
+            elapsedTime = day * SECONDS_IN_DAY;
+        }
     }
 
     // Update is called once per frame
