@@ -35,32 +35,26 @@ public class ForagerManager : MonoBehaviour
         Distributing
     }
 
-    void Start()
-    {
-        Debug.Log("ForagerManager Start");
+IEnumerator Start()
+{
+    Debug.Log("ForagerManager Start");
 
-        if (antManager == null)
-        {
-            Debug.LogError("antManager is NULL");
-            return;
-        }
+    while (antManager == null || antManager.simulation == null)
+        yield return null;
 
-        simulation = antManager.simulation;
+    simulation = antManager.simulation;
 
-        if (simulation == null)
-        {
-            Debug.LogError("simulation is NULL (from antManager)");
-        }
-    }
+    Debug.Log("ForagerManager linked simulation OK");
+}
 
     void Update()
     {
         if (simulation == null)
             simulation = antManager.simulation;
 
-        if (simulation == null)
+        if (antManager == null || antManager.simulation == null)
         {
-            Debug.Log("ForagerManager waiting for simulation...");
+            Debug.Log("Waiting for AntManager simulation...");
             return;
         }
 
@@ -146,13 +140,18 @@ public class ForagerManager : MonoBehaviour
     {
         antManager.roles[id] = AntManager.AntRole.Forager;
 
-        // Remove from miner job system
         antManager.antTargets.Remove(id);
         antManager.antPaths.Remove(id);
 
         states[id] = ForagerState.WalkingToExit;
         moveTimers[id] = 0f;
+
+        // ensure visible when becoming forager
+        antManager.hiddenAnts.Remove(id);
+
         SendToExit(id);
+
+        Debug.Log($"Ant {id} promoted to Forager");
     }
 
     void DemoteToMiner(int id)
@@ -189,11 +188,16 @@ public class ForagerManager : MonoBehaviour
 
                 case ForagerState.Outside:
                     returnTimers[id] -= Time.deltaTime;
+
                     if (returnTimers[id] <= 0f)
                     {
                         int food = Random.Range(minFood, maxFood + 1);
                         foodCarried[id] = food;
-                        antManager.SetCarrying(id, true);
+
+                        antManager.SetCarrying(id, true, food);
+
+                        antManager.hiddenAnts.Remove(id);
+
                         states[id] = ForagerState.ReturningToColony;
                         SendToQueen(id);
                     }
@@ -231,14 +235,14 @@ public class ForagerManager : MonoBehaviour
     {
         if (!paths.ContainsKey(id) || paths[id].Count > 0) return;
 
-        // Ant is at exit — "disappear" it by moving off map temporarily
-        // We just mark it outside and start the timer
         states[id] = ForagerState.Outside;
+
         returnTimers[id] = forageReturnDelay + Random.Range(0f, 2f);
 
-        // Hide the ant visually by moving it far off
-        antManager.ants[id] = new Vector2Int(-999, -999);
-        antManager.DrawAnts();
+        // NEW: proper hide system
+        antManager.hiddenAnts.Add(id);
+
+        Debug.Log($"Forager {id} left colony (hidden)");
     }
 
     void CheckReachedQueen(int id)

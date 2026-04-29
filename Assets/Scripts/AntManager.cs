@@ -57,7 +57,19 @@ public class AntManager : MonoBehaviour
 
     void Start()
     {
+        if (popCounter == null)
+        {
+            Debug.LogError("popCounter not assigned!");
+            return;
+        }
+
         simulation = popCounter.GetState();
+
+        if (simulation == null)
+        {
+            Debug.LogError("SimulationState is NULL from popCounter");
+            return;
+        }
 
         if (!mapLoader.queenFound)
         {
@@ -66,7 +78,6 @@ public class AntManager : MonoBehaviour
         }
 
         queenPos = mapLoader.queenPos;
-        //SpawnAnts(0);
         DrawAnts();
     }
 
@@ -211,6 +222,8 @@ public class AntManager : MonoBehaviour
             foodCarried.Remove(id);
         }
     }
+    public HashSet<int> hiddenAnts = new();
+
     public void DrawAnts()
     {
         AntColonie.ClearAllTiles();
@@ -220,15 +233,16 @@ public class AntManager : MonoBehaviour
             if (!ants.TryGetValue(id, out Vector2Int gridPos))
                 continue;
 
-            if (gridPos.x < 0 || gridPos.y < 0)
+            // NEW: proper hide system instead of -999 hack
+            if (hiddenAnts.Contains(id))
                 continue;
 
             Vector3Int pos = mapLoader.MapToTilePos(gridPos);
 
             TileBase tileToUse = AntTile;
 
-            // SINGLE source of truth for food
-            bool isCarrying = foodCarried.TryGetValue(id, out int f) && f > 0;
+            bool isCarrying =
+                foodCarried.TryGetValue(id, out int f) && f > 0;
 
             antStates.TryGetValue(id, out var state);
             roles.TryGetValue(id, out var role);
@@ -247,8 +261,8 @@ public class AntManager : MonoBehaviour
 
             AntColonie.SetTile(pos, tileToUse);
 
-            // DEBUG (keep temporarily)
-            Debug.Log($"ANT {id} pos={gridPos} carrying={isCarrying} state={state}");
+            // Debug (safe + readable)
+            //Debug.Log($"ANT {id} pos={gridPos} carrying={isCarrying} state={state}");
         }
     }
     public List<Vector2Int> FindPathPublic(Vector2Int start, Vector2Int goal)
