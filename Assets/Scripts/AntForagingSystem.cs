@@ -57,7 +57,7 @@ public class ForagerManager : MonoBehaviour
 
         if (antManager == null || antManager.simulation == null)
         {
-            Debug.Log("Waiting for AntManager simulation...");
+            //Debug.Log("Waiting for AntManager simulation...");
             return;
         }
 
@@ -136,7 +136,7 @@ public class ForagerManager : MonoBehaviour
             }
         }
 
-        Debug.Log($"Population={pop}, Food={stock}, TargetForagers={targetForagerCount}");
+        //Debug.Log($"Population={pop}, Food={stock}, TargetForagers={targetForagerCount}");
     }
 
     void PromoteToForager(int id)
@@ -154,7 +154,7 @@ public class ForagerManager : MonoBehaviour
 
         SendToExit(id);
 
-        Debug.Log($"Ant {id} promoted to Forager");
+        //Debug.Log($"Ant {id} promoted to Forager");
     }
 
     void DemoteToMiner(int id)
@@ -208,6 +208,11 @@ public class ForagerManager : MonoBehaviour
                     break;
 
                 case ForagerState.ReturningToColony:
+                    if (!paths.ContainsKey(id) || paths[id].Count == 0)
+                    {
+                        SendToQueen(id);
+                        return;
+                    }
                     MoveAlongPath(id);
                     CheckReachedQueen(id);
                     break;
@@ -243,10 +248,12 @@ public class ForagerManager : MonoBehaviour
 
         returnTimers[id] = forageReturnDelay + Random.Range(0f, 2f);
 
-        // NEW: proper hide system
         antManager.hiddenAnts.Add(id);
 
-        Debug.Log($"Forager {id} left colony (hidden)");
+        // clear path so no stale data
+        paths.Remove(id);
+
+        //Debug.Log($"Forager {id} left colony (hidden)");
     }
 
     void CheckReachedQueen(int id)
@@ -260,10 +267,12 @@ public class ForagerManager : MonoBehaviour
     {
         if (!foodCarried.ContainsKey(id) || foodCarried[id] <= 0)
         {
-            antManager.SetCarrying(id, false);
+            antManager.SetCarrying(id, false, 0);
+            foodCarried[id] = 0;
             // Out of food — go forage again
             states[id] = ForagerState.WalkingToExit;
             SendToExit(id);
+            antManager.DrawAnts();
             return;
         }
 
@@ -302,8 +311,11 @@ public class ForagerManager : MonoBehaviour
             // No hungry ants at all — dump food into stock and go forage
             simulation.StockNourriture += foodCarried[id];
             foodCarried[id] = 0;
+            antManager.SetCarrying(id, false, 0);
             states[id] = ForagerState.WalkingToExit;
+            paths.Remove(id);
             SendToExit(id);
+            antManager.DrawAnts();
             return;
         }
 
@@ -362,14 +374,14 @@ public class ForagerManager : MonoBehaviour
                 if (foodCarried.ContainsKey(id))
                     carried = foodCarried[id];
 
-                Debug.Log($"Forager {id} | Carrying Food: {carried} | State: {states[id]}");
+                //Debug.Log($"Forager {id} | Carrying Food: {carried} | State: {states[id]}");
             }
         }
 
-        Debug.Log(
-            $"FOOD STOCK: {simulation.StockNourriture} | " +
-            $"Foragers: {currentForagers}/{targetForagerCount}"
-        );
+        //Debug.Log(
+        //    $"FOOD STOCK: {simulation.StockNourriture} | " +
+        //    $"Foragers: {currentForagers}/{targetForagerCount}"
+        //);
     }
     int FindHungriestAnt()
     {
@@ -391,10 +403,23 @@ public class ForagerManager : MonoBehaviour
 
     void SendToExit(int id)
     {
+        // Make sure ant is visible and at a valid position first
+        antManager.hiddenAnts.Remove(id);
+
+        Vector2Int currentPos = antManager.ants[id];
+
+        // If position is invalid (was hidden off-map), snap to queen first
+        if (currentPos.x < 0 || currentPos.y < 0 ||
+            currentPos.x >= mapLoader.Cols || currentPos.y >= mapLoader.Rows)
+        {
+            antManager.ants[id] = mapLoader.queenPos;
+            currentPos = mapLoader.queenPos;
+        }
+
         var exit = FindExitTile();
         if (exit == null) return;
 
-        var path = antManager.FindPathPublic(antManager.ants[id], exit.Value);
+        var path = antManager.FindPathPublic(currentPos, exit.Value);
         if (path == null) return;
 
         paths[id] = new Queue<Vector2Int>(path);
@@ -402,10 +427,37 @@ public class ForagerManager : MonoBehaviour
 
     void SendToQueen(int id)
     {
-        var path = antManager.FindPathPublic(antManager.ants[id], antManager.queenPos);
-        if (path == null) return;
+        Vector2Int currentPos = antManager.ants[id];
+
+        var path = antManager.FindPathPublic(
+            currentPos,
+            mapLoader.queenPos
+        );
+
+        if (path == null || path.Count == 0)
+        {
+            Debug.LogWarning($"Forager {id} failed to path to queen — resetting");
+            ResetSingleForagerToExit(id);
+            return;
+        }
 
         paths[id] = new Queue<Vector2Int>(path);
+    }
+
+    void ResetSingleForagerToExit(int id)
+    {
+        var exit = FindExitTile();
+        if (exit == null) return;
+
+        antManager.ants[id] = exit.Value;
+
+        paths.Remove(id);
+        moveTimers[id] = 0f;
+
+        states[id] = ForagerState.Outside;
+        returnTimers[id] = forageReturnDelay;
+
+        antManager.hiddenAnts.Remove(id);
     }
 
     Vector2Int? FindExitTile()
@@ -418,5 +470,32 @@ public class ForagerManager : MonoBehaviour
                     return new Vector2Int(x, y);
 
         return null;
+    }
+
+    public void ResetBrokenForagersOnly()
+    {
+        foreach (int id in antManager.antIds)
+        {
+            if (!antManager.roles.TryGetValue(id, out var role) ||
+                role != AntManager.AntRole.Forager)
+                continue;
+
+            Vector2Int pos = antManager.ants[id];
+
+            // Only reset if OUTSIDE map or stuck in invalid tile
+            if (pos.x < 0 || pos.y < 0 ||
+                pos.x >= mapLoader.Cols || pos.y >= mapLoader.Rows)
+            {
+                ResetSingleForagerToExit(id);
+                continue;
+            }
+
+            // Optional: also reset if inside a wall
+            char tile = mapLoader.GetMapData()[pos.y, pos.x];
+            if (tile == '1') // wall
+            {
+                ResetSingleForagerToExit(id);
+            }
+        }
     }
 }

@@ -28,7 +28,6 @@ public class AntManager : MonoBehaviour
     public float moveInterval = 0.2f; //<------
 
     public Dictionary<int, Vector2Int> ants = new();
-    public Vector2Int queenPos;
 
     public Dictionary<int, AntState> antStates = new Dictionary<int, AntState>();
 
@@ -77,7 +76,7 @@ public class AntManager : MonoBehaviour
             return;
         }
 
-        queenPos = mapLoader.queenPos;
+        mapLoader.queenPos = mapLoader.queenPos;
         DrawAnts();
     }
 
@@ -133,7 +132,7 @@ public class AntManager : MonoBehaviour
                 continue;
         }
 
-        Debug.Log($"Foragers: {foragers} / Total ants: {antIds.Count}");
+        //Debug.Log($"Foragers: {foragers} / Total ants: {antIds.Count}");
     }
     void SyncAntCount()
     {
@@ -155,7 +154,7 @@ public class AntManager : MonoBehaviour
         int id = nextAntId++;
 
         antIds.Add(id);
-        ants[id] = queenPos;
+        ants[id] = mapLoader.queenPos;
 
         antStates[id] = AntState.Idle;
         antMoveTimers[id] = 0f;
@@ -167,9 +166,9 @@ public class AntManager : MonoBehaviour
 
         roles[id] = AntRole.Miner;
 
-        Debug.Log("ant added at " + queenPos);
+        //Debug.Log("ant added at " + mapLoader.queenPos);
     }
-    Vector2Int? GetNearestExitAdjacent(Vector2Int from)
+    public Vector2Int? GetNearestExitAdjacent(Vector2Int from)
     {
         var mapData = mapLoader.GetMapData();
 
@@ -262,7 +261,7 @@ public class AntManager : MonoBehaviour
             AntColonie.SetTile(pos, tileToUse);
 
             // Debug (safe + readable)
-            Debug.Log($"ANT {id} pos={gridPos} carrying={isCarrying} state={state}");
+            //Debug.Log($"ANT {id} pos={gridPos} carrying={isCarrying} state={state}");
         }
     }
     public List<Vector2Int> FindPathPublic(Vector2Int start, Vector2Int goal)
@@ -326,7 +325,7 @@ public class AntManager : MonoBehaviour
 
     public void OnMapShift(Vector2Int shift)
     {
-        queenPos += shift;
+        mapLoader.queenPos += shift;
     }
     bool IsWalkable(Vector2Int p)
     {
@@ -367,8 +366,8 @@ public class AntManager : MonoBehaviour
 
         foreach (var job in mapLoader.jobs)
         {
-            int dist = Mathf.Abs(job.target.x - queenPos.x) +
-                       Mathf.Abs(job.target.y - queenPos.y);
+            int dist = Mathf.Abs(job.target.x - mapLoader.queenPos.x) +
+                       Mathf.Abs(job.target.y - mapLoader.queenPos.y);
 
             if (dist > deepestDist)
             {
@@ -476,7 +475,7 @@ public class AntManager : MonoBehaviour
 
         if (simulation == null)
         {
-            Debug.Log("NO SIMULATION");
+            //Debug.Log("NO SIMULATION");
             return;
         }
 
@@ -660,6 +659,8 @@ public class AntManager : MonoBehaviour
         foreach (var job in mapLoader.jobs)
             job.target += delta;
 
-        FindObjectOfType<ForagerManager>()?.ResetForagersToExit();
+        var fm = FindObjectOfType<ForagerManager>();
+        if (fm != null)
+            fm.ResetBrokenForagersOnly();
     }
 }

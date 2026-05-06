@@ -300,7 +300,7 @@ public class MapLoader : MonoBehaviour
         for (int y = 0; y < newRows; y++)
             for (int x = 0; x < newCols; x++)
             {
-                char type = (Random.Range(0, 20) == 0) ? '5' : '1';
+                char type = (Random.Range(0, 50) == 0) ? '5' : '1';
                 newMap[y, x] = type;
                 newPlannedMap[y, x] = type;
             }
