@@ -76,6 +76,8 @@ public class AntManager : MonoBehaviour
             return;
         }
 
+        AntColonie.GetComponent<TilemapRenderer>().mode = TilemapRenderer.Mode.Individual;
+
         mapLoader.queenPos = mapLoader.queenPos;
         DrawAnts();
     }
@@ -226,33 +228,45 @@ public class AntManager : MonoBehaviour
     public void DrawAnts()
     {
         AntColonie.ClearAllTiles();
+        ClearAntCountLabels();
+
+        // Count ants per cell
+        var cellCounts = new Dictionary<Vector3Int, List<int>>();
 
         foreach (int id in antIds)
         {
-            if (!ants.TryGetValue(id, out Vector2Int gridPos))
-                continue;
-
-            // NEW: proper hide system instead of -999 hack
-            if (hiddenAnts.Contains(id))
-                continue;
+            if (!ants.TryGetValue(id, out Vector2Int gridPos)) continue;
+            if (hiddenAnts.Contains(id)) continue;
 
             Vector3Int pos = mapLoader.MapToTilePos(gridPos);
 
+            if (!cellCounts.ContainsKey(pos))
+                cellCounts[pos] = new List<int>();
+
+            cellCounts[pos].Add(id);
+        }
+
+        foreach (var kvp in cellCounts)
+        {
+            Vector3Int pos = kvp.Key;
+            List<int> ids = kvp.Value;
+
+            // Pick tile based on the "most important" ant in the cell
+            // Priority: forager with food > forager distributing > forager > miner
             TileBase tileToUse = AntTile;
 
-            bool isCarrying =
-                foodCarried.TryGetValue(id, out int f) && f > 0;
-
-            antStates.TryGetValue(id, out var state);
-            roles.TryGetValue(id, out var role);
-
-            if (role == AntRole.Forager)
+            foreach (int id in ids)
             {
-                if (isCarrying)
+                roles.TryGetValue(id, out var role);
+                foodCarried.TryGetValue(id, out int f);
+                antStates.TryGetValue(id, out var state);
+
+                if (role == AntRole.Forager && f > 0)
                 {
                     tileToUse = AntWithFoodTile;
+                    break;
                 }
-                else if (state == AntState.Distributing)
+                if (role == AntRole.Forager && state == AntState.Distributing)
                 {
                     tileToUse = AntDistributingTile;
                 }
@@ -260,8 +274,53 @@ public class AntManager : MonoBehaviour
 
             AntColonie.SetTile(pos, tileToUse);
 
-            // Debug (safe + readable)
-            //Debug.Log($"ANT {id} pos={gridPos} carrying={isCarrying} state={state}");
+            AntColonie.SetTileFlags(pos, TileFlags.None);
+            AntColonie.SetColor(pos, Color.white);
+
+            // Tint based on count
+            if (ids.Count >= 8)
+                AntColonie.SetColor(pos, new Color(1f, 0.2f, 0.2f)); // red
+            else if (ids.Count >= 5)
+                AntColonie.SetColor(pos, new Color(1f, 0.6f, 0.2f)); // orange
+            else if (ids.Count >= 2)
+                AntColonie.SetColor(pos, new Color(1f, 1f, 0.3f));   // yellow
+            else
+                AntColonie.SetColor(pos, Color.white);                // normal
+
+            // Show count label if more than 1
+            if (ids.Count > 1)
+                ShowAntCountLabel(pos, ids.Count);
+        }
+    }
+
+    public GameObject antCountLabelPrefab; // assign a TMP prefab in Inspector
+    private Dictionary<Vector3Int, GameObject> antCountLabels = new();
+
+    void ClearAntCountLabels()
+    {
+        foreach (var go in antCountLabels.Values)
+            if (go != null) go.SetActive(false);
+    }
+
+    void ShowAntCountLabel(Vector3Int tilePos, int count)
+    {
+        if (antCountLabelPrefab == null) return;
+
+        if (!antCountLabels.TryGetValue(tilePos, out var go) || go == null)
+        {
+            go = Instantiate(antCountLabelPrefab, AntColonie.transform);
+            antCountLabels[tilePos] = go;
+        }
+
+        go.SetActive(true);
+        go.transform.position = AntColonie.GetCellCenterWorld(tilePos) + new Vector3(0.2f, 0.2f, 0f);
+
+        var tmp = go.GetComponent<TMPro.TMP_Text>();
+        if (tmp != null)
+        {
+            tmp.text = count.ToString();
+            tmp.fontSize = 3f;
+            tmp.color = Color.white;
         }
     }
     public List<Vector2Int> FindPathPublic(Vector2Int start, Vector2Int goal)
