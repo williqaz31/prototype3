@@ -7,7 +7,8 @@ namespace XCharts.Editor
     [CustomPropertyDrawer(typeof(LabelLine), true)]
     public class LabelLineDrawer : BasePropertyDrawer
     {
-        public override string ClassName { get { return "LabelLine"; } }
+        public override string ClassName => "LabelLine";
+
         public override void OnGUI(Rect pos, SerializedProperty prop, GUIContent label)
         {
             base.OnGUI(pos, prop, label);

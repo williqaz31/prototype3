@@ -1,74 +1,101 @@
-
 using System;
 using UnityEngine;
 
 namespace XCharts.Runtime
 {
     /// <summary>
-    /// the animation info.
-    /// ||动画配置参数。
+    ///     the animation info.
+    ///     ||动画配置参数。
     /// </summary>
     [Since("v3.8.0")]
-    [System.Serializable]
+    [Serializable]
     public class AnimationInfo
     {
-        [SerializeField][Since("v3.8.0")] private bool m_Enable = true;
-        [SerializeField][Since("v3.8.0")] private bool m_Reverse = false;
-        [SerializeField][Since("v3.8.0")] private float m_Delay = 0;
-        [SerializeField][Since("v3.8.0")] private float m_Duration = 1000;
-        [SerializeField][Since("v3.14.0")] private float m_Speed = 0;
-        public AnimationInfoContext context = new AnimationInfoContext();
+        [SerializeField] [Since("v3.8.0")] private bool m_Enable = true;
+        [SerializeField] [Since("v3.8.0")] private bool m_Reverse;
+        [SerializeField] [Since("v3.8.0")] private float m_Delay;
+        [SerializeField] [Since("v3.8.0")] private float m_Duration = 1000;
+        [SerializeField] [Since("v3.14.0")] private float m_Speed;
+        public AnimationInfoContext context = new();
 
         /// <summary>
-        /// whether enable animation.
-        /// ||是否开启动画效果。
+        ///     whether enable animation.
+        ///     ||是否开启动画效果。
         /// </summary>
-        public bool enable { get { return m_Enable; } set { m_Enable = value; } }
+        public bool enable
+        {
+            get => m_Enable;
+            set => m_Enable = value;
+        }
+
         /// <summary>
-        /// whether enable reverse animation.
-        /// ||是否开启反向动画效果。
+        ///     whether enable reverse animation.
+        ///     ||是否开启反向动画效果。
         /// </summary>
-        public bool reverse { get { return m_Reverse; } set { m_Reverse = value; } }
+        public bool reverse
+        {
+            get => m_Reverse;
+            set => m_Reverse = value;
+        }
+
         /// <summary>
-        /// the delay time before animation start.
-        /// ||动画开始前的延迟时间。
+        ///     the delay time before animation start.
+        ///     ||动画开始前的延迟时间。
         /// </summary>
-        public float delay { get { return m_Delay; } set { m_Delay = value; } }
+        public float delay
+        {
+            get => m_Delay;
+            set => m_Delay = value;
+        }
+
         /// <summary>
-        /// the duration of animation. Default is used to calculate the speed of animation. It can also be specified by speed.
-        /// ||动画的时长。默认用于计算动画的速度。也可以通过speed指定速度。
+        ///     the duration of animation. Default is used to calculate the speed of animation. It can also be specified by speed.
+        ///     ||动画的时长。默认用于计算动画的速度。也可以通过speed指定速度。
         /// </summary>
-        public float duration { get { return m_Duration; } set { m_Duration = value; } }
+        public float duration
+        {
+            get => m_Duration;
+            set => m_Duration = value;
+        }
+
         /// <summary>
-        /// the speed of animation. When speed is specified, duration will be invalid. Default is 0, which means no speed specified.
-        /// ||动画的速度。当指定speed时，duration将失效。默认为0，表示不指定速度。
+        ///     the speed of animation. When speed is specified, duration will be invalid. Default is 0, which means no speed
+        ///     specified.
+        ///     ||动画的速度。当指定speed时，duration将失效。默认为0，表示不指定速度。
         /// </summary>
-        public float speed { get { return m_Speed; } set { m_Speed = value; } }
+        public float speed
+        {
+            get => m_Speed;
+            set => m_Speed = value;
+        }
+
         /// <summary>
-        /// the callback function of animation start.
-        /// ||动画开始的回调。
+        ///     the callback function of animation start.
+        ///     ||动画开始的回调。
         /// </summary>
         public Action OnAnimationStart { get; set; }
+
         /// <summary>
-        /// the callback function of animation end.
-        /// ||动画结束的回调。
+        ///     the callback function of animation end.
+        ///     ||动画结束的回调。
         /// </summary>
         public Action OnAnimationEnd { get; set; }
 
         /// <summary>
-        /// the delegate function of animation delay.
-        /// ||动画延迟的委托函数。
+        ///     the delegate function of animation delay.
+        ///     ||动画延迟的委托函数。
         /// </summary>
         public AnimationDelayFunction delayFunction { get; set; }
+
         /// <summary>
-        /// the delegate function of animation duration.
-        /// ||动画时长的委托函数。
+        ///     the delegate function of animation duration.
+        ///     ||动画时长的委托函数。
         /// </summary>
         public AnimationDurationFunction durationFunction { get; set; }
 
         /// <summary>
-        /// Reset animation.
-        /// ||重置动画。
+        ///     Reset animation.
+        ///     ||重置动画。
         /// </summary>
         public void Reset()
         {
@@ -90,8 +117,8 @@ namespace XCharts.Runtime
         }
 
         /// <summary>
-        /// Start animation.
-        /// ||开始动画。
+        ///     Start animation.
+        ///     ||开始动画。
         /// </summary>
         /// <param name="reset">是否重置上一次的参数</param>
         public void Start(bool reset = true)
@@ -102,6 +129,7 @@ namespace XCharts.Runtime
                 context.pause = false;
                 return;
             }
+
             context.init = false;
             context.start = true;
             context.end = false;
@@ -116,15 +144,13 @@ namespace XCharts.Runtime
                 context.dataCurrProgress.Clear();
                 context.dataDestProgress.Clear();
             }
-            if (OnAnimationStart != null)
-            {
-                OnAnimationStart();
-            }
+
+            if (OnAnimationStart != null) OnAnimationStart();
         }
 
         /// <summary>
-        /// Pause animation.
-        /// ||暂停动画。
+        ///     Pause animation.
+        ///     ||暂停动画。
         /// </summary>
         public void Pause()
         {
@@ -134,8 +160,8 @@ namespace XCharts.Runtime
         }
 
         /// <summary>
-        /// Resume animation.
-        /// ||恢复动画。
+        ///     Resume animation.
+        ///     ||恢复动画。
         /// </summary>
         public void Resume()
         {
@@ -145,8 +171,8 @@ namespace XCharts.Runtime
         }
 
         /// <summary>
-        /// End animation.
-        /// ||结束动画。
+        ///     End animation.
+        ///     ||结束动画。
         /// </summary>
         public void End()
         {
@@ -157,15 +183,12 @@ namespace XCharts.Runtime
             context.end = true;
             context.currPointIndex = context.destPointIndex;
             context.startTime = Time.time;
-            if (OnAnimationEnd != null)
-            {
-                OnAnimationEnd();
-            }
+            if (OnAnimationEnd != null) OnAnimationEnd();
         }
 
         /// <summary>
-        /// Initialize animation.
-        /// ||初始化动画。
+        ///     Initialize animation.
+        ///     ||初始化动画。
         /// </summary>
         /// <param name="curr">当前进度</param>
         /// <param name="dest">目标进度</param>
@@ -186,13 +209,14 @@ namespace XCharts.Runtime
                 if (!context.init) context.currProgress = curr;
                 context.destProgress = dest;
             }
+
             context.init = true;
             return true;
         }
 
         /// <summary>
-        /// Whether animation is finish.
-        /// ||动画是否结束。
+        ///     Whether animation is finish.
+        ///     ||动画是否结束。
         /// </summary>
         public bool IsFinish()
         {
@@ -200,25 +224,25 @@ namespace XCharts.Runtime
             if (context.end) return true;
             if (context.pause) return false;
             if (!context.init) return false;
-            return m_Reverse ? context.currProgress <= context.destProgress
+            return m_Reverse
+                ? context.currProgress <= context.destProgress
                 : context.currProgress >= context.destProgress;
         }
 
         /// <summary>
-        /// Whether animation is in delay.
-        /// ||动画是否在延迟中。
+        ///     Whether animation is in delay.
+        ///     ||动画是否在延迟中。
         /// </summary>
         public bool IsInDelay()
         {
             if (!context.start)
                 return false;
-            else
-                return m_Delay > 0 && Time.time - context.startTime < m_Delay / 1000;
+            return m_Delay > 0 && Time.time - context.startTime < m_Delay / 1000;
         }
 
         /// <summary>
-        /// Whether animation is in index delay.
-        /// ||动画是否在索引延迟中。
+        ///     Whether animation is in index delay.
+        ///     ||动画是否在索引延迟中。
         /// </summary>
         /// <param name="dataIndex"></param>
         /// <returns></returns>
@@ -226,13 +250,12 @@ namespace XCharts.Runtime
         {
             if (context.start)
                 return Time.time - context.startTime < GetIndexDelay(dataIndex) / 1000f;
-            else
-                return false;
+            return false;
         }
 
         /// <summary>
-        /// Get animation delay.
-        /// ||获取动画延迟。
+        ///     Get animation delay.
+        ///     ||获取动画延迟。
         /// </summary>
         /// <param name="dataIndex"></param>
         /// <returns></returns>
@@ -247,10 +270,8 @@ namespace XCharts.Runtime
         internal float GetCurrAnimationDuration(int dataIndex = -1)
         {
             if (dataIndex >= 0)
-            {
                 if (context.start && durationFunction != null)
                     return durationFunction(dataIndex) / 1000f;
-            }
             return m_Duration > 0 ? m_Duration / 1000 : 1f;
         }
 
@@ -267,6 +288,7 @@ namespace XCharts.Runtime
                 isBarEnd = false;
                 return initValue;
             }
+
             var c1 = !context.dataCurrProgress.ContainsKey(index);
             var c2 = !context.dataDestProgress.ContainsKey(index);
             if (c1 || c2)
@@ -283,6 +305,7 @@ namespace XCharts.Runtime
             {
                 isBarEnd = context.dataCurrProgress[index] == context.dataDestProgress[index];
             }
+
             return context.dataCurrProgress[index];
         }
 
@@ -311,7 +334,8 @@ namespace XCharts.Runtime
             }
         }
 
-        internal float CheckItemProgress(int dataIndex, float destProgress, ref bool isEnd, float startProgress, bool m_UnscaledTime)
+        internal float CheckItemProgress(int dataIndex, float destProgress, ref bool isEnd, float startProgress,
+            bool m_UnscaledTime)
         {
             if (m_Reverse)
             {
@@ -319,43 +343,36 @@ namespace XCharts.Runtime
                 startProgress = destProgress;
                 destProgress = temp;
             }
+
             var currHig = GetDataCurrProgress(dataIndex, startProgress, destProgress, ref isEnd);
-            if (IsFinish())
+            if (IsFinish()) return destProgress;
+
+            if (IsInDelay() || IsInIndexDelay(dataIndex)) return startProgress;
+
+            if (context.pause) return currHig;
+
+            var delta = GetDelta(destProgress - startProgress, m_UnscaledTime);
+            currHig += delta;
+            if (reverse)
             {
-                return destProgress;
-            }
-            else if (IsInDelay() || IsInIndexDelay(dataIndex))
-            {
-                return startProgress;
-            }
-            else if (context.pause)
-            {
-                return currHig;
+                if ((destProgress > 0 && currHig <= 0) || (destProgress < 0 && currHig >= 0))
+                {
+                    currHig = 0;
+                    isEnd = true;
+                }
             }
             else
             {
-                var delta = GetDelta(destProgress - startProgress, m_UnscaledTime);
-                currHig += delta;
-                if (reverse)
+                if ((destProgress - startProgress > 0 && currHig > destProgress) ||
+                    (destProgress - startProgress < 0 && currHig < destProgress))
                 {
-                    if ((destProgress > 0 && currHig <= 0) || (destProgress < 0 && currHig >= 0))
-                    {
-                        currHig = 0;
-                        isEnd = true;
-                    }
+                    currHig = destProgress;
+                    isEnd = true;
                 }
-                else
-                {
-                    if ((destProgress - startProgress > 0 && currHig > destProgress) ||
-                        (destProgress - startProgress < 0 && currHig < destProgress))
-                    {
-                        currHig = destProgress;
-                        isEnd = true;
-                    }
-                }
-                SetDataCurrProgress(dataIndex, currHig);
-                return currHig;
             }
+
+            SetDataCurrProgress(dataIndex, currHig);
+            return currHig;
         }
 
         internal void CheckSymbol(float dest, bool m_UnscaledTime)
@@ -385,93 +402,106 @@ namespace XCharts.Runtime
             if (m_Speed > 0)
             {
                 context.currDuration = (float)total / m_Speed;
-                return (float)(m_Speed * (unscaledTime ? Time.unscaledDeltaTime : Time.deltaTime));
+                return m_Speed * (unscaledTime ? Time.unscaledDeltaTime : Time.deltaTime);
             }
-            else
-            {
-                context.currDuration = 0;
-                return (float)(total / GetCurrAnimationDuration() * (unscaledTime ? Time.unscaledDeltaTime : Time.deltaTime));
-            }
+
+            context.currDuration = 0;
+            return (float)(total / GetCurrAnimationDuration() *
+                           (unscaledTime ? Time.unscaledDeltaTime : Time.deltaTime));
         }
     }
 
     /// <summary>
-    /// Fade in animation.
-    /// ||淡入动画。
+    ///     Fade in animation.
+    ///     ||淡入动画。
     /// </summary>
     [Since("v3.8.0")]
-    [System.Serializable]
+    [Serializable]
     public class AnimationFadeIn : AnimationInfo
     {
     }
 
     /// <summary>
-    /// Fade out animation.
-    /// ||淡出动画。
+    ///     Fade out animation.
+    ///     ||淡出动画。
     /// </summary>
     [Since("v3.8.0")]
-    [System.Serializable]
+    [Serializable]
     public class AnimationFadeOut : AnimationInfo
     {
     }
 
     /// <summary>
-    /// Data change animation.
-    /// ||数据变更动画。
+    ///     Data change animation.
+    ///     ||数据变更动画。
     /// </summary>
     [Since("v3.8.0")]
-    [System.Serializable]
+    [Serializable]
     public class AnimationChange : AnimationInfo
     {
     }
 
     /// <summary>
-    /// Data addition animation.
-    /// ||数据新增动画。
+    ///     Data addition animation.
+    ///     ||数据新增动画。
     /// </summary>
     [Since("v3.8.0")]
-    [System.Serializable]
+    [Serializable]
     public class AnimationAddition : AnimationInfo
     {
     }
 
     /// <summary>
-    /// Data hiding animation.
-    /// ||数据隐藏动画。
+    ///     Data hiding animation.
+    ///     ||数据隐藏动画。
     /// </summary>
     [Since("v3.8.0")]
-    [System.Serializable]
+    [Serializable]
     public class AnimationHiding : AnimationInfo
     {
     }
 
     /// <summary>
-    /// Interactive animation of charts.
-    /// ||交互动画。
+    ///     Interactive animation of charts.
+    ///     ||交互动画。
     /// </summary>
     [Since("v3.8.0")]
-    [System.Serializable]
+    [Serializable]
     public class AnimationInteraction : AnimationInfo
     {
-        [SerializeField][Since("v3.8.0")] private MLValue m_Width = new MLValue(1.1f);
-        [SerializeField][Since("v3.8.0")] private MLValue m_Radius = new MLValue(1.1f);
-        [SerializeField][Since("v3.8.0")] private MLValue m_Offset = new MLValue(MLValue.Type.Absolute, 5f);
+        [SerializeField] [Since("v3.8.0")] private MLValue m_Width = new(1.1f);
+        [SerializeField] [Since("v3.8.0")] private MLValue m_Radius = new(1.1f);
+        [SerializeField] [Since("v3.8.0")] private MLValue m_Offset = new(MLValue.Type.Absolute, 5f);
 
         /// <summary>
-        /// the mlvalue of width.
-        /// ||宽度的多样式数值。
+        ///     the mlvalue of width.
+        ///     ||宽度的多样式数值。
         /// </summary>
-        public MLValue width { get { return m_Width; } set { m_Width = value; } }
+        public MLValue width
+        {
+            get => m_Width;
+            set => m_Width = value;
+        }
+
         /// <summary>
-        /// the mlvalue of radius.
-        /// ||半径的多样式数值。
+        ///     the mlvalue of radius.
+        ///     ||半径的多样式数值。
         /// </summary>
-        public MLValue radius { get { return m_Radius; } set { m_Radius = value; } }
+        public MLValue radius
+        {
+            get => m_Radius;
+            set => m_Radius = value;
+        }
+
         /// <summary>
-        /// the mlvalue of offset. Such as the offset of the pie chart when the sector is selected.
-        /// ||交互的多样式数值。如饼图的扇形选中时的偏移。
+        ///     the mlvalue of offset. Such as the offset of the pie chart when the sector is selected.
+        ///     ||交互的多样式数值。如饼图的扇形选中时的偏移。
         /// </summary>
-        public MLValue offset { get { return m_Offset; } set { m_Offset = value; } }
+        public MLValue offset
+        {
+            get => m_Offset;
+            set => m_Offset = value;
+        }
 
         public float GetRadius(float radius)
         {
@@ -495,11 +525,11 @@ namespace XCharts.Runtime
     }
 
     /// <summary>
-    /// Data exchange animation. Generally used for animation of data sorting.
-    /// ||数据交换动画。一般用于图表数据排序时顺序变化的动画。
+    ///     Data exchange animation. Generally used for animation of data sorting.
+    ///     ||数据交换动画。一般用于图表数据排序时顺序变化的动画。
     /// </summary>
     [Since("v3.15.0")]
-    [System.Serializable]
+    [Serializable]
     public class AnimationExchange : AnimationInfo
     {
     }

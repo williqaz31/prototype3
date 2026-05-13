@@ -1,16 +1,17 @@
 using UnityEditor;
 using UnityEngine;
+using XCharts.Runtime;
 #if dUI_TextMeshPro
 using TMPro;
 #endif
-using XCharts.Runtime;
 
 namespace XCharts.Editor
 {
     [CustomPropertyDrawer(typeof(TextStyle), true)]
     public class TextStyleDrawer : BasePropertyDrawer
     {
-        public override string ClassName { get { return "TextStyle"; } }
+        public override string ClassName => "TextStyle";
+
         public override void OnGUI(Rect pos, SerializedProperty prop, GUIContent label)
         {
             base.OnGUI(pos, prop, label);

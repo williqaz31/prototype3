@@ -13,7 +13,7 @@ namespace XCharts.Editor
             PropertyField("m_SerieIndex");
             PropertyField("m_OnTop");
             PropertyField("m_Animation");
-            PropertyListField("m_Data", true);
+            PropertyListField("m_Data");
             --EditorGUI.indentLevel;
         }
     }
@@ -21,14 +21,15 @@ namespace XCharts.Editor
     [CustomPropertyDrawer(typeof(MarkLineData), true)]
     public class MarkLineDataDrawer : BasePropertyDrawer
     {
-        public override string ClassName { get { return "MarkLineData"; } }
+        public override string ClassName => "MarkLineData";
+
         public override void OnGUI(Rect pos, SerializedProperty prop, GUIContent label)
         {
             base.OnGUI(pos, prop, label);
             if (MakeComponentFoldout(prop, "", true))
             {
                 ++EditorGUI.indentLevel;
-                var type = (MarkLineType) (prop.FindPropertyRelative("m_Type")).enumValueIndex;
+                var type = (MarkLineType)prop.FindPropertyRelative("m_Type").enumValueIndex;
                 var group = prop.FindPropertyRelative("m_Group").intValue;
                 PropertyField(prop, "m_Type");
                 PropertyField(prop, "m_Name");
@@ -47,6 +48,7 @@ namespace XCharts.Editor
                         PropertyField(prop, "m_Dimension");
                         break;
                 }
+
                 PropertyField(prop, "m_Group");
                 if (group > 0 && type == MarkLineType.Custom) PropertyField(prop, "m_ZeroPosition");
                 PropertyField(prop, "m_LineStyle");

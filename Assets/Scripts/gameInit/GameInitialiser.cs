@@ -1,10 +1,6 @@
-
-using UnityEngine;
 using System.Collections;
-using System.ComponentModel;
-using System.IO;
-using System.Net;
 using SimulationFourmiliere;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class GameInitialiser : MonoBehaviour
@@ -16,33 +12,34 @@ public class GameInitialiser : MonoBehaviour
     [SerializeField] public CanvasGroup intro;
     [SerializeField] public GameObject tout;
     [SerializeField] public Canvas gameOverCanvas;
-    
+
     [SerializeField] public Canvas aucunApportWarning;
-    
+
     [SerializeField] public GestionNourriture gestionNourriture;
     [SerializeField] public GameObject panelBouff;
-   // [SerializeField] public CanvasGroup gameOver;
 
-   public SimulationState simState;
-   private string saveName;
-    
+    private string saveName;
+    // [SerializeField] public CanvasGroup gameOver;
+
+    public SimulationState simState;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    private void Start()
     {
         
         
-      
         saveName = SaveSystem.Instance.currentSaveName;
-        
-        State etat = SaveSystem.Load(saveName);
 
-        if (etat != null)
+       
+
+          var etat = SaveSystem.Load(saveName);
+
+        if (etat != null && saveName != "")
         {
             //Si la partie à terminée nous la gardons ainsi
             if (etat.gameOver)
             {
-               
-               AfficherFinDePartie(); 
+                AfficherFinDePartie();
             }
             else
             {
@@ -52,16 +49,13 @@ public class GameInitialiser : MonoBehaviour
                 gestionNourriture.setApport(etat.appartParJour);
                 clockManager.fromLoad = true;
                 clockManager.day = etat.gameTime;
-                
+
 
                 // Load la map d'enregistrer
 
                 mapLoader.LoadMap(etat.mapData, etat.rows, etat.cols);
                 mapLoader.LoadOdds(etat.odds, etat.rows, etat.cols);
             }
-
-
-
         }
         else
         {
@@ -72,41 +66,28 @@ public class GameInitialiser : MonoBehaviour
             popCounter.simState = simState;
             clockManager.fromLoad = false;
             mapLoader.LoadDefault();
-           
         }
-
-       
-
     }
 
-   
 
-    void OnEnable()
+    private void OnEnable()
     {
         popCounter.GameOver += FinDePartie;
         gestionNourriture.onChangementApport += ChangerApport;
-       
-        
-       
-        
-       
     }
 
-    void OnDisable()
+    private void OnDisable()
     {
         popCounter.GameOver -= FinDePartie;
         gestionNourriture.onChangementApport -= ChangerApport;
-       
+
         popCounter.simState.AucunApport -= AucunApport;
-        
-        
     }
 
-    void AucunApport()
+    private void AucunApport()
     {
         Time.timeScale = 0f;
         aucunApportWarning.gameObject.SetActive(true);
-     
     }
 
     public void CloseWarning()
@@ -117,17 +98,14 @@ public class GameInitialiser : MonoBehaviour
 
     private void FinDePartie()
     {
-        State state = new State();
+        var state = new State();
         state.gameOver = true;
         SaveSystem.Save(saveName, state);
         AfficherFinDePartie();
-       
-        
     }
 
     private void ChangerApport(int newApport)
     {
-      
         if (popCounter.simState != null)
         {
             popCounter.simState.AucunApport += AucunApport;
@@ -139,54 +117,48 @@ public class GameInitialiser : MonoBehaviour
         }
     }
 
-    void AfficherFinDePartie()
+    private void AfficherFinDePartie()
     {
         tout.SetActive(false);
         gameOverCanvas.gameObject.SetActive(true);
     }
 
-    
+
     public void Quit()
-    { 
+    {
         gameOverCanvas.gameObject.SetActive(false);
-        
+
         Time.timeScale = 1f;
         if (IsGameSaved())
         {
-            
             SceneManager.LoadScene("MaiMenue");
-           
-         
         }
         else
         {
             Debug.Log("Game not saved");
             SceneManager.LoadScene("MaiMenue");
         }
-        
-        
-      
     }
 
     private bool IsGameSaved()
     {
-        string[] saves = SaveSystem.GetAllSaves();
+        var saves = SaveSystem.GetAllSaves();
 
-        for (int i = 0; i < saves.Length; i++)
-        {
+        for (var i = 0; i < saves.Length; i++)
             if (saves[i] == saveName)
-            {
                 return true;
 
-            }
-        }
         return false;
     }
 
     public void SaveGame()
     {
         Debug.Log("Save Game");
-        State etat = SaveSystem.Instance.CreateSaveState();
+        var etat = SaveSystem.Instance.CreateSaveState();
+        if (saveName == "")
+        {
+            saveName = "Default";
+        }
         SaveSystem.Save(saveName, etat);
     }
 
@@ -196,29 +168,28 @@ public class GameInitialiser : MonoBehaviour
         StartCoroutine(Fin());
         tout.SetActive(true);
         SaveSystem.Instance.JumpStart();
-        
-        
-        
     }
-    IEnumerator Debut()
+
+    private IEnumerator Debut()
     {
-        float temps = 0f;
+        var temps = 0f;
 
         while (temps <= 2f)
         {
             temps += Time.deltaTime;
-            intro.alpha = (temps/2f);
+            intro.alpha = temps / 2f;
             yield return null;
         }
     }
-    IEnumerator Fin()
+
+    private IEnumerator Fin()
     {
-        float temps = 0f;
+        var temps = 0f;
 
         while (temps <= 1.5f)
         {
             temps += Time.deltaTime;
-            intro.alpha = 1 - (temps/1.5f);
+            intro.alpha = 1 - temps / 1.5f;
             yield return null;
         }
     }

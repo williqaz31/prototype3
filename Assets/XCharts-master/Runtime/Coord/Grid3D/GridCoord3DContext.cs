@@ -5,11 +5,11 @@ namespace XCharts.Runtime
 {
     public class GridCoord3DContext : MainComponentContext
     {
-        public float x;
-        public float y;
-        public Rect maxRect = new Rect(0, 0, 0, 0);
+        public List<ChartLabel> endLabelList = new();
         public bool isPointerEnter;
-        public List<ChartLabel> endLabelList = new List<ChartLabel>();
+
+        public Rect maxRect = new(0, 0, 0, 0);
+
         //public Vector3 position = Vector3.zero;
         public Vector3 pointA = Vector3.zero;
         public Vector3 pointB = Vector3.zero;
@@ -19,5 +19,7 @@ namespace XCharts.Runtime
         public Vector3 pointF = Vector3.zero;
         public Vector3 pointG = Vector3.zero;
         public Vector3 pointH = Vector3.zero;
+        public float x;
+        public float y;
     }
 }

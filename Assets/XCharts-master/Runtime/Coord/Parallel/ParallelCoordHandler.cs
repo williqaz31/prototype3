@@ -1,24 +1,25 @@
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
+using UnityEngine.Scripting;
 using UnityEngine.UI;
 using XUGL;
 
 namespace XCharts.Runtime
 {
-    [UnityEngine.Scripting.Preserve]
+    [Preserve]
     internal sealed class ParallelCoordHandler : MainComponentHandler<ParallelCoord>
     {
-        private Dictionary<int, double> m_SerieDimMin = new Dictionary<int, double>();
-        private Dictionary<int, double> m_SerieDimMax = new Dictionary<int, double>();
         private double m_LastInterval;
         private int m_LastSplitNumber;
+        private readonly Dictionary<int, double> m_SerieDimMax = new();
+        private readonly Dictionary<int, double> m_SerieDimMin = new();
 
         public override void InitComponent()
         {
             var grid = component;
             grid.painter = chart.painter;
-            grid.refreshComponent = delegate()
+            grid.refreshComponent = delegate
             {
                 grid.UpdateRuntimeData(chart);
                 chart.OnCoordinateChanged();
@@ -51,17 +52,12 @@ namespace XCharts.Runtime
 
         public override void DrawBase(VertexHelper vh)
         {
-            if (!SeriesHelper.IsAnyClipSerie(chart.series))
-            {
-                DrawCoord(vh);
-            }
+            if (!SeriesHelper.IsAnyClipSerie(chart.series)) DrawCoord(vh);
         }
+
         public override void DrawUpper(VertexHelper vh)
         {
-            if (SeriesHelper.IsAnyClipSerie(chart.series))
-            {
-                DrawCoord(vh);
-            }
+            if (SeriesHelper.IsAnyClipSerie(chart.series)) DrawCoord(vh);
         }
 
         private void DrawCoord(VertexHelper vh)
@@ -98,15 +94,13 @@ namespace XCharts.Runtime
                         component.context.parallelAxes.Add(axis);
                 }
             }
+
             m_SerieDimMin.Clear();
             m_SerieDimMax.Clear();
             foreach (var serie in chart.series)
-            {
-                if ((serie is Parallel) && serie.parallelIndex == component.index)
-                {
+                if (serie is Parallel && serie.parallelIndex == component.index)
                     foreach (var serieData in serie.data)
-                    {
-                        for (int i = 0; i < serieData.data.Count; i++)
+                        for (var i = 0; i < serieData.data.Count; i++)
                         {
                             var value = serieData.data[i];
                             if (!m_SerieDimMin.ContainsKey(i))
@@ -119,10 +113,8 @@ namespace XCharts.Runtime
                             else if (m_SerieDimMax[i] < value)
                                 m_SerieDimMax[i] = value;
                         }
-                    }
-                }
-            }
-            for (int i = 0; i < component.context.parallelAxes.Count; i++)
+
+            for (var i = 0; i < component.context.parallelAxes.Count; i++)
             {
                 var axis = component.context.parallelAxes[i];
                 if (axis.IsCategory())
@@ -137,7 +129,6 @@ namespace XCharts.Runtime
                 }
                 else if (m_SerieDimMax.ContainsKey(i))
                 {
-
                     var tempMinValue = m_SerieDimMin[i];
                     var tempMaxValue = m_SerieDimMax[i];
                     AxisHelper.AdjustMinMaxValue(axis, ref tempMinValue, ref tempMaxValue, true);
@@ -145,8 +136,8 @@ namespace XCharts.Runtime
                     m_SerieDimMax[i] = tempMaxValue;
                 }
             }
-            for (int i = 0; i < component.context.parallelAxes.Count; i++)
-            {
+
+            for (var i = 0; i < component.context.parallelAxes.Count; i++)
                 if (m_SerieDimMax.ContainsKey(i))
                 {
                     var axis = component.context.parallelAxes[i];
@@ -170,7 +161,6 @@ namespace XCharts.Runtime
                         chart.RefreshChart();
                     }
                 }
-            }
         }
     }
 }

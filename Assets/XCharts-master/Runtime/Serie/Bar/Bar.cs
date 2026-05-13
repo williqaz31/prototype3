@@ -1,19 +1,22 @@
-using UnityEngine;
+using System;
+using Random = UnityEngine.Random;
 
 namespace XCharts.Runtime
 {
-    [System.Serializable]
+    [Serializable]
     [SerieHandler(typeof(BarHandler), true)]
     [SerieConvert(typeof(Line), typeof(Pie))]
     [CoordOptions(typeof(GridCoord), typeof(PolarCoord))]
     [DefaultAnimation(AnimationType.BottomToTop)]
     [DefaultTooltip(Tooltip.Type.Shadow, Tooltip.Trigger.Axis)]
-    [SerieComponent(typeof(TitleStyle), typeof(LabelStyle), typeof(EmphasisStyle), typeof(BlurStyle), typeof(SelectStyle))]
-    [SerieDataComponent(typeof(ItemStyle), typeof(TitleStyle), typeof(LabelStyle), typeof(EmphasisStyle), typeof(BlurStyle), typeof(SelectStyle))]
+    [SerieComponent(typeof(TitleStyle), typeof(LabelStyle), typeof(EmphasisStyle), typeof(BlurStyle),
+        typeof(SelectStyle))]
+    [SerieDataComponent(typeof(ItemStyle), typeof(TitleStyle), typeof(LabelStyle), typeof(EmphasisStyle),
+        typeof(BlurStyle), typeof(SelectStyle))]
     [SerieDataExtraField("m_Ignore")]
     public class Bar : Serie, INeedSerieContainer
     {
-        public override bool useSortData { get { return realtimeSort; } }
+        public override bool useSortData => realtimeSort;
 
         public int containerIndex { get; internal set; }
         public int containterInstanceId { get; internal set; }
@@ -21,10 +24,7 @@ namespace XCharts.Runtime
         public static Serie AddDefaultSerie(BaseChart chart, string serieName)
         {
             var serie = chart.AddSerie<Bar>(serieName);
-            for (int i = 0; i < 5; i++)
-            {
-                chart.AddData(serie.index, UnityEngine.Random.Range(10, 90));
-            }
+            for (var i = 0; i < 5; i++) chart.AddData(serie.index, Random.Range(10, 90));
             return serie;
         }
 

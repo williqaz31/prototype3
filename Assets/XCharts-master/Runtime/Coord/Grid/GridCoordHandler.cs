@@ -1,18 +1,19 @@
 using System.Text;
 using UnityEngine;
+using UnityEngine.Scripting;
 using UnityEngine.UI;
 using XUGL;
 
 namespace XCharts.Runtime
 {
-    [UnityEngine.Scripting.Preserve]
+    [Preserve]
     internal sealed class GridCoordHandler : MainComponentHandler<GridCoord>
     {
         public override void InitComponent()
         {
             var grid = component;
             grid.painter = chart.painter;
-            grid.refreshComponent = delegate ()
+            grid.refreshComponent = delegate
             {
                 grid.UpdateRuntimeData(chart);
                 chart.OnCoordinateChanged();
@@ -40,29 +41,20 @@ namespace XCharts.Runtime
         public override void Update()
         {
             if (chart.isPointerInChart)
-            {
                 component.context.isPointerEnter = component.Contains(chart.pointerPos);
-            }
             else
-            {
                 component.context.isPointerEnter = false;
-            }
         }
 
         public override void DrawBase(VertexHelper vh)
         {
             DrawBackground(vh, component);
-            if (!SeriesHelper.IsAnyClipSerie(chart.series))
-            {
-                DrawCoord(vh, component);
-            }
+            if (!SeriesHelper.IsAnyClipSerie(chart.series)) DrawCoord(vh, component);
         }
+
         public override void DrawUpper(VertexHelper vh)
         {
-            if (SeriesHelper.IsAnyClipSerie(chart.series))
-            {
-                DrawCoord(vh, component);
-            }
+            if (SeriesHelper.IsAnyClipSerie(chart.series)) DrawCoord(vh, component);
         }
 
         private void DrawBackground(VertexHelper vh, GridCoord grid)
@@ -84,9 +76,9 @@ namespace XCharts.Runtime
             if (grid.showBorder)
             {
                 var borderWidth = grid.borderWidth == 0 ? chart.theme.axis.lineWidth * 2 : grid.borderWidth;
-                var borderColor = ChartHelper.IsClearColor(grid.borderColor) ?
-                    chart.theme.axis.lineColor :
-                    grid.borderColor;
+                var borderColor = ChartHelper.IsClearColor(grid.borderColor)
+                    ? chart.theme.axis.lineColor
+                    : grid.borderColor;
                 UGL.DrawBorder(vh, grid.context.center, grid.context.width - borderWidth,
                     grid.context.height - borderWidth, borderWidth, borderColor);
             }

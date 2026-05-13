@@ -7,7 +7,8 @@ namespace XCharts.Editor
     [CustomPropertyDrawer(typeof(Location), true)]
     public class LocationDrawer : BasePropertyDrawer
     {
-        public override string ClassName { get { return "Location"; } }
+        public override string ClassName => "Location";
+
         public override void OnGUI(Rect pos, SerializedProperty prop, GUIContent label)
         {
             base.OnGUI(pos, prop, label);

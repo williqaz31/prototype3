@@ -1,49 +1,18 @@
 using System.Collections.Generic;
 using System.Linq;
 using SimulationFourmiliere;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Tilemaps;
-using SimulationFourmiliere;
 
 public class AntManager : MonoBehaviour
 {
-    public MapLoader mapLoader;
-    public Tilemap AntColonie;
-    public SimulationState simulation;
-
-    public TileBase AntTile;
-    public TileBase AntWithFoodTile;
-    public TileBase AntDistributingTile;
-
-    private int nextAntId = 0;
-    public List<int> antIds = new();
-
-    public Dictionary<int, Vector2Int> antTargets = new Dictionary<int, Vector2Int>();
-    public Dictionary<int, Queue<Vector2Int>> antPaths = new Dictionary<int, Queue<Vector2Int>>();
-
-    private Dictionary<int, float> digTimers = new Dictionary<int, float>();
-    private Dictionary<int, float> digDurations = new Dictionary<int, float>();
-
-    private Dictionary<int, float> antMoveTimers = new Dictionary<int, float>();
-    public float moveInterval = 0.2f; //<------
-
-    public Dictionary<int, Vector2Int> ants = new();
-
-    public Dictionary<int, AntState> antStates = new Dictionary<int, AntState>();
-
-    [SerializeField] public PopCounter popCounter;
-
-    public Dictionary<int, int> hunger = new Dictionary<int, int>();
-
-    public Dictionary<int, int> foodCarried = new();
-
     public enum AntRole
     {
         Miner,
         Forager
     }
 
-    public Dictionary<int, AntRole> roles = new Dictionary<int, AntRole>();
     public enum AntState
     {
         Idle,
@@ -53,8 +22,44 @@ public class AntManager : MonoBehaviour
         Distributing
     }
 
+    public MapLoader mapLoader;
+    public Tilemap AntColonie;
 
-    void Start()
+    public TileBase AntTile;
+    public TileBase AntWithFoodTile;
+    public TileBase AntDistributingTile;
+    public List<int> antIds = new();
+    public float moveInterval = 0.2f; //<------
+
+    [SerializeField] public PopCounter popCounter;
+
+    public GameObject antCountLabelPrefab; // assign a TMP prefab in Inspector
+    private readonly Dictionary<Vector3Int, GameObject> antCountLabels = new();
+
+    private readonly Dictionary<int, float> antMoveTimers = new();
+    public Dictionary<int, Queue<Vector2Int>> antPaths = new();
+
+    public Dictionary<int, Vector2Int> ants = new();
+
+    public Dictionary<int, AntState> antStates = new();
+
+    public Dictionary<int, Vector2Int> antTargets = new();
+    private readonly Dictionary<int, float> digDurations = new();
+
+    private readonly Dictionary<int, float> digTimers = new();
+
+    public Dictionary<int, int> foodCarried = new();
+    public HashSet<int> hiddenAnts = new();
+
+    public Dictionary<int, int> hunger = new();
+
+    private int nextAntId;
+
+    public Dictionary<int, AntRole> roles = new();
+    public SimulationState simulation;
+
+
+    private void Start()
     {
         if (popCounter == null)
         {
@@ -80,6 +85,27 @@ public class AntManager : MonoBehaviour
 
         mapLoader.queenPos = mapLoader.queenPos;
         DrawAnts();
+    }
+
+    private void Update()
+    {
+        SyncAntCount();
+        AssignJobs();
+        UpdateAnts();
+
+        var freeAnts = antIds.Count(id => !antTargets.ContainsKey(id));
+        var openJobs = mapLoader.jobs.Count(j => !j.taken);
+        var totalJobs = mapLoader.jobs.Count;
+        //Debug.Log($"Ants: {ants.Count} | Free: {freeAnts} | Jobs total: {totalJobs} | Jobs open: {openJobs}");
+
+        if (simulation == null)
+            //Debug.Log("NO SIMULATION");
+            return;
+
+        if (Time.frameCount % 60 == 0)
+        {
+            //LogForagerCount();
+        }
     }
 
     public void HideAnt(int id)
@@ -110,10 +136,10 @@ public class AntManager : MonoBehaviour
         hunger[id] = Mathf.Max(0, hunger[id] - 1);
     }
 
-    void RemoveAnt()
+    private void RemoveAnt()
     {
-        int index = ants.Count - 1;
-        int id = antIds[index];
+        var index = ants.Count - 1;
+        var id = antIds[index];
 
         antIds.RemoveAt(index);
 
@@ -123,24 +149,24 @@ public class AntManager : MonoBehaviour
         antPaths.Remove(id);
         antTargets.Remove(id);
     }
+
     public void LogForagerCount()
     {
-        int foragers = 0;
+        var foragers = 0;
 
-        foreach (int id in antIds)
-        {
+        foreach (var id in antIds)
             if (roles.TryGetValue(id, out var role) &&
                 role == AntRole.Forager)
                 continue;
-        }
 
         //Debug.Log($"Foragers: {foragers} / Total ants: {antIds.Count}");
     }
-    void SyncAntCount()
+
+    private void SyncAntCount()
     {
         if (simulation == null) return;
 
-        int target = simulation.Colonie.Pop();
+        var target = simulation.Colonie.Pop();
 
         while (ants.Count < target)
             SpawnSingleAnt();
@@ -151,9 +177,10 @@ public class AntManager : MonoBehaviour
         //Debug.Log("TARGET POP = " + simulation.Colonie.Pop());
         //Debug.Log("CURRENT ANTS = " + ants.Count);
     }
-    void SpawnSingleAnt()
+
+    private void SpawnSingleAnt()
     {
-        int id = nextAntId++;
+        var id = nextAntId++;
 
         antIds.Add(id);
         ants[id] = mapLoader.queenPos;
@@ -170,41 +197,41 @@ public class AntManager : MonoBehaviour
 
         //Debug.Log("ant added at " + mapLoader.queenPos);
     }
+
     public Vector2Int? GetNearestExitAdjacent(Vector2Int from)
     {
         var mapData = mapLoader.GetMapData();
 
-        int bestDist = int.MaxValue;
+        var bestDist = int.MaxValue;
         Vector2Int? best = null;
 
-        Vector2Int[] dirs = {
-        new Vector2Int(1,0),
-        new Vector2Int(-1,0),
-        new Vector2Int(0,1),
-        new Vector2Int(0,-1)
-    };
-
-        for (int y = 0; y < mapLoader.Rows; y++)
+        Vector2Int[] dirs =
         {
-            for (int x = 0; x < mapLoader.Cols; x++)
+            new(1, 0),
+            new(-1, 0),
+            new(0, 1),
+            new(0, -1)
+        };
+
+        for (var y = 0; y < mapLoader.Rows; y++)
+        for (var x = 0; x < mapLoader.Cols; x++)
+        {
+            if (mapData[y, x] != '4') continue;
+
+            var grass = new Vector2Int(x, y);
+
+            foreach (var d in dirs)
             {
-                if (mapData[y, x] != '4') continue;
+                var neighbor = grass + d;
 
-                Vector2Int grass = new Vector2Int(x, y);
+                if (!IsWalkable(neighbor)) continue;
 
-                foreach (var d in dirs)
+                var dist = Mathf.Abs(from.x - neighbor.x) + Mathf.Abs(from.y - neighbor.y);
+
+                if (dist < bestDist)
                 {
-                    var neighbor = grass + d;
-
-                    if (!IsWalkable(neighbor)) continue;
-
-                    int dist = Mathf.Abs(from.x - neighbor.x) + Mathf.Abs(from.y - neighbor.y);
-
-                    if (dist < bestDist)
-                    {
-                        bestDist = dist;
-                        best = neighbor;
-                    }
+                    bestDist = dist;
+                    best = neighbor;
                 }
             }
         }
@@ -215,15 +242,10 @@ public class AntManager : MonoBehaviour
     public void SetCarrying(int id, bool carrying, int amount = 1)
     {
         if (carrying)
-        {
             foodCarried[id] = amount;
-        }
         else
-        {
             foodCarried.Remove(id);
-        }
     }
-    public HashSet<int> hiddenAnts = new();
 
     public void DrawAnts()
     {
@@ -233,12 +255,12 @@ public class AntManager : MonoBehaviour
         // Count ants per cell
         var cellCounts = new Dictionary<Vector3Int, List<int>>();
 
-        foreach (int id in antIds)
+        foreach (var id in antIds)
         {
-            if (!ants.TryGetValue(id, out Vector2Int gridPos)) continue;
+            if (!ants.TryGetValue(id, out var gridPos)) continue;
             if (hiddenAnts.Contains(id)) continue;
 
-            Vector3Int pos = mapLoader.MapToTilePos(gridPos);
+            var pos = mapLoader.MapToTilePos(gridPos);
 
             if (!cellCounts.ContainsKey(pos))
                 cellCounts[pos] = new List<int>();
@@ -248,17 +270,17 @@ public class AntManager : MonoBehaviour
 
         foreach (var kvp in cellCounts)
         {
-            Vector3Int pos = kvp.Key;
-            List<int> ids = kvp.Value;
+            var pos = kvp.Key;
+            var ids = kvp.Value;
 
             // Pick tile based on the "most important" ant in the cell
             // Priority: forager with food > forager distributing > forager > miner
-            TileBase tileToUse = AntTile;
+            var tileToUse = AntTile;
 
-            foreach (int id in ids)
+            foreach (var id in ids)
             {
                 roles.TryGetValue(id, out var role);
-                foodCarried.TryGetValue(id, out int f);
+                foodCarried.TryGetValue(id, out var f);
                 antStates.TryGetValue(id, out var state);
 
                 if (role == AntRole.Forager && f > 0)
@@ -266,10 +288,8 @@ public class AntManager : MonoBehaviour
                     tileToUse = AntWithFoodTile;
                     break;
                 }
-                if (role == AntRole.Forager && state == AntState.Distributing)
-                {
-                    tileToUse = AntDistributingTile;
-                }
+
+                if (role == AntRole.Forager && state == AntState.Distributing) tileToUse = AntDistributingTile;
             }
 
             AntColonie.SetTile(pos, tileToUse);
@@ -283,9 +303,9 @@ public class AntManager : MonoBehaviour
             else if (ids.Count >= 5)
                 AntColonie.SetColor(pos, new Color(1f, 0.6f, 0.2f)); // orange
             else if (ids.Count >= 2)
-                AntColonie.SetColor(pos, new Color(1f, 1f, 0.3f));   // yellow
+                AntColonie.SetColor(pos, new Color(1f, 1f, 0.3f)); // yellow
             else
-                AntColonie.SetColor(pos, Color.white);                // normal
+                AntColonie.SetColor(pos, Color.white); // normal
 
             // Show count label if more than 1
             if (ids.Count > 1)
@@ -293,16 +313,14 @@ public class AntManager : MonoBehaviour
         }
     }
 
-    public GameObject antCountLabelPrefab; // assign a TMP prefab in Inspector
-    private Dictionary<Vector3Int, GameObject> antCountLabels = new();
-
-    void ClearAntCountLabels()
+    private void ClearAntCountLabels()
     {
         foreach (var go in antCountLabels.Values)
-            if (go != null) go.SetActive(false);
+            if (go != null)
+                go.SetActive(false);
     }
 
-    void ShowAntCountLabel(Vector3Int tilePos, int count)
+    private void ShowAntCountLabel(Vector3Int tilePos, int count)
     {
         if (antCountLabelPrefab == null) return;
 
@@ -315,7 +333,7 @@ public class AntManager : MonoBehaviour
         go.SetActive(true);
         go.transform.position = AntColonie.GetCellCenterWorld(tilePos) + new Vector3(0.2f, 0.2f, 0f);
 
-        var tmp = go.GetComponent<TMPro.TMP_Text>();
+        var tmp = go.GetComponent<TMP_Text>();
         if (tmp != null)
         {
             tmp.text = count.ToString();
@@ -323,11 +341,13 @@ public class AntManager : MonoBehaviour
             tmp.color = Color.white;
         }
     }
+
     public List<Vector2Int> FindPathPublic(Vector2Int start, Vector2Int goal)
     {
         return FindPath(start, goal);
     }
-    List<Vector2Int> FindPath(Vector2Int start, Vector2Int goal)
+
+    private List<Vector2Int> FindPath(Vector2Int start, Vector2Int goal)
     {
         if (start == goal) return new List<Vector2Int>();
 
@@ -338,12 +358,13 @@ public class AntManager : MonoBehaviour
         queue.Enqueue(start);
         visited.Add(start);
 
-        Vector2Int[] dirs = {
-        new Vector2Int(1,0),
-        new Vector2Int(-1,0),
-        new Vector2Int(0,1),
-        new Vector2Int(0,-1)
-    };
+        Vector2Int[] dirs =
+        {
+            new(1, 0),
+            new(-1, 0),
+            new(0, 1),
+            new(0, -1)
+        };
 
         while (queue.Count > 0)
         {
@@ -386,7 +407,8 @@ public class AntManager : MonoBehaviour
     {
         mapLoader.queenPos += shift;
     }
-    bool IsWalkable(Vector2Int p)
+
+    private bool IsWalkable(Vector2Int p)
     {
         var mapData = mapLoader.GetMapData();
 
@@ -394,18 +416,20 @@ public class AntManager : MonoBehaviour
             p.y >= mapLoader.Rows || p.x >= mapLoader.Cols)
             return false;
 
-        char tile = mapData[p.y, p.x];
+        var tile = mapData[p.y, p.x];
 
         return tile == '0' || tile == '4' || tile == '9';
     }
-    Vector2Int? GetAccessibleNeighbor(Vector2Int target)
+
+    private Vector2Int? GetAccessibleNeighbor(Vector2Int target)
     {
-        Vector2Int[] dirs = {
-        new Vector2Int(1,0),
-        new Vector2Int(-1,0),
-        new Vector2Int(0,1),
-        new Vector2Int(0,-1)
-    };
+        Vector2Int[] dirs =
+        {
+            new(1, 0),
+            new(-1, 0),
+            new(0, 1),
+            new(0, -1)
+        };
 
         foreach (var d in dirs)
         {
@@ -417,15 +441,16 @@ public class AntManager : MonoBehaviour
 
         return null;
     }
+
     public void AssignJobs()
     {
         // Find the current dig target (the deepest job, taken or not)
         MapLoader.DigJob deepestJob = null;
-        int deepestDist = -1;
+        var deepestDist = -1;
 
         foreach (var job in mapLoader.jobs)
         {
-            int dist = Mathf.Abs(job.target.x - mapLoader.queenPos.x) +
+            var dist = Mathf.Abs(job.target.x - mapLoader.queenPos.x) +
                        Mathf.Abs(job.target.y - mapLoader.queenPos.y);
 
             if (dist > deepestDist)
@@ -435,7 +460,7 @@ public class AntManager : MonoBehaviour
             }
         }
 
-        foreach (int id in antIds)
+        foreach (var id in antIds)
         {
             // VERY IMPORTANT:
             // Foragers should NOT receive mining jobs
@@ -451,7 +476,6 @@ public class AntManager : MonoBehaviour
             MapLoader.DigJob assigned = null;
 
             foreach (var job in mapLoader.jobs)
-            {
                 if (!job.taken)
                 {
                     var adj = GetAccessibleNeighbor(job.target);
@@ -468,14 +492,13 @@ public class AntManager : MonoBehaviour
                     assigned = job;
                     break;
                 }
-            }
 
             // If no untaken job, walk toward the deepest job anyway
             if (assigned == null && deepestJob != null)
             {
                 var adj = GetAccessibleNeighbor(deepestJob.target);
 
-                Vector2Int? staging =
+                var staging =
                     adj ?? GetNearestOpenTileToward(ants[id], deepestJob.target);
 
                 if (staging == null) continue;
@@ -483,81 +506,57 @@ public class AntManager : MonoBehaviour
                 var path = FindPath(ants[id], staging.Value);
                 if (path == null) continue;
 
-                // Don't mark job taken — ant is just staging
+                // Don't mark job taken ï¿½ ant is just staging
                 antPaths[id] = new Queue<Vector2Int>(path);
             }
         }
     }
-    Vector2Int? GetNearestOpenTileToward(Vector2Int from, Vector2Int target)
+
+    private Vector2Int? GetNearestOpenTileToward(Vector2Int from, Vector2Int target)
     {
         var mapData = mapLoader.GetMapData();
-        Vector2Int best = from;
-        int bestDist = int.MaxValue;
+        var best = from;
+        var bestDist = int.MaxValue;
 
-        for (int y = 0; y < mapLoader.Rows; y++)
+        for (var y = 0; y < mapLoader.Rows; y++)
+        for (var x = 0; x < mapLoader.Cols; x++)
         {
-            for (int x = 0; x < mapLoader.Cols; x++)
-            {
-                if (!IsWalkable(new Vector2Int(x, y))) continue;
+            if (!IsWalkable(new Vector2Int(x, y))) continue;
 
-                // Pick tiles that are closer to target than current ant position
-                int distToTarget = Mathf.Abs(x - target.x) + Mathf.Abs(y - target.y);
-                if (distToTarget < bestDist)
-                {
-                    bestDist = distToTarget;
-                    best = new Vector2Int(x, y);
-                }
+            // Pick tiles that are closer to target than current ant position
+            var distToTarget = Mathf.Abs(x - target.x) + Mathf.Abs(y - target.y);
+            if (distToTarget < bestDist)
+            {
+                bestDist = distToTarget;
+                best = new Vector2Int(x, y);
             }
         }
 
         return best == from ? null : best;
     }
-    int GetFreeAnt()
+
+    private int GetFreeAnt()
     {
-        foreach (int id in antIds)
-        {
+        foreach (var id in antIds)
             if (!antTargets.ContainsKey(id))
                 return id;
-        }
         return -1;
     }
-    void Update()
+
+    private void ForceIdleRecheck()
     {
-        SyncAntCount();
-        AssignJobs();
-        UpdateAnts();
-
-        int freeAnts = antIds.Count(id => !antTargets.ContainsKey(id));
-        int openJobs = mapLoader.jobs.Count(j => !j.taken);
-        int totalJobs = mapLoader.jobs.Count;
-        //Debug.Log($"Ants: {ants.Count} | Free: {freeAnts} | Jobs total: {totalJobs} | Jobs open: {openJobs}");
-
-        if (simulation == null)
-        {
-            //Debug.Log("NO SIMULATION");
-            return;
-        }
-
-        if (Time.frameCount % 60 == 0)
-        {
-            //LogForagerCount();
-        }
-    }
-    void ForceIdleRecheck()
-    {
-        foreach (int id in antIds)
-        {
+        foreach (var id in antIds)
             if (!antPaths.ContainsKey(id) &&
                 antStates[id] == AntState.Idle)
             {
                 AssignJobs();
                 break;
             }
-        }
     }
+
     public void UpdateAnts()
     {
-        foreach (int id in antIds)
+        foreach (var id in antIds)
         {
             // =========================
             // DIGGING STATE (NEW LOGIC)
@@ -568,7 +567,7 @@ public class AntManager : MonoBehaviour
 
                 if (digTimers[id] >= digDurations[id])
                 {
-                    Vector2Int target = antTargets[id];
+                    var target = antTargets[id];
 
                     // ACTUAL DIG HAPPENS HERE
                     mapLoader.RemoveJobAt(target);
@@ -630,14 +629,14 @@ public class AntManager : MonoBehaviour
                 continue;
             }
 
-            Vector2Int next = path.Dequeue();
+            var next = path.Dequeue();
             ants[id] = next;
         }
 
         DrawAnts();
     }
 
-    void TryReassignJob(int i)
+    private void TryReassignJob(int i)
     {
         if (antStates[i] == AntState.Idle)
             return;
@@ -663,7 +662,8 @@ public class AntManager : MonoBehaviour
             antPaths[i] = new Queue<Vector2Int>(path);
         }
     }
-    void OnAntArrived(int antIndex, Vector2Int pos)
+
+    private void OnAntArrived(int antIndex, Vector2Int pos)
     {
         var state = antStates[antIndex];
 
@@ -677,27 +677,30 @@ public class AntManager : MonoBehaviour
 
             return;
         }
-        else if (state == AntState.CarryingToExit)
+
+        if (state == AntState.CarryingToExit)
         {
             // DROP DIRT
             antStates[antIndex] = AntState.Idle;
             antTargets.Remove(antIndex);
             antPaths.Remove(antIndex);
         }
+
         DrawAnts();
     }
 
-    void InvalidateAllPaths()
+    private void InvalidateAllPaths()
     {
         antPaths.Clear();
         antTargets.Clear();
 
-        foreach (int id in antIds)
+        foreach (var id in antIds)
             antStates[id] = AntState.Idle;
     }
+
     public void ShiftAll(Vector2Int delta)
     {
-        foreach (int id in antIds)
+        foreach (var id in antIds)
             ants[id] += delta;
 
         var keys = new List<int>(antTargets.Keys);
@@ -715,6 +718,7 @@ public class AntManager : MonoBehaviour
             foreach (var p in newQueue)
                 path.Enqueue(p);
         }
+
         foreach (var job in mapLoader.jobs)
             job.target += delta;
 

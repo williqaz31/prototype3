@@ -1,10 +1,10 @@
+#if dUI_TextMeshPro
+using TMPro;
+#endif
 using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
-#if dUI_TextMeshPro
-using TMPro;
-#endif
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -13,108 +13,115 @@ namespace XCharts.Runtime
 {
     [Serializable]
 #if UNITY_2018_3
-
     [ExcludeFromPresetAttribute]
 #endif
     public class XCSettings : ScriptableObject
     {
-        public readonly static string THEME_ASSET_NAME_PREFIX = "XCTheme-";
-        public readonly static string THEME_ASSET_FOLDER = "Assets/XCharts/Resources";
+        public static readonly string THEME_ASSET_NAME_PREFIX = "XCTheme-";
+        public static readonly string THEME_ASSET_FOLDER = "Assets/XCharts/Resources";
 
-        [SerializeField] private Lang m_Lang = null;
-        [SerializeField] private Font m_Font = null;
+        [SerializeField] private Lang m_Lang;
+        [SerializeField] private Font m_Font;
 #if dUI_TextMeshPro
         [SerializeField] private TMP_FontAsset m_TMPFont = null;
 #endif
-        [SerializeField][Range(1, 200)] private int m_FontSizeLv1 = 28;
-        [SerializeField][Range(1, 200)] private int m_FontSizeLv2 = 24;
-        [SerializeField][Range(1, 200)] private int m_FontSizeLv3 = 20;
-        [SerializeField][Range(1, 200)] private int m_FontSizeLv4 = 18;
+        [SerializeField] [Range(1, 200)] private int m_FontSizeLv1 = 28;
+        [SerializeField] [Range(1, 200)] private int m_FontSizeLv2 = 24;
+        [SerializeField] [Range(1, 200)] private int m_FontSizeLv3 = 20;
+        [SerializeField] [Range(1, 200)] private int m_FontSizeLv4 = 18;
         [SerializeField] private LineStyle.Type m_AxisLineType = LineStyle.Type.Solid;
-        [SerializeField][Range(0, 20)] private float m_AxisLineWidth = 0.8f;
+        [SerializeField] [Range(0, 20)] private float m_AxisLineWidth = 0.8f;
         [SerializeField] private LineStyle.Type m_AxisSplitLineType = LineStyle.Type.Solid;
-        [SerializeField][Range(0, 20)] private float m_AxisSplitLineWidth = 0.8f;
-        [SerializeField][Range(0, 20)] private float m_AxisTickWidth = 0.8f;
-        [SerializeField][Range(0, 20)] private float m_AxisTickLength = 5f;
-        [SerializeField][Range(0, 200)] private float m_GaugeAxisLineWidth = 15f;
-        [SerializeField][Range(0, 20)] private float m_GaugeAxisSplitLineWidth = 0.8f;
-        [SerializeField][Range(0, 20)] private float m_GaugeAxisSplitLineLength = 15f;
-        [SerializeField][Range(0, 20)] private float m_GaugeAxisTickWidth = 0.8f;
-        [SerializeField][Range(0, 20)] private float m_GaugeAxisTickLength = 5f;
-        [SerializeField][Range(0, 20)] private float m_TootipLineWidth = 0.8f;
-        [SerializeField][Range(0, 20)] private float m_DataZoomBorderWidth = 0.5f;
-        [SerializeField][Range(0, 20)] private float m_DataZoomDataLineWidth = 0.5f;
-        [SerializeField][Range(0, 20)] private float m_VisualMapBorderWidth = 0f;
+        [SerializeField] [Range(0, 20)] private float m_AxisSplitLineWidth = 0.8f;
+        [SerializeField] [Range(0, 20)] private float m_AxisTickWidth = 0.8f;
+        [SerializeField] [Range(0, 20)] private float m_AxisTickLength = 5f;
+        [SerializeField] [Range(0, 200)] private float m_GaugeAxisLineWidth = 15f;
+        [SerializeField] [Range(0, 20)] private float m_GaugeAxisSplitLineWidth = 0.8f;
+        [SerializeField] [Range(0, 20)] private float m_GaugeAxisSplitLineLength = 15f;
+        [SerializeField] [Range(0, 20)] private float m_GaugeAxisTickWidth = 0.8f;
+        [SerializeField] [Range(0, 20)] private float m_GaugeAxisTickLength = 5f;
+        [SerializeField] [Range(0, 20)] private float m_TootipLineWidth = 0.8f;
+        [SerializeField] [Range(0, 20)] private float m_DataZoomBorderWidth = 0.5f;
+        [SerializeField] [Range(0, 20)] private float m_DataZoomDataLineWidth = 0.5f;
+        [SerializeField] [Range(0, 20)] private float m_VisualMapBorderWidth;
 
-        [SerializeField][Range(0, 20)] private float m_SerieLineWidth = 1.8f;
-        [SerializeField][Range(0, 200)] private float m_SerieLineSymbolSize = 5f;
-        [SerializeField][Range(0, 200)] private float m_SerieScatterSymbolSize = 20f;
-        [SerializeField][Range(0, 200)] private float m_SerieSelectedRate = 1.3f;
-        [SerializeField][Range(0, 10)] private float m_SerieCandlestickBorderWidth = 1f;
+        [SerializeField] [Range(0, 20)] private float m_SerieLineWidth = 1.8f;
+        [SerializeField] [Range(0, 200)] private float m_SerieLineSymbolSize = 5f;
+        [SerializeField] [Range(0, 200)] private float m_SerieScatterSymbolSize = 20f;
+        [SerializeField] [Range(0, 200)] private float m_SerieSelectedRate = 1.3f;
+        [SerializeField] [Range(0, 10)] private float m_SerieCandlestickBorderWidth = 1f;
 
-        [SerializeField] private bool m_EditorShowAllListData = false;
+        [SerializeField] private bool m_EditorShowAllListData;
 
-        [SerializeField][Range(1, 20)] protected int m_MaxPainter = 10;
-        [SerializeField][Range(1, 10)] protected float m_LineSmoothStyle = 3f;
-        [SerializeField][Range(1f, 20)] protected float m_LineSmoothness = 2f;
-        [SerializeField][Range(1f, 20)] protected float m_LineSegmentDistance = 3f;
-        [SerializeField][Range(1, 10)] protected float m_CicleSmoothness = 2f;
-        [SerializeField][Range(10, 50)] protected float m_VisualMapTriangeLen = 20f;
-        [SerializeField] protected List<Theme> m_CustomThemes = new List<Theme>();
+        [SerializeField] [Range(1, 20)] protected int m_MaxPainter = 10;
+        [SerializeField] [Range(1, 10)] protected float m_LineSmoothStyle = 3f;
+        [SerializeField] [Range(1f, 20)] protected float m_LineSmoothness = 2f;
+        [SerializeField] [Range(1f, 20)] protected float m_LineSegmentDistance = 3f;
+        [SerializeField] [Range(1, 10)] protected float m_CicleSmoothness = 2f;
+        [SerializeField] [Range(10, 50)] protected float m_VisualMapTriangeLen = 20f;
+        [SerializeField] protected List<Theme> m_CustomThemes = new();
 
-        public static Lang lang { get { return Instance.m_Lang; } }
-        public static Font font { get { return Instance.m_Font; } }
+        public static Lang lang => Instance.m_Lang;
+        public static Font font => Instance.m_Font;
 #if dUI_TextMeshPro
         public static TMP_FontAsset tmpFont { get { return Instance.m_TMPFont; } }
 #endif
         /// <summary>
-        /// 一级字体大小。
+        ///     一级字体大小。
         /// </summary>
-        public static int fontSizeLv1 { get { return Instance.m_FontSizeLv1; } }
-        public static int fontSizeLv2 { get { return Instance.m_FontSizeLv2; } }
-        public static int fontSizeLv3 { get { return Instance.m_FontSizeLv3; } }
-        public static int fontSizeLv4 { get { return Instance.m_FontSizeLv4; } }
-        public static LineStyle.Type axisLineType { get { return Instance.m_AxisLineType; } }
-        public static float axisLineWidth { get { return Instance.m_AxisLineWidth; } }
-        public static LineStyle.Type axisSplitLineType { get { return Instance.m_AxisSplitLineType; } }
-        public static float axisSplitLineWidth { get { return Instance.m_AxisSplitLineWidth; } }
-        public static float axisTickWidth { get { return Instance.m_AxisTickWidth; } }
-        public static float axisTickLength { get { return Instance.m_AxisTickLength; } }
-        public static float gaugeAxisLineWidth { get { return Instance.m_GaugeAxisLineWidth; } }
-        public static float gaugeAxisSplitLineWidth { get { return Instance.m_GaugeAxisSplitLineWidth; } }
-        public static float gaugeAxisSplitLineLength { get { return Instance.m_GaugeAxisSplitLineLength; } }
-        public static float gaugeAxisTickWidth { get { return Instance.m_GaugeAxisTickWidth; } }
-        public static float gaugeAxisTickLength { get { return Instance.m_GaugeAxisTickLength; } }
+        public static int fontSizeLv1 => Instance.m_FontSizeLv1;
 
-        public static float tootipLineWidth { get { return Instance.m_TootipLineWidth; } }
-        public static float dataZoomBorderWidth { get { return Instance.m_DataZoomBorderWidth; } }
-        public static float dataZoomDataLineWidth { get { return Instance.m_DataZoomDataLineWidth; } }
-        public static float visualMapBorderWidth { get { return Instance.m_VisualMapBorderWidth; } }
+        public static int fontSizeLv2 => Instance.m_FontSizeLv2;
+        public static int fontSizeLv3 => Instance.m_FontSizeLv3;
+        public static int fontSizeLv4 => Instance.m_FontSizeLv4;
+        public static LineStyle.Type axisLineType => Instance.m_AxisLineType;
+        public static float axisLineWidth => Instance.m_AxisLineWidth;
+        public static LineStyle.Type axisSplitLineType => Instance.m_AxisSplitLineType;
+        public static float axisSplitLineWidth => Instance.m_AxisSplitLineWidth;
+        public static float axisTickWidth => Instance.m_AxisTickWidth;
+        public static float axisTickLength => Instance.m_AxisTickLength;
+        public static float gaugeAxisLineWidth => Instance.m_GaugeAxisLineWidth;
+        public static float gaugeAxisSplitLineWidth => Instance.m_GaugeAxisSplitLineWidth;
+        public static float gaugeAxisSplitLineLength => Instance.m_GaugeAxisSplitLineLength;
+        public static float gaugeAxisTickWidth => Instance.m_GaugeAxisTickWidth;
+        public static float gaugeAxisTickLength => Instance.m_GaugeAxisTickLength;
+
+        public static float tootipLineWidth => Instance.m_TootipLineWidth;
+        public static float dataZoomBorderWidth => Instance.m_DataZoomBorderWidth;
+        public static float dataZoomDataLineWidth => Instance.m_DataZoomDataLineWidth;
+        public static float visualMapBorderWidth => Instance.m_VisualMapBorderWidth;
 
         #region serie
-        public static float serieLineWidth { get { return Instance.m_SerieLineWidth; } }
-        public static float serieLineSymbolSize { get { return Instance.m_SerieLineSymbolSize; } }
-        public static float serieScatterSymbolSize { get { return Instance.m_SerieScatterSymbolSize; } }
-        public static float serieSelectedRate { get { return Instance.m_SerieSelectedRate; } }
-        public static float serieCandlestickBorderWidth { get { return Instance.m_SerieCandlestickBorderWidth; } }
+
+        public static float serieLineWidth => Instance.m_SerieLineWidth;
+        public static float serieLineSymbolSize => Instance.m_SerieLineSymbolSize;
+        public static float serieScatterSymbolSize => Instance.m_SerieScatterSymbolSize;
+        public static float serieSelectedRate => Instance.m_SerieSelectedRate;
+        public static float serieCandlestickBorderWidth => Instance.m_SerieCandlestickBorderWidth;
+
         #endregion
 
         #region editor
-        public static bool editorShowAllListData { get { return Instance.m_EditorShowAllListData; } }
+
+        public static bool editorShowAllListData => Instance.m_EditorShowAllListData;
+
         #endregion
 
         #region graphic
-        public static int maxPainter { get { return Instance.m_MaxPainter; } }
-        public static float lineSmoothStyle { get { return Instance.m_LineSmoothStyle; } }
-        public static float lineSmoothness { get { return Instance.m_LineSmoothness; } }
-        public static float lineSegmentDistance { get { return Instance.m_LineSegmentDistance; } }
-        public static float cicleSmoothness { get { return Instance.m_CicleSmoothness; } }
-        public static float visualMapTriangeLen { get { return Instance.m_VisualMapTriangeLen; } }
+
+        public static int maxPainter => Instance.m_MaxPainter;
+        public static float lineSmoothStyle => Instance.m_LineSmoothStyle;
+        public static float lineSmoothness => Instance.m_LineSmoothness;
+        public static float lineSegmentDistance => Instance.m_LineSegmentDistance;
+        public static float cicleSmoothness => Instance.m_CicleSmoothness;
+        public static float visualMapTriangeLen => Instance.m_VisualMapTriangeLen;
+
         #endregion
 
-        public static List<Theme> customThemes { get { return Instance.m_CustomThemes; } }
+        public static List<Theme> customThemes => Instance.m_CustomThemes;
 
         private static XCSettings s_Instance;
+
         public static XCSettings Instance
         {
             get
@@ -136,7 +143,7 @@ namespace XCharts.Runtime
                         if (s_Instance.m_Lang == null)
                             s_Instance.m_Lang = Resources.Load<Lang>("XCLang-EN");
                         if (s_Instance.m_Lang == null)
-                            s_Instance.m_Lang = ScriptableObject.CreateInstance<Lang>();
+                            s_Instance.m_Lang = CreateInstance<Lang>();
                         if (s_Instance.m_Font == null)
                             s_Instance.m_Font = Resources.GetBuiltinResource<Font>("Arial.ttf");
 #if dUI_TextMeshPro
@@ -146,6 +153,7 @@ namespace XCharts.Runtime
                     }
 #endif
                 }
+
                 return s_Instance;
             }
         }
@@ -153,7 +161,7 @@ namespace XCharts.Runtime
 #if UNITY_EDITOR
         public static bool ExistAssetFile()
         {
-            return System.IO.File.Exists("Assets/XCharts/Resources/XCSettings.asset");
+            return File.Exists("Assets/XCharts/Resources/XCSettings.asset");
         }
 
         public static string GetSettingAssetPath()
@@ -161,9 +169,8 @@ namespace XCharts.Runtime
             var path = "Assets/XCharts/Resources/XCSettings.asset";
             if (File.Exists(path)) return path;
             var dir = Application.dataPath;
-            string[] matchingPaths = Directory.GetDirectories(dir);
+            var matchingPaths = Directory.GetDirectories(dir);
             foreach (var match in matchingPaths)
-            {
                 if (match.Contains("XCharts"))
                 {
                     var jsonPath = string.Format("{0}/package.json", match);
@@ -178,7 +185,7 @@ namespace XCharts.Runtime
                         }
                     }
                 }
-            }
+
             return null;
         }
 #endif
@@ -197,6 +204,7 @@ namespace XCharts.Runtime
 #endif
                 return true;
             }
+
             return false;
         }
     }

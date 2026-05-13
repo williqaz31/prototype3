@@ -4,15 +4,14 @@ namespace XCharts.Runtime
 {
     public static class ListPool<T>
     {
-        private static readonly ObjectPool<List<T>> s_ListPool = new ObjectPool<List<T>>(OnGet, OnClear);
-        static void OnGet(List<T> l)
+        private static readonly ObjectPool<List<T>> s_ListPool = new(OnGet, OnClear);
+
+        private static void OnGet(List<T> l)
         {
-            if (l.Capacity < 50)
-            {
-                l.Capacity = 50;
-            }
+            if (l.Capacity < 50) l.Capacity = 50;
         }
-        static void OnClear(List<T> l)
+
+        private static void OnClear(List<T> l)
         {
             l.Clear();
         }

@@ -3,17 +3,18 @@ using XCharts.Runtime;
 #if INPUT_SYSTEM_ENABLED
 using Input = XCharts.Runtime.InputHelper;
 #endif
+
 namespace XCharts.Example
 {
     [DisallowMultipleComponent]
     [ExecuteInEditMode]
     public class Example41_RadarUpdate : MonoBehaviour
     {
-        RadarChart chart;
-        int count = 0;
-        double max = 0;
+        private RadarChart chart;
+        private int count;
+        private double max;
 
-        void Awake()
+        private void Awake()
         {
             chart = gameObject.GetComponent<RadarChart>();
             if (chart == null)
@@ -23,45 +24,43 @@ namespace XCharts.Example
             }
         }
 
-        void Update()
+        private void Update()
         {
             if (Input.GetKeyDown(KeyCode.Space))
             {
                 UpdateData();
                 count++;
             }
+
             UpdateMax();
         }
 
-        void UpdateData()
+        private void UpdateData()
         {
             var serieIndex = 0;
             var serie = chart.GetSerie(serieIndex);
             if (serie == null) return;
             if (serie.radarType == RadarType.Multiple)
-            {
-                for (int i = 0; i < serie.dataCount; i++)
+                for (var i = 0; i < serie.dataCount; i++)
                 {
                     var serieData = serie.GetSerieData(i);
-                    for (int j = 0; j < serieData.data.Count; j++)
+                    for (var j = 0; j < serieData.data.Count; j++)
                     {
                         var value = Random.Range(10, 100);
                         chart.UpdateData(serieIndex, i, j, value);
                     }
                 }
-            }
             else
-            {
-                for (int i = 0; i < serie.dataCount; i++)
+                for (var i = 0; i < serie.dataCount; i++)
                 {
                     var value = Random.Range(10, 100);
                     chart.UpdateData(serieIndex, i, value);
                 }
-            }
+
             chart.GetChartComponent<Title>().subText = "max:" + serie.context.dataMax;
         }
 
-        void UpdateMax()
+        private void UpdateMax()
         {
             var serieIndex = 0;
             var serie = chart.GetSerie(serieIndex);

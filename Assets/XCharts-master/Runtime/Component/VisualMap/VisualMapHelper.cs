@@ -30,7 +30,7 @@ namespace XCharts.Runtime
 
         public static void SetMinMax(VisualMap visualMap, double min, double max)
         {
-            if ((visualMap.min != min || visualMap.max != max))
+            if (visualMap.min != min || visualMap.max != max)
             {
                 if (max >= min)
                 {
@@ -74,10 +74,10 @@ namespace XCharts.Runtime
                 max = axis.context.maxValue;
                 if (axis.IsCategory() && axis.boundaryGap)
                 {
-                    float startX = grid.context.x + axis.context.scaleWidth / 2;
-                    value = (min + (pos.x - startX) / (grid.context.width - axis.context.scaleWidth) * (max - min));
+                    var startX = grid.context.x + axis.context.scaleWidth / 2;
+                    value = min + (pos.x - startX) / (grid.context.width - axis.context.scaleWidth) * (max - min);
                     if (visualMap.IsPiecewise())
-                        value = (int) value;
+                        value = (int)value;
                 }
                 else
                 {
@@ -90,10 +90,11 @@ namespace XCharts.Runtime
                 max = relativedAxis.context.maxValue;
                 if (relativedAxis.IsCategory() && relativedAxis.boundaryGap)
                 {
-                    float startY = grid.context.y + relativedAxis.context.scaleWidth / 2;
-                    value = (min + (pos.y - startY) / (grid.context.height - relativedAxis.context.scaleWidth) * (max - min));
+                    var startY = grid.context.y + relativedAxis.context.scaleWidth / 2;
+                    value = min + (pos.y - startY) / (grid.context.height - relativedAxis.context.scaleWidth) *
+                        (max - min);
                     if (visualMap.IsPiecewise())
-                        value = (int) value;
+                        value = (int)value;
                 }
                 else
                 {
@@ -102,17 +103,12 @@ namespace XCharts.Runtime
             }
 
             var color = visualMap.GetColor(value);
-            if (ChartHelper.IsClearColor(color))
-            {
-                return defaultColor;
-            }
-            else
-            {
-                if (color.a != 0)
-                    color.a = defaultColor.a;
+            if (ChartHelper.IsClearColor(color)) return defaultColor;
 
-                return color;
-            }
+            if (color.a != 0)
+                color.a = defaultColor.a;
+
+            return color;
         }
 
         public static Color32 GetItemStyleGradientColor(ItemStyle itemStyle, Vector3 pos, BaseChart chart,
@@ -123,12 +119,11 @@ namespace XCharts.Runtime
             var grid = chart.GetChartComponent<GridCoord>(axis.gridIndex);
             var value = min + (pos.x - grid.context.x) / grid.context.width * (max - min);
             var rate = (value - min) / (max - min);
-            var color = itemStyle.GetGradientColor((float) rate, defaultColor);
+            var color = itemStyle.GetGradientColor((float)rate, defaultColor);
 
             if (ChartHelper.IsClearColor(color))
                 return defaultColor;
-            else
-                return color;
+            return color;
         }
 
         public static Color32 GetLineStyleGradientColor(LineStyle lineStyle, Vector3 pos, GridCoord grid,
@@ -138,12 +133,11 @@ namespace XCharts.Runtime
             var max = axis.context.maxValue;
             var value = min + (pos.x - grid.context.x) / grid.context.width * (max - min);
             var rate = (value - min) / (max - min);
-            var color = lineStyle.GetGradientColor((float) rate, defaultColor);
+            var color = lineStyle.GetGradientColor((float)rate, defaultColor);
 
             if (ChartHelper.IsClearColor(color))
                 return defaultColor;
-            else
-                return color;
+            return color;
         }
 
         public static bool IsNeedGradient(VisualMap visualMap)
@@ -156,6 +150,7 @@ namespace XCharts.Runtime
                 return false;
             return true;
         }
+
         public static bool IsNeedLineGradient(VisualMap visualMap)
         {
             if (visualMap == null)
@@ -166,6 +161,7 @@ namespace XCharts.Runtime
                 return false;
             return true;
         }
+
         public static bool IsNeedAreaGradient(VisualMap visualMap)
         {
             if (visualMap == null)
@@ -182,8 +178,7 @@ namespace XCharts.Runtime
             if (visualMap == null || !visualMap.show)
                 return defaultDimension;
 
-            return visualMap != null && visualMap.dimension >= 0 ?
-                visualMap.dimension : defaultDimension;
+            return visualMap != null && visualMap.dimension >= 0 ? visualMap.dimension : defaultDimension;
         }
     }
 }

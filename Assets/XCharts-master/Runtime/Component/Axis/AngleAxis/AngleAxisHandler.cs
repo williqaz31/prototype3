@@ -1,10 +1,11 @@
 using UnityEngine;
+using UnityEngine.Scripting;
 using UnityEngine.UI;
 using XUGL;
 
 namespace XCharts.Runtime
 {
-    [UnityEngine.Scripting.Preserve]
+    [Preserve]
     internal sealed class AngleAxisHandler : AxisHandler<AngleAxis>
     {
         public override void InitComponent()
@@ -65,7 +66,7 @@ namespace XCharts.Runtime
             axis.context.labelObjectList.Clear();
             axis.context.startAngle = 90 - axis.startAngle;
 
-            string objName = component.GetType().Name + axis.index;
+            var objName = component.GetType().Name + axis.index;
             var axisObj = ChartHelper.AddObject(objName, chart.transform, chart.chartMinAnchor,
                 chart.chartMaxAnchor, chart.chartPivot, chart.chartSizeDelta, -1, chart.childrenNodeNames);
             axisObj.transform.localPosition = Vector3.zero;
@@ -80,10 +81,10 @@ namespace XCharts.Runtime
             var margin = axis.axisLabel.distance + axis.axisTick.GetLength(chart.theme.axis.tickLength);
             var isCategory = axis.IsCategory();
             var isPercentStack = SeriesHelper.IsPercentStack<Bar>(chart.series);
-            for (int i = 0; i < splitNumber; i++)
+            for (var i = 0; i < splitNumber; i++)
             {
-                float scaleAngle = AxisHelper.GetScaleWidth(axis, total, i + 1, null);
-                bool inside = axis.axisLabel.inside;
+                var scaleAngle = AxisHelper.GetScaleWidth(axis, total, i + 1);
+                var inside = axis.axisLabel.inside;
                 var labelName = AxisHelper.GetLabelName(axis, total, i, axis.context.minValue, axis.context.maxValue,
                     null, isPercentStack, chart.useUtc);
                 var label = ChartHelper.AddAxisLabelObject(splitNumber, i, objName + i, axisObj.transform,
@@ -91,7 +92,7 @@ namespace XCharts.Runtime
                     chart.theme.axis, labelName, Color.clear);
                 label.text.SetAlignment(axis.axisLabel.textStyle.GetAlignment(TextAnchor.MiddleCenter));
                 var pos = ChartHelper.GetPos(cenPos, radius + margin,
-                    isCategory ? (totalAngle + scaleAngle / 2) : totalAngle, true);
+                    isCategory ? totalAngle + scaleAngle / 2 : totalAngle, true);
                 AxisHelper.AdjustCircleLabelPos(label, pos, cenPos, txtHig, Vector3.zero);
                 if (i == 0) axis.axisLabel.SetRelatedText(label.text, scaleAngle);
                 axis.context.labelObjectList.Add(label);
@@ -106,28 +107,26 @@ namespace XCharts.Runtime
             var radius = polar.context.outsideRadius;
             var cenPos = polar.context.center;
             var total = 360;
-            var size = AxisHelper.GetScaleNumber(angleAxis, total, null);
+            var size = AxisHelper.GetScaleNumber(angleAxis, total);
             var currAngle = angleAxis.context.startAngle;
             var tickWidth = angleAxis.axisTick.GetWidth(chart.theme.axis.tickWidth);
             var tickLength = angleAxis.axisTick.GetLength(chart.theme.axis.tickLength);
             var tickColor = angleAxis.axisTick.GetColor(chart.theme.axis.lineColor);
             var lineColor = angleAxis.axisLine.GetColor(chart.theme.axis.lineColor);
             var splitLineColor = angleAxis.splitLine.GetColor(chart.theme.axis.splitLineColor);
-            for (int i = 1; i < size; i++)
+            for (var i = 1; i < size; i++)
             {
                 var scaleWidth = AxisHelper.GetScaleWidth(angleAxis, total, i);
                 var pos1 = ChartHelper.GetPos(cenPos, polar.context.insideRadius, currAngle, true);
                 var pos2 = ChartHelper.GetPos(cenPos, polar.context.outsideRadius, currAngle, true);
                 if (angleAxis.show && angleAxis.splitLine.show)
-                {
                     if (angleAxis.splitLine.NeedShow(i - 1, size - 1))
                     {
                         var lineWidth = angleAxis.splitLine.GetWidth(chart.theme.axis.splitLineWidth);
                         UGL.DrawLine(vh, pos1, pos2, lineWidth, splitLineColor);
                     }
-                }
+
                 if (angleAxis.show && angleAxis.axisTick.show)
-                {
                     if ((i == 1 && angleAxis.axisTick.showStartTick) ||
                         (i == size - 1 && angleAxis.axisTick.showEndTick) ||
                         (i > 1 && i < size - 1))
@@ -136,9 +135,10 @@ namespace XCharts.Runtime
                         var tickPos = ChartHelper.GetPos(cenPos, tickY, currAngle, true);
                         UGL.DrawLine(vh, pos2, tickPos, tickWidth, tickColor);
                     }
-                }
+
                 currAngle += scaleWidth;
             }
+
             if (angleAxis.show && angleAxis.axisLine.show)
             {
                 var lineWidth = angleAxis.axisLine.GetWidth(chart.theme.axis.lineWidth);
@@ -168,7 +168,9 @@ namespace XCharts.Runtime
             var dir = (chart.pointerPos - new Vector2(polar.context.center.x, polar.context.center.y)).normalized;
             var angle = ChartHelper.GetAngle360(Vector2.up, dir);
             axis.context.pointerValue = (angle - component.context.startAngle + 360) % 360;
-            axis.context.pointerLabelPosition = polar.context.center + new Vector3(dir.x, dir.y) * (polar.context.outsideRadius + polar.indicatorLabelOffset);
+            axis.context.pointerLabelPosition = polar.context.center +
+                                                new Vector3(dir.x, dir.y) * (polar.context.outsideRadius +
+                                                                             polar.indicatorLabelOffset);
         }
     }
 }

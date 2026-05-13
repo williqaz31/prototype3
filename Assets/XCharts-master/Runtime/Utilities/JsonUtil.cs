@@ -1,14 +1,12 @@
 using System;
 using System.Collections;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.Networking;
 
 namespace XCharts.Runtime
 {
     public static class JsonUtil
     {
-
         public static IEnumerator GetWebJson<T>(string url, Action<T[]> callback)
         {
             var www = UnityWebRequest.Get(url);
@@ -57,8 +55,8 @@ namespace XCharts.Runtime
 
         public static T[] GetJsonArray<T>(string json)
         {
-            string newJson = "{ \"array\": " + json + "}";
-            Wrapper<T> wrapper = JsonUtility.FromJson<Wrapper<T>>(newJson);
+            var newJson = "{ \"array\": " + json + "}";
+            var wrapper = JsonUtility.FromJson<Wrapper<T>>(newJson);
             return wrapper.array;
         }
 

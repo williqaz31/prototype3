@@ -10,9 +10,9 @@ namespace XCharts.Example
     [RequireComponent(typeof(BaseChart))]
     public class Example02_ChartEvent : MonoBehaviour
     {
-        BaseChart chart;
+        private BaseChart chart;
 
-        void Awake()
+        private void Awake()
         {
             chart = gameObject.GetComponent<BaseChart>();
 
@@ -33,62 +33,65 @@ namespace XCharts.Example
             chart.onDrawTop = OnDrawTop;
         }
 
-        void OnPointerEnter(PointerEventData eventData, BaseGraph chart)
+        private void OnPointerEnter(PointerEventData eventData, BaseGraph chart)
         {
             Debug.Log("enter:" + chart);
         }
 
-        void OnPointerExit(PointerEventData eventData, BaseGraph chart)
+        private void OnPointerExit(PointerEventData eventData, BaseGraph chart)
         {
             Debug.Log("exit:" + chart);
         }
 
-        void OnPointerDown(PointerEventData eventData, BaseGraph chart)
+        private void OnPointerDown(PointerEventData eventData, BaseGraph chart)
         {
             Debug.Log("down:" + chart);
         }
 
-        void OnPointerUp(PointerEventData eventData, BaseGraph chart)
+        private void OnPointerUp(PointerEventData eventData, BaseGraph chart)
         {
             Debug.Log("up:" + chart);
         }
 
-        void OnPointerClick(PointerEventData eventData, BaseGraph chart)
+        private void OnPointerClick(PointerEventData eventData, BaseGraph chart)
         {
             Debug.Log("click:" + chart);
         }
 
-        void OnScroll(PointerEventData eventData, BaseGraph chart)
+        private void OnScroll(PointerEventData eventData, BaseGraph chart)
         {
             Debug.Log("scroll:" + chart);
         }
 
-        void OnSerieClick(SerieEventData data)
+        private void OnSerieClick(SerieEventData data)
         {
-            Debug.Log("OnSerieClick: " + data.serieIndex + " " + data.dataIndex + " " + data.dimension + " " + data.value);
+            Debug.Log("OnSerieClick: " + data.serieIndex + " " + data.dataIndex + " " + data.dimension + " " +
+                      data.value);
         }
 
-        void OnSerieEnter(SerieEventData data)
+        private void OnSerieEnter(SerieEventData data)
         {
-            Debug.Log("OnSerieEnter: " + data.serieIndex + " " + data.dataIndex + " " + data.dimension + " " + data.value);
+            Debug.Log("OnSerieEnter: " + data.serieIndex + " " + data.dataIndex + " " + data.dimension + " " +
+                      data.value);
         }
 
-        void OnSerieExit(SerieEventData data)
+        private void OnSerieExit(SerieEventData data)
         {
-            Debug.Log("OnSerieExit: " + data.serieIndex + " " + data.dataIndex + " " + data.dimension + " " + data.value);
+            Debug.Log(
+                "OnSerieExit: " + data.serieIndex + " " + data.dataIndex + " " + data.dimension + " " + data.value);
         }
 
-        void OnDraw(VertexHelper vh)
+        private void OnDraw(VertexHelper vh)
         {
             //Debug.Log("OnDraw");
         }
 
-        void OnDrawBeforeSerie(VertexHelper vh, Serie serie)
+        private void OnDrawBeforeSerie(VertexHelper vh, Serie serie)
         {
             //Debug.Log("OnDrawBeforeSerie: " + serie.index);
         }
 
-        void OnDrawAfterSerie(VertexHelper vh, Serie serie)
+        private void OnDrawAfterSerie(VertexHelper vh, Serie serie)
         {
             //Debug.Log("OnDrawAfterSerie: " + serie.index);
             if (serie.index != 0) return;
@@ -105,7 +108,7 @@ namespace XCharts.Example
             }
         }
 
-        void OnDrawTop(VertexHelper vh)
+        private void OnDrawTop(VertexHelper vh)
         {
             //Debug.Log("OnDrawTop");
         }

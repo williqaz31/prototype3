@@ -10,7 +10,7 @@ namespace XCharts.Editor
         public override void OnInspectorGUI()
         {
             ++EditorGUI.indentLevel;
-            var type = (VisualMap.Type) baseProperty.FindPropertyRelative("m_Type").enumValueIndex;
+            var type = (VisualMap.Type)baseProperty.FindPropertyRelative("m_Type").enumValueIndex;
             var isPiece = type == VisualMap.Type.Piecewise;
             PropertyField("m_Type");
             PropertyField("m_SerieIndex");
@@ -37,6 +37,7 @@ namespace XCharts.Editor
                 PropertyField("m_Orient");
                 PropertyField("m_Location");
             }
+
             PropertyListField("m_OutOfRange");
             PropertyListField("m_InRange");
             --EditorGUI.indentLevel;
@@ -46,7 +47,8 @@ namespace XCharts.Editor
     [CustomPropertyDrawer(typeof(VisualMapRange), true)]
     public class VisualMapRangeDrawer : BasePropertyDrawer
     {
-        public override string ClassName { get { return "Range"; } }
+        public override string ClassName => "Range";
+
         public override void OnGUI(Rect pos, SerializedProperty prop, GUIContent label)
         {
             base.OnGUI(pos, prop, label);

@@ -1,12 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using UnityEditor;
 using UnityEngine;
 
 namespace XCharts.Runtime
 {
     public partial class BaseChart
     {
+        private readonly HashSet<string> barStackSet = new();
+
+        private readonly List<string> tempList = new();
+
         public T AddSerie<T>(string serieName = null, bool show = true, bool addToHead = false) where T : Serie
         {
             if (!CanAddSerie<T>()) return null;
@@ -64,7 +69,7 @@ namespace XCharts.Runtime
         }
 
         /// <summary>
-        /// 重置serie的数据项索引。避免数据项索引异常。
+        ///     重置serie的数据项索引。避免数据项索引异常。
         /// </summary>
         /// <param name="serieIndex"></param>
         public bool ResetDataIndex(int serieIndex)
@@ -94,10 +99,8 @@ namespace XCharts.Runtime
         {
             if (!type.IsSubclassOf(typeof(Serie))) return false;
             foreach (var serie in m_Series)
-            {
                 if (serie.GetType() == type)
                     return true;
-            }
             return false;
         }
 
@@ -109,6 +112,7 @@ namespace XCharts.Runtime
                 if (serie.useSortData)
                     return true;
             }
+
             return false;
         }
 
@@ -120,22 +124,21 @@ namespace XCharts.Runtime
                 if (serie.useSortData)
                     return serie;
             }
+
             return null;
         }
 
         public T GetSerie<T>() where T : Serie
         {
             foreach (var serie in m_Series)
-            {
-                if (serie is T) return serie as T;
-            }
+                if (serie is T)
+                    return serie as T;
             return null;
         }
 
         public Serie GetSerie(string serieName)
         {
             foreach (var serie in m_Series)
-            {
                 if (string.IsNullOrEmpty(serie.serieName))
                 {
                     if (string.IsNullOrEmpty(serieName)) return serie;
@@ -144,7 +147,7 @@ namespace XCharts.Runtime
                 {
                     return serie;
                 }
-            }
+
             return null;
         }
 
@@ -162,7 +165,7 @@ namespace XCharts.Runtime
 
         public void RemoveSerie(string serieName)
         {
-            for (int i = m_Series.Count - 1; i >= 0; i--)
+            for (var i = m_Series.Count - 1; i >= 0; i--)
             {
                 var serie = m_Series[i];
                 if (string.IsNullOrEmpty(serieName))
@@ -185,7 +188,7 @@ namespace XCharts.Runtime
 
         public void RemoveSerie<T>() where T : Serie
         {
-            for (int i = m_Series.Count - 1; i >= 0; i--)
+            for (var i = m_Series.Count - 1; i >= 0; i--)
             {
                 var serie = m_Series[i];
                 if (serie is T)
@@ -217,7 +220,8 @@ namespace XCharts.Runtime
             }
             catch
             {
-                Debug.LogError(string.Format("ConvertSerie Failed: can't found {0}.ConvertSerie(Serie serie)", type.Name));
+                Debug.LogError(string.Format("ConvertSerie Failed: can't found {0}.ConvertSerie(Serie serie)",
+                    type.Name));
                 return false;
             }
         }
@@ -242,9 +246,9 @@ namespace XCharts.Runtime
         }
 
         /// <summary>
-        /// Add a data to serie.
-        /// ||If serieName doesn't exist in legend,will be add to legend.
-        /// ||添加一个数据到指定的系列中。
+        ///     Add a data to serie.
+        ///     ||If serieName doesn't exist in legend,will be add to legend.
+        ///     ||添加一个数据到指定的系列中。
         /// </summary>
         /// <param name="serieName">the name of serie</param>
         /// <param name="data">the data to add</param>
@@ -260,12 +264,13 @@ namespace XCharts.Runtime
                 RefreshPainter(serie.painter);
                 return serieData;
             }
+
             return null;
         }
 
         /// <summary>
-        /// Add a data to serie.
-        /// ||添加一个数据到指定的系列中。
+        ///     Add a data to serie.
+        ///     ||添加一个数据到指定的系列中。
         /// </summary>
         /// <param name="serieIndex">the index of serie</param>
         /// <param name="data">the data to add</param>
@@ -281,19 +286,21 @@ namespace XCharts.Runtime
                 RefreshPainter(serie.painter);
                 return serieData;
             }
+
             return null;
         }
 
         /// <summary>
-        /// Add an arbitray dimension data to serie,such as (x,y,z,...).
-        /// ||添加多维数据（x,y,z...）到指定的系列中。
+        ///     Add an arbitray dimension data to serie,such as (x,y,z,...).
+        ///     ||添加多维数据（x,y,z...）到指定的系列中。
         /// </summary>
         /// <param name="serieName">the name of serie</param>
         /// <param name="multidimensionalData">the (x,y,z,...) data</param>
         /// <param name="dataName">the name of data</param>
         /// <param name="dataId">the unique id of data</param>
         /// <returns>Returns True on success</returns>
-        public SerieData AddData(string serieName, List<double> multidimensionalData, string dataName = null, string dataId = null)
+        public SerieData AddData(string serieName, List<double> multidimensionalData, string dataName = null,
+            string dataId = null)
         {
             var serie = GetSerie(serieName);
             if (serie != null)
@@ -302,19 +309,21 @@ namespace XCharts.Runtime
                 RefreshPainter(serie.painter);
                 return serieData;
             }
+
             return null;
         }
 
         /// <summary>
-        /// Add an arbitray dimension data to serie,such as (x,y,z,...).
-        /// ||添加多维数据（x,y,z...）到指定的系列中。
+        ///     Add an arbitray dimension data to serie,such as (x,y,z,...).
+        ///     ||添加多维数据（x,y,z...）到指定的系列中。
         /// </summary>
         /// <param name="serieIndex">the index of serie,index starts at 0</param>
         /// <param name="multidimensionalData">the (x,y,z,...) data</param>
         /// <param name="dataName">the name of data</param>
         /// <param name="dataId">the unique id of data</param>
         /// <returns>Returns True on success</returns>
-        public SerieData AddData(int serieIndex, List<double> multidimensionalData, string dataName = null, string dataId = null)
+        public SerieData AddData(int serieIndex, List<double> multidimensionalData, string dataName = null,
+            string dataId = null)
         {
             var serie = GetSerie(serieIndex);
             if (serie != null)
@@ -323,6 +332,7 @@ namespace XCharts.Runtime
                 RefreshPainter(serie.painter);
                 return serieData;
             }
+
             return null;
         }
 
@@ -343,6 +353,7 @@ namespace XCharts.Runtime
                 RefreshPainter(serie.painter);
                 return serieData;
             }
+
             return null;
         }
 
@@ -363,12 +374,13 @@ namespace XCharts.Runtime
                 RefreshPainter(serie.painter);
                 return serieData;
             }
+
             return null;
         }
 
         /// <summary>
-        /// Add a (x,y) data to serie.
-        /// ||添加（x,y）数据到指定系列中。
+        ///     Add a (x,y) data to serie.
+        ///     ||添加（x,y）数据到指定系列中。
         /// </summary>
         /// <param name="serieName">the name of serie</param>
         /// <param name="xValue">x data</param>
@@ -376,7 +388,8 @@ namespace XCharts.Runtime
         /// <param name="dataName">the name of data</param>
         /// <param name="dataId">the unique id of data</param>
         /// <returns>Returns True on success</returns>
-        public SerieData AddData(string serieName, double xValue, double yValue, string dataName = null, string dataId = null)
+        public SerieData AddData(string serieName, double xValue, double yValue, string dataName = null,
+            string dataId = null)
         {
             var serie = GetSerie(serieName);
             if (serie != null)
@@ -385,12 +398,13 @@ namespace XCharts.Runtime
                 RefreshPainter(serie.painter);
                 return serieData;
             }
+
             return null;
         }
 
         /// <summary>
-        /// Add a (x,y) data to serie.
-        /// ||添加（x,y）数据到指定系列中。
+        ///     Add a (x,y) data to serie.
+        ///     ||添加（x,y）数据到指定系列中。
         /// </summary>
         /// <param name="serieIndex">the index of serie</param>
         /// <param name="xValue">x data</param>
@@ -398,7 +412,8 @@ namespace XCharts.Runtime
         /// <param name="dataName">the name of data</param>
         /// <param name="dataId">the unique id of data</param>
         /// <returns>Returns True on success</returns>
-        public SerieData AddData(int serieIndex, double xValue, double yValue, string dataName = null, string dataId = null)
+        public SerieData AddData(int serieIndex, double xValue, double yValue, string dataName = null,
+            string dataId = null)
         {
             var serie = GetSerie(serieIndex);
             if (serie != null)
@@ -407,11 +422,13 @@ namespace XCharts.Runtime
                 RefreshPainter(serie.painter);
                 return serieData;
             }
+
             return null;
         }
+
         /// <summary>
-        /// Add a (time,y) data to serie.
-        /// ||添加（time,y）数据到指定的系列中。
+        ///     Add a (time,y) data to serie.
+        ///     ||添加（time,y）数据到指定的系列中。
         /// </summary>
         /// <param name="serieName"></param>
         /// <param name="time"></param>
@@ -419,15 +436,16 @@ namespace XCharts.Runtime
         /// <param name="dataName"></param>
         /// <param name="dataId"></param>
         /// <returns></returns>
-        public SerieData AddData(string serieName, DateTime time, double yValue, string dataName = null, string dataId = null)
+        public SerieData AddData(string serieName, DateTime time, double yValue, string dataName = null,
+            string dataId = null)
         {
             var xValue = DateTimeUtil.GetTimestamp(time);
             return AddData(serieName, xValue, yValue, dataName, dataId);
         }
 
         /// <summary>
-        /// Add a (time,y) data to serie.
-        /// ||添加（time,y）数据到指定的系列中。
+        ///     Add a (time,y) data to serie.
+        ///     ||添加（time,y）数据到指定的系列中。
         /// </summary>
         /// <param name="serieIndex"></param>
         /// <param name="time"></param>
@@ -435,13 +453,15 @@ namespace XCharts.Runtime
         /// <param name="dataName"></param>
         /// <param name="dataId"></param>
         /// <returns></returns>
-        public SerieData AddData(int serieIndex, DateTime time, double yValue, string dataName = null, string dataId = null)
+        public SerieData AddData(int serieIndex, DateTime time, double yValue, string dataName = null,
+            string dataId = null)
         {
             var xValue = DateTimeUtil.GetTimestamp(time);
             return AddData(serieIndex, xValue, yValue, dataName, dataId);
         }
 
-        public SerieData AddData(int serieIndex, double indexOrTimestamp, double open, double close, double lowest, double heighest, string dataName = null, string dataId = null)
+        public SerieData AddData(int serieIndex, double indexOrTimestamp, double open, double close, double lowest,
+            double heighest, string dataName = null, string dataId = null)
         {
             var serie = GetSerie(serieIndex);
             if (serie != null)
@@ -450,9 +470,12 @@ namespace XCharts.Runtime
                 RefreshPainter(serie.painter);
                 return serieData;
             }
+
             return null;
         }
-        public SerieData AddData(string serieName, double indexOrTimestamp, double open, double close, double lowest, double heighest, string dataName = null, string dataId = null)
+
+        public SerieData AddData(string serieName, double indexOrTimestamp, double open, double close, double lowest,
+            double heighest, string dataName = null, string dataId = null)
         {
             var serie = GetSerie(serieName);
             if (serie != null)
@@ -461,12 +484,13 @@ namespace XCharts.Runtime
                 RefreshPainter(serie.painter);
                 return serieData;
             }
+
             return null;
         }
 
         /// <summary>
-        /// Add a link data to serie.
-        /// ||添加一个关系图的关系数据。
+        ///     Add a link data to serie.
+        ///     ||添加一个关系图的关系数据。
         /// </summary>
         /// <param name="serieIndex">the index of serie</param>
         /// <param name="sourceId">the source id of link</param>
@@ -482,12 +506,13 @@ namespace XCharts.Runtime
                 RefreshPainter(serie.painter);
                 return link;
             }
+
             return null;
         }
 
         /// <summary>
-        /// Update serie data by serie name.
-        /// ||更新指定系列中的指定索引数据。
+        ///     Update serie data by serie name.
+        ///     ||更新指定系列中的指定索引数据。
         /// </summary>
         /// <param name="serieName">the name of serie</param>
         /// <param name="dataIndex">the index of data</param>
@@ -502,17 +527,16 @@ namespace XCharts.Runtime
                     RefreshPainter(serie);
                     return true;
                 }
-                else
-                {
-                    return false;
-                }
+
+                return false;
             }
+
             return false;
         }
 
         /// <summary>
-        /// Update serie data by serie index.
-        /// ||更新指定系列中的指定索引数据。
+        ///     Update serie data by serie index.
+        ///     ||更新指定系列中的指定索引数据。
         /// </summary>
         /// <param name="serieIndex">the index of serie</param>
         /// <param name="dataIndex">the index of data</param>
@@ -527,16 +551,15 @@ namespace XCharts.Runtime
                     RefreshPainter(serie);
                     return true;
                 }
-                else
-                {
-                    return false;
-                }
+
+                return false;
             }
+
             return false;
         }
 
         /// <summary>
-        /// 更新指定系列指定索引的数据项的多维数据。
+        ///     更新指定系列指定索引的数据项的多维数据。
         /// </summary>
         /// <param name="serieName"></param>
         /// <param name="dataIndex"></param>
@@ -551,16 +574,15 @@ namespace XCharts.Runtime
                     RefreshPainter(serie);
                     return true;
                 }
-                else
-                {
-                    return false;
-                }
+
+                return false;
             }
+
             return false;
         }
 
         /// <summary>
-        /// 更新指定系列指定索引的数据项的多维数据。
+        ///     更新指定系列指定索引的数据项的多维数据。
         /// </summary>
         /// <param name="serieIndex"></param>
         /// <param name="dataIndex"></param>
@@ -575,16 +597,15 @@ namespace XCharts.Runtime
                     RefreshPainter(serie);
                     return true;
                 }
-                else
-                {
-                    return false;
-                }
+
+                return false;
             }
+
             return false;
         }
 
         /// <summary>
-        /// 更新指定系列指定索引指定维数的数据。维数从0开始。
+        ///     更新指定系列指定索引指定维数的数据。维数从0开始。
         /// </summary>
         /// <param name="serieName"></param>
         /// <param name="dataIndex"></param>
@@ -600,16 +621,15 @@ namespace XCharts.Runtime
                     RefreshPainter(serie);
                     return true;
                 }
-                else
-                {
-                    return false;
-                }
+
+                return false;
             }
+
             return false;
         }
 
         /// <summary>
-        /// 更新指定系列指定索引指定维数的数据。维数从0开始。
+        ///     更新指定系列指定索引指定维数的数据。维数从0开始。
         /// </summary>
         /// <param name="serieIndex"></param>
         /// <param name="dataIndex"></param>
@@ -625,17 +645,16 @@ namespace XCharts.Runtime
                     RefreshPainter(serie);
                     return true;
                 }
-                else
-                {
-                    return false;
-                }
+
+                return false;
             }
+
             return false;
         }
 
         /// <summary>
-        /// Update serie data name.
-        /// ||更新指定系列中的指定索引数据名称。
+        ///     Update serie data name.
+        ///     ||更新指定系列中的指定索引数据名称。
         /// </summary>
         /// <param name="serieName"></param>
         /// <param name="dataIndex"></param>
@@ -643,16 +662,13 @@ namespace XCharts.Runtime
         public bool UpdateDataName(string serieName, int dataIndex, string dataName)
         {
             var serie = GetSerie(serieName);
-            if (serie != null)
-            {
-                return serie.UpdateDataName(dataIndex, dataName);
-            }
+            if (serie != null) return serie.UpdateDataName(dataIndex, dataName);
             return false;
         }
 
         /// <summary>
-        /// Update serie data name.
-        /// ||更新指定系列中的指定索引数据名称。
+        ///     Update serie data name.
+        ///     ||更新指定系列中的指定索引数据名称。
         /// </summary>
         /// <param name="serieIndex"></param>
         /// <param name="dataName"></param>
@@ -660,30 +676,21 @@ namespace XCharts.Runtime
         public bool UpdateDataName(int serieIndex, int dataIndex, string dataName)
         {
             var serie = GetSerie(serieIndex);
-            if (serie != null)
-            {
-                return serie.UpdateDataName(dataIndex, dataName);
-            }
+            if (serie != null) return serie.UpdateDataName(dataIndex, dataName);
             return false;
         }
 
         public double GetData(string serieName, int dataIndex, int dimension = 1)
         {
             var serie = GetSerie(serieName);
-            if (serie != null)
-            {
-                return serie.GetData(dataIndex, dimension);
-            }
+            if (serie != null) return serie.GetData(dataIndex, dimension);
             return 0;
         }
 
         public double GetData(int serieIndex, int dataIndex, int dimension = 1)
         {
             var serie = GetSerie(serieIndex);
-            if (serie != null)
-            {
-                return serie.GetData(dataIndex, dimension);
-            }
+            if (serie != null) return serie.GetData(dataIndex, dimension);
             return 0;
         }
 
@@ -696,8 +703,8 @@ namespace XCharts.Runtime
         }
 
         /// <summary>
-        /// Whether to show serie.
-        /// ||设置指定系列是否显示。
+        ///     Whether to show serie.
+        ///     ||设置指定系列是否显示。
         /// </summary>
         /// <param name="serieName">the name of serie</param>
         /// <param name="active">Active or not</param>
@@ -709,8 +716,8 @@ namespace XCharts.Runtime
         }
 
         /// <summary>
-        /// Whether to show serie.
-        /// ||设置指定系列是否显示。
+        ///     Whether to show serie.
+        ///     ||设置指定系列是否显示。
         /// </summary>
         /// <param name="serieIndex">the index of serie</param>
         /// <param name="active">Active or not</param>
@@ -731,23 +738,20 @@ namespace XCharts.Runtime
         }
 
         /// <summary>
-        /// Add a category data to xAxis.
-        /// ||添加一个类目数据到指定的x轴。
+        ///     Add a category data to xAxis.
+        ///     ||添加一个类目数据到指定的x轴。
         /// </summary>
         /// <param name="category">the category data</param>
         /// <param name="xAxisIndex">which xAxis should category add to</param>
         public void AddXAxisData(string category, int xAxisIndex = 0)
         {
             var xAxis = GetChartComponent<XAxis>(xAxisIndex);
-            if (xAxis != null)
-            {
-                xAxis.AddData(category);
-            }
+            if (xAxis != null) xAxis.AddData(category);
         }
 
         /// <summary>
-        /// Update category data.
-        /// ||更新X轴类目数据。
+        ///     Update category data.
+        ///     ||更新X轴类目数据。
         /// </summary>
         /// <param name="index">the index of category data</param>
         /// <param name="category"></param>
@@ -755,30 +759,24 @@ namespace XCharts.Runtime
         public void UpdateXAxisData(int index, string category, int xAxisIndex = 0)
         {
             var xAxis = GetChartComponent<XAxis>(xAxisIndex);
-            if (xAxis != null)
-            {
-                xAxis.UpdateData(index, category);
-            }
+            if (xAxis != null) xAxis.UpdateData(index, category);
         }
 
         /// <summary>
-        /// Add an icon to xAxis.
-        /// ||添加一个图标到指定的x轴。
+        ///     Add an icon to xAxis.
+        ///     ||添加一个图标到指定的x轴。
         /// </summary>
         /// <param name="icon"></param>
         /// <param name="xAxisIndex"></param>
         public void AddXAxisIcon(Sprite icon, int xAxisIndex = 0)
         {
             var xAxis = GetChartComponent<XAxis>(xAxisIndex);
-            if (xAxis != null)
-            {
-                xAxis.AddIcon(icon);
-            }
+            if (xAxis != null) xAxis.AddIcon(icon);
         }
 
         /// <summary>
-        /// Update xAxis icon.
-        /// ||更新X轴图标。
+        ///     Update xAxis icon.
+        ///     ||更新X轴图标。
         /// </summary>
         /// <param name="index"></param>
         /// <param name="icon"></param>
@@ -786,30 +784,24 @@ namespace XCharts.Runtime
         public void UpdateXAxisIcon(int index, Sprite icon, int xAxisIndex = 0)
         {
             var xAxis = GetChartComponent<XAxis>(xAxisIndex);
-            if (xAxis != null)
-            {
-                xAxis.UpdateIcon(index, icon);
-            }
+            if (xAxis != null) xAxis.UpdateIcon(index, icon);
         }
 
         /// <summary>
-        /// Add a category data to yAxis.
-        /// ||添加一个类目数据到指定的y轴。
+        ///     Add a category data to yAxis.
+        ///     ||添加一个类目数据到指定的y轴。
         /// </summary>
         /// <param name="category">the category data</param>
         /// <param name="yAxisIndex">which yAxis should category add to</param>
         public void AddYAxisData(string category, int yAxisIndex = 0)
         {
             var yAxis = GetChartComponent<YAxis>(yAxisIndex);
-            if (yAxis != null)
-            {
-                yAxis.AddData(category);
-            }
+            if (yAxis != null) yAxis.AddData(category);
         }
 
         /// <summary>
-        /// Update category data.
-        /// ||更新Y轴类目数据。
+        ///     Update category data.
+        ///     ||更新Y轴类目数据。
         /// </summary>
         /// <param name="index">the index of category data</param>
         /// <param name="category"></param>
@@ -817,29 +809,23 @@ namespace XCharts.Runtime
         public void UpdateYAxisData(int index, string category, int yAxisIndex = 0)
         {
             var yAxis = GetChartComponent<YAxis>(yAxisIndex);
-            if (yAxis != null)
-            {
-                yAxis.UpdateData(index, category);
-            }
+            if (yAxis != null) yAxis.UpdateData(index, category);
         }
 
         /// <summary>
-        /// Add an icon to yAxis.
-        /// ||添加一个图标到指定的y轴。
+        ///     Add an icon to yAxis.
+        ///     ||添加一个图标到指定的y轴。
         /// </summary>
         /// <param name="icon"></param>
         /// <param name="yAxisIndex"></param>
         public void AddYAxisIcon(Sprite icon, int yAxisIndex = 0)
         {
             var yAxis = GetChartComponent<YAxis>(yAxisIndex);
-            if (yAxis != null)
-            {
-                yAxis.AddIcon(icon);
-            }
+            if (yAxis != null) yAxis.AddIcon(icon);
         }
 
         /// <summary>
-        /// 更新Y轴图标。
+        ///     更新Y轴图标。
         /// </summary>
         /// <param name="index"></param>
         /// <param name="icon"></param>
@@ -847,27 +833,22 @@ namespace XCharts.Runtime
         public void UpdateYAxisIcon(int index, Sprite icon, int yAxisIndex = 0)
         {
             var yAxis = GetChartComponent<YAxis>(yAxisIndex);
-            if (yAxis != null)
-            {
-                yAxis.UpdateIcon(index, icon);
-            }
+            if (yAxis != null) yAxis.UpdateIcon(index, icon);
         }
 
         public float GetSerieBarGap<T>(int gridIndex) where T : Serie
         {
-            float gap = 0f;
-            for (int i = 0; i < m_Series.Count; i++)
+            var gap = 0f;
+            for (var i = 0; i < m_Series.Count; i++)
             {
                 var serie = m_Series[i];
                 if (serie.show && serie is T)
                 {
                     if (!CheckSerieGridIndex(serie, gridIndex)) continue;
-                    if (serie.barGap != 0)
-                    {
-                        gap = serie.barGap;
-                    }
+                    if (serie.barGap != 0) gap = serie.barGap;
                 }
             }
+
             return gap;
         }
 
@@ -876,16 +857,12 @@ namespace XCharts.Runtime
             if (string.IsNullOrEmpty(stack)) return 0;
             double total = 0;
             foreach (var serie in m_Series)
-            {
                 if (serie is T)
                 {
                     if (!CheckSerieGridIndex(serie, gridIndex)) continue;
-                    if (stack.Equals(serie.stack))
-                    {
-                        total += serie.data[dataIndex].data[1];
-                    }
+                    if (stack.Equals(serie.stack)) total += serie.data[dataIndex].data[1];
                 }
-            }
+
             return total;
         }
 
@@ -893,7 +870,7 @@ namespace XCharts.Runtime
         {
             var count = 0;
             barStackSet.Clear();
-            for (int i = 0; i < m_Series.Count; i++)
+            for (var i = 0; i < m_Series.Count; i++)
             {
                 var serie = m_Series[i];
                 if (!serie.show) continue;
@@ -905,10 +882,11 @@ namespace XCharts.Runtime
                         if (barStackSet.Contains(serie.stack)) continue;
                         barStackSet.Add(serie.stack);
                     }
-                    count++;
 
+                    count++;
                 }
             }
+
             return count;
         }
 
@@ -921,22 +899,24 @@ namespace XCharts.Runtime
                     var xAxis = m_XAxes[serie.xAxisIndex];
                     if (xAxis.gridIndex != gridIndex) return false;
                 }
+
                 if (serie.yAxisIndex >= 0 && serie.yAxisIndex < m_YAxes.Count)
                 {
                     var yAxis = m_YAxes[serie.yAxisIndex];
                     if (yAxis.gridIndex != gridIndex) return false;
                 }
             }
+
             return true;
         }
 
-        private HashSet<string> barStackSet = new HashSet<string>();
-        public float GetSerieTotalWidth<T>(float categoryWidth, float gap, int realBarCount, int gridIndex) where T : Serie
+        public float GetSerieTotalWidth<T>(float categoryWidth, float gap, int realBarCount, int gridIndex)
+            where T : Serie
         {
             float total = 0;
             float lastGap = 0;
             barStackSet.Clear();
-            for (int i = 0; i < m_Series.Count; i++)
+            for (var i = 0; i < m_Series.Count; i++)
             {
                 var serie = m_Series[i];
                 if (!serie.show) continue;
@@ -948,6 +928,7 @@ namespace XCharts.Runtime
                         if (barStackSet.Contains(serie.stack)) continue;
                         barStackSet.Add(serie.stack);
                     }
+
                     var width = GetStackBarWidth<T>(categoryWidth, serie, realBarCount);
                     if (gap == -1)
                     {
@@ -961,6 +942,7 @@ namespace XCharts.Runtime
                     }
                 }
             }
+
             if (total > 0 && gap != -1) total -= lastGap;
             return total;
         }
@@ -972,7 +954,7 @@ namespace XCharts.Runtime
             var count = 0;
             var totalRealBarCount = GetSerieBarRealCount<T>(gridIndex);
             barStackSet.Clear();
-            for (int i = 0; i < m_Series.Count; i++)
+            for (var i = 0; i < m_Series.Count; i++)
             {
                 var serie = m_Series[i];
                 if (!serie.show) continue;
@@ -984,6 +966,7 @@ namespace XCharts.Runtime
                         if (barStackSet.Contains(serie.stack)) continue;
                         barStackSet.Add(serie.stack);
                     }
+
                     var width = GetStackBarWidth<T>(categoryWidth, serie, totalRealBarCount);
                     if (gap == -1)
                     {
@@ -993,12 +976,13 @@ namespace XCharts.Runtime
                     {
                         total += width + ChartHelper.GetActualValue(gap, width);
                     }
+
                     if (count + 1 >= index)
                         break;
-                    else
-                        count++;
+                    count++;
                 }
             }
+
             return total;
         }
 
@@ -1006,33 +990,31 @@ namespace XCharts.Runtime
         {
             if (string.IsNullOrEmpty(now.stack)) return now.GetBarWidth(categoryWidth, realBarCount);
             float barWidth = 0;
-            for (int i = 0; i < m_Series.Count; i++)
+            for (var i = 0; i < m_Series.Count; i++)
             {
                 var serie = m_Series[i];
-                if ((serie is T) &&
+                if (serie is T &&
                     serie.show && now.stack.Equals(serie.stack))
-                {
-                    if (serie.barWidth > barWidth) barWidth = serie.barWidth;
-                }
+                    if (serie.barWidth > barWidth)
+                        barWidth = serie.barWidth;
             }
+
             if (barWidth == 0)
             {
                 var width = ChartHelper.GetActualValue(0.6f, categoryWidth);
                 if (realBarCount == 0)
                     return width < 1 ? categoryWidth : width;
-                else
-                    return width / realBarCount;
+                return width / realBarCount;
             }
-            else
-                return ChartHelper.GetActualValue(barWidth, categoryWidth);
+
+            return ChartHelper.GetActualValue(barWidth, categoryWidth);
         }
 
-        private List<string> tempList = new List<string>();
         public int GetSerieIndexIfStack<T>(Serie currSerie, int gridIndex) where T : Serie
         {
             tempList.Clear();
-            int index = 0;
-            for (int i = 0; i < m_Series.Count; i++)
+            var index = 0;
+            for (var i = 0; i < m_Series.Count; i++)
             {
                 var serie = m_Series[i];
                 if (!serie.show) continue;
@@ -1058,13 +1040,14 @@ namespace XCharts.Runtime
                     }
                 }
             }
+
             return 0;
         }
 
         internal void InitSerieHandlers()
         {
             m_SerieHandlers.Clear();
-            for (int i = 0; i < m_Series.Count; i++)
+            for (var i = 0; i < m_Series.Count; i++)
             {
                 var serie = m_Series[i];
                 serie.index = i;
@@ -1086,11 +1069,13 @@ namespace XCharts.Runtime
                     serie.context.tooltipType = attribute1.type;
                 }
             }
+
             if (!serie.GetType().IsDefined(typeof(SerieHandlerAttribute), false))
             {
                 Debug.LogError("Serie no Handler:" + serie.GetType());
                 return;
             }
+
             var attribute = serie.GetType().GetAttribute<SerieHandlerAttribute>();
             var handler = (SerieHandler)Activator.CreateInstance(attribute.handler);
             handler.attribute = attribute;
@@ -1129,6 +1114,7 @@ namespace XCharts.Runtime
             {
                 serie.symbol.show = false;
             }
+
             InsertSerie(serie, index, addToHead);
             return serie;
         }
@@ -1136,12 +1122,9 @@ namespace XCharts.Runtime
         private void ResetSeriesIndex()
         {
 #if UNITY_EDITOR && UNITY_2019_1_OR_NEWER
-            UnityEditor.EditorUtility.SetDirty(this);
+            EditorUtility.SetDirty(this);
 #endif
-            for (int i = 0; i < m_Series.Count; i++)
-            {
-                m_Series[i].index = i;
-            }
+            for (var i = 0; i < m_Series.Count; i++) m_Series[i].index = i;
         }
 
         private void AddSerieAfterDeserialize(Serie serie)
@@ -1160,10 +1143,8 @@ namespace XCharts.Runtime
             if (string.IsNullOrEmpty(name))
                 return false;
             foreach (var serie in m_Series)
-            {
                 if (name.Equals(serie.serieName))
                     return true;
-            }
             return false;
         }
     }

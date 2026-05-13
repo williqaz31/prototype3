@@ -1,13 +1,14 @@
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using UnityEngine.Scripting;
+using UnityEngine.UI;
 
 namespace XCharts.Runtime
 {
-    [UnityEngine.Scripting.Preserve]
+    [Preserve]
     internal sealed class XAxis3DHander : AxisHandler<XAxis3D>
     {
-        protected override Orient orient { get { return Orient.Horizonal; } }
+        protected override Orient orient => Orient.Horizonal;
 
         public override void InitComponent()
         {
@@ -17,28 +18,19 @@ namespace XCharts.Runtime
         public override void Update()
         {
             UpdateAxisMinMaxValue(component.index, component);
-            if (!chart.isTriggerOnClick)
-            {
-                UpdatePointerValue(component);
-            }
+            if (!chart.isTriggerOnClick) UpdatePointerValue(component);
         }
 
         public override void OnPointerClick(PointerEventData eventData)
         {
             base.OnPointerClick(eventData);
-            if (chart.isTriggerOnClick)
-            {
-                UpdatePointerValue(component);
-            }
+            if (chart.isTriggerOnClick) UpdatePointerValue(component);
         }
 
         public override void OnPointerExit(PointerEventData eventData)
         {
             base.OnPointerExit(eventData);
-            if (chart.isTriggerOnClick)
-            {
-                component.context.pointerValue = double.PositiveInfinity;
-            }
+            if (chart.isTriggerOnClick) component.context.pointerValue = double.PositiveInfinity;
         }
 
         public override void DrawBase(VertexHelper vh)
@@ -64,6 +56,7 @@ namespace XCharts.Runtime
                     axis.context.start = grid.context.pointA;
                     axis.context.end = grid.xyExchanged ? grid.context.pointB : grid.context.pointD;
                 }
+
                 var vect = axis.context.end - axis.context.start;
                 axis.context.x = axis.context.start.x;
                 axis.context.y = axis.context.start.y;
@@ -77,7 +70,7 @@ namespace XCharts.Runtime
             var theme = chart.theme;
             var xAxisIndex = xAxis.index;
             xAxis.painter = chart.painter;
-            xAxis.refreshComponent = delegate ()
+            xAxis.refreshComponent = delegate
             {
                 var yAxis = chart.GetChartComponent<YAxis3D>(xAxis.index);
                 InitAxis3D(yAxis, orient);
@@ -89,8 +82,7 @@ namespace XCharts.Runtime
         {
             base.UpdateAxisLabelText(axis);
             if (axis.IsTime() || axis.IsValue())
-            {
-                for (int i = 0; i < axis.context.labelObjectList.Count; i++)
+                for (var i = 0; i < axis.context.labelObjectList.Count; i++)
                 {
                     var label = axis.context.labelObjectList[i];
                     if (label != null)
@@ -100,7 +92,6 @@ namespace XCharts.Runtime
                         CheckValueLabelActive(component, i, label, pos);
                     }
                 }
-            }
         }
 
         protected override Vector3 GetLabelPosition(float scaleWid, int i)

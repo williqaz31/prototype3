@@ -1,12 +1,13 @@
+using System;
 using UnityEngine;
 
 namespace XCharts.Runtime
 {
     /// <summary>
-    /// Settings related to axis minor tick.
-    /// ||坐标轴次刻度相关设置。注意：次刻度无法在类目轴中使用。
+    ///     Settings related to axis minor tick.
+    ///     ||坐标轴次刻度相关设置。注意：次刻度无法在类目轴中使用。
     /// </summary>
-    [System.Serializable]
+    [Serializable]
     [Since("v3.2.0")]
     public class AxisMinorTick : BaseLine
     {
@@ -14,22 +15,26 @@ namespace XCharts.Runtime
         [SerializeField] private bool m_AutoColor;
 
         /// <summary>
-        /// Number of segments that the axis is split into.
-        /// ||分隔线之间分割的刻度数。
+        ///     Number of segments that the axis is split into.
+        ///     ||分隔线之间分割的刻度数。
         /// </summary>
         public int splitNumber
         {
-            get { return m_SplitNumber; }
-            set { if (PropertyUtil.SetStruct(ref m_SplitNumber, value)) SetAllDirty(); }
+            get => m_SplitNumber;
+            set
+            {
+                if (PropertyUtil.SetStruct(ref m_SplitNumber, value)) SetAllDirty();
+            }
         }
-        public bool autoColor { get { return m_AutoColor; } set { m_AutoColor = value; } }
 
-        public override bool vertsDirty { get { return m_VertsDirty || m_LineStyle.anyDirty; } }
-        public override void ClearVerticesDirty()
+        public bool autoColor
         {
-            base.ClearVerticesDirty();
-            m_LineStyle.ClearVerticesDirty();
+            get => m_AutoColor;
+            set => m_AutoColor = value;
         }
+
+        public override bool vertsDirty => m_VertsDirty || m_LineStyle.anyDirty;
+
         public static AxisMinorTick defaultMinorTick
         {
             get
@@ -40,6 +45,12 @@ namespace XCharts.Runtime
                 };
                 return tick;
             }
+        }
+
+        public override void ClearVerticesDirty()
+        {
+            base.ClearVerticesDirty();
+            m_LineStyle.ClearVerticesDirty();
         }
 
         public AxisMinorTick Clone()

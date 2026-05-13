@@ -1,6 +1,5 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using XCharts.Runtime;
 
 namespace XCharts.Example
@@ -9,16 +8,16 @@ namespace XCharts.Example
     public class Example30_PieChart : MonoBehaviour
     {
         private PieChart chart;
+        private readonly float m_CenterSpeed = 1f;
+        private readonly float m_RadiusSpeed = 100f;
         private Serie serie, serie1;
-        private float m_RadiusSpeed = 100f;
-        private float m_CenterSpeed = 1f;
 
         private void OnEnable()
         {
             StartCoroutine(PieDemo());
         }
 
-        IEnumerator PieDemo()
+        private IEnumerator PieDemo()
         {
             while (true)
             {
@@ -35,7 +34,7 @@ namespace XCharts.Example
             }
         }
 
-        IEnumerator PieAdd()
+        private IEnumerator PieAdd()
         {
             chart = gameObject.GetComponent<PieChart>();
             if (chart == null)
@@ -43,6 +42,7 @@ namespace XCharts.Example
                 chart = gameObject.AddComponent<PieChart>();
                 chart.Init();
             }
+
             yield return null;
             chart.GetChartComponent<Title>().text = "PieChart - 饼图";
             chart.GetChartComponent<Title>().subText = "基础饼图";
@@ -68,14 +68,11 @@ namespace XCharts.Example
             chart.AddData(0, 135, "视频广告");
             chart.AddData(0, 1548, "搜索引擎");
 
-            chart.onSerieClick = delegate (SerieEventData data)
-            {
-
-            };
+            chart.onSerieClick = delegate { };
             yield return new WaitForSeconds(1);
         }
 
-        IEnumerator PieShowLabel()
+        private IEnumerator PieShowLabel()
         {
             chart.EnsureChartComponent<Title>().subText = "显示文本标签";
 
@@ -99,7 +96,7 @@ namespace XCharts.Example
             chart.RefreshChart();
         }
 
-        IEnumerator Doughnut()
+        private IEnumerator Doughnut()
         {
             chart.EnsureChartComponent<Title>().subText = "圆环图";
             serie.radius[0] = 2f;
@@ -109,6 +106,7 @@ namespace XCharts.Example
                 chart.RefreshChart();
                 yield return null;
             }
+
             serie.gap = 1f;
             chart.RefreshChart();
             yield return new WaitForSeconds(1);
@@ -123,7 +121,7 @@ namespace XCharts.Example
             yield return new WaitForSeconds(1);
         }
 
-        IEnumerator DoublePie()
+        private IEnumerator DoublePie()
         {
             chart.EnsureChartComponent<Title>().subText = "多图组合";
             serie1 = chart.AddSerie<Pie>("访问来源2");
@@ -141,14 +139,9 @@ namespace XCharts.Example
                 chart.RefreshChart();
                 yield return null;
             }
-            if (null == serie.label)
-            {
-                serie.EnsureComponent<LabelStyle>();
-            }
-            if (null == serie1.label)
-            {
-                serie1.EnsureComponent<LabelStyle>();
-            }
+
+            if (null == serie.label) serie.EnsureComponent<LabelStyle>();
+            if (null == serie1.label) serie1.EnsureComponent<LabelStyle>();
             serie1.label.show = true;
             serie1.label.position = LabelStyle.Position.Inside;
             serie1.label.textStyle.color = Color.white;
@@ -158,7 +151,7 @@ namespace XCharts.Example
             yield return new WaitForSeconds(1);
         }
 
-        IEnumerator RosePie()
+        private IEnumerator RosePie()
         {
             chart.EnsureChartComponent<Title>().subText = "玫瑰图";
             chart.EnsureChartComponent<Legend>().show = false;
@@ -168,7 +161,7 @@ namespace XCharts.Example
             serie1.label.position = LabelStyle.Position.Outside;
             serie1.labelLine.lineType = LabelLine.LineType.Curves;
             serie1.label.textStyle.color = Color.clear;
-            for (int i = 0; i < 2; i++)
+            for (var i = 0; i < 2; i++)
             {
                 chart.AddData(i, 10, "rose1");
                 chart.AddData(i, 5, "rose2");
@@ -187,6 +180,7 @@ namespace XCharts.Example
                 chart.RefreshChart();
                 yield return null;
             }
+
             yield return new WaitForSeconds(1);
             while (serie.radius[0] > 3f)
             {

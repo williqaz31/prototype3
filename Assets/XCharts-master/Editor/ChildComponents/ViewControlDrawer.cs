@@ -7,7 +7,8 @@ namespace XCharts.Editor
     [CustomPropertyDrawer(typeof(ViewControl), true)]
     public class ViewControlDrawer : BasePropertyDrawer
     {
-        public override string ClassName { get { return "ViewControl"; } }
+        public override string ClassName => "ViewControl";
+
         public override void OnGUI(Rect pos, SerializedProperty prop, GUIContent label)
         {
             base.OnGUI(pos, prop, label);

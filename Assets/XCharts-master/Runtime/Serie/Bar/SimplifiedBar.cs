@@ -1,5 +1,5 @@
 using System;
-using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace XCharts.Runtime
 {
@@ -9,9 +9,9 @@ namespace XCharts.Runtime
     [CoordOptions(typeof(GridCoord))]
     [DefaultAnimation(AnimationType.LeftToRight, false)]
     [DefaultTooltip(Tooltip.Type.Shadow, Tooltip.Trigger.Axis)]
-    [SerieComponent()]
-    [SerieDataComponent()]
-    [SerieDataExtraField()]
+    [SerieComponent]
+    [SerieDataComponent]
+    [SerieDataExtraField]
     public class SimplifiedBar : Serie, INeedSerieContainer, ISimplifiedSerie
     {
         public int containerIndex { get; internal set; }
@@ -22,14 +22,15 @@ namespace XCharts.Runtime
             var serie = chart.AddSerie<SimplifiedBar>(serieName);
             serie.symbol.show = false;
             var lastValue = 0d;
-            for (int i = 0; i < 50; i++)
+            for (var i = 0; i < 50; i++)
             {
                 if (i < 20)
-                    lastValue += UnityEngine.Random.Range(0, 5);
+                    lastValue += Random.Range(0, 5);
                 else
-                    lastValue += UnityEngine.Random.Range(-3, 5);
+                    lastValue += Random.Range(-3, 5);
                 chart.AddData(serie.index, lastValue);
             }
+
             return serie;
         }
 

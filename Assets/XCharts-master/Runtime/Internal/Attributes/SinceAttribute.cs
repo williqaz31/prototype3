@@ -2,7 +2,7 @@ using System;
 
 namespace XCharts.Runtime
 {
-    [AttributeUsage(AttributeTargets.All, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.All)]
     public class Since : Attribute
     {
         public readonly string version;

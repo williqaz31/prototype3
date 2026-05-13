@@ -9,23 +9,22 @@ namespace XCharts.Editor
 {
     public class SerieBaseEditor
     {
-        public BaseChart chart { get; private set; }
-        public Serie serie { get; private set; }
-
         //Editor m_Inspector;
         internal SerializedProperty baseProperty;
-        internal SerializedProperty showProperty;
-        internal List<HeaderMenuInfo> menus = new List<HeaderMenuInfo>();
-        internal List<HeaderMenuInfo> serieDataMenus = new List<HeaderMenuInfo>();
         protected Dictionary<string, Type> m_CoordOptionsDic;
         protected List<string> m_CoordOptionsNames;
         private string m_DisplayName;
+        internal List<HeaderMenuInfo> menus = new();
+        internal List<HeaderMenuInfo> serieDataMenus = new();
+        internal SerializedProperty showProperty;
+        public BaseChart chart { get; private set; }
+        public Serie serie { get; private set; }
 
         internal void Init(BaseChart chart, Serie target, SerializedProperty property, UnityEditor.Editor inspector)
         {
             this.chart = chart;
-            this.serie = target;
-            this.baseProperty = property;
+            serie = target;
+            baseProperty = property;
             m_DisplayName = string.Format("Serie {0}: {1}", serie.index, serie.GetType().Name);
             //m_Inspector = inspector;
             showProperty = baseProperty.FindPropertyRelative("m_Show");
@@ -43,16 +42,19 @@ namespace XCharts.Editor
                     m_CoordOptionsDic[attribute.type0.Name] = attribute.type0;
                     m_CoordOptionsNames.Add(attribute.type0.Name);
                 }
+
                 if (attribute.type1 != null)
                 {
                     m_CoordOptionsDic[attribute.type1.Name] = attribute.type1;
                     m_CoordOptionsNames.Add(attribute.type1.Name);
                 }
+
                 if (attribute.type2 != null)
                 {
                     m_CoordOptionsDic[attribute.type2.Name] = attribute.type2;
                     m_CoordOptionsNames.Add(attribute.type2.Name);
                 }
+
                 if (attribute.type3 != null)
                 {
                     m_CoordOptionsDic[attribute.type3.Name] = attribute.type3;
@@ -62,10 +64,12 @@ namespace XCharts.Editor
         }
 
         public virtual void OnEnable()
-        { }
+        {
+        }
 
         public virtual void OnDisable()
-        { }
+        {
+        }
 
         internal void OnInternalInspectorGUI()
         {
@@ -74,10 +78,12 @@ namespace XCharts.Editor
         }
 
         public virtual void OnInspectorGUI()
-        { }
+        {
+        }
 
         protected virtual void DrawExtendeds()
-        { }
+        {
+        }
 
         public virtual string GetDisplayTitle()
         {
@@ -125,6 +131,7 @@ namespace XCharts.Editor
             var prop = FindProperty(relativePropName);
             ChartEditorHelper.MakeTwoField(ref m_DrawRect, m_DrawRect.width, prop, prop.displayName);
         }
+
         protected void PropertyFieldLimitMin(string relativePropName, double min)
         {
             var prop = PropertyField(relativePropName);
@@ -132,15 +139,15 @@ namespace XCharts.Editor
             {
                 case SerializedPropertyType.Float:
                     if (prop.floatValue < min)
-                        prop.floatValue = (float) min;
+                        prop.floatValue = (float)min;
                     break;
                 case SerializedPropertyType.Integer:
                     if (prop.intValue < min)
-                        prop.intValue = (int) min;
+                        prop.intValue = (int)min;
                     break;
             }
-
         }
+
         protected void PropertyFieldLimitMax(string relativePropName, int max)
         {
             var prop = PropertyField(relativePropName);
@@ -148,11 +155,11 @@ namespace XCharts.Editor
             {
                 case SerializedPropertyType.Float:
                     if (prop.floatValue > max)
-                        prop.floatValue = (float) max;
+                        prop.floatValue = max;
                     break;
                 case SerializedPropertyType.Integer:
                     if (prop.intValue > max)
-                        prop.intValue = (int) max;
+                        prop.intValue = max;
                     break;
             }
         }

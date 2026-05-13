@@ -1,16 +1,14 @@
 using System.Collections.Generic;
-using System.Text;
 using UnityEngine;
-using UnityEngine.EventSystems;
+using UnityEngine.Scripting;
 using UnityEngine.UI;
-using XUGL;
 
 namespace XCharts.Runtime
 {
     /// <summary>
-    /// For grid coord
+    ///     For grid coord
     /// </summary>
-    [UnityEngine.Scripting.Preserve]
+    [Preserve]
     internal sealed partial class LineHandler : SerieHandler<Line>
     {
         public override void Update()
@@ -53,13 +51,11 @@ namespace XCharts.Runtime
         public override void DrawUpper(VertexHelper vh)
         {
             if (serie.IsUseCoord<GridCoord>())
-            {
                 if (SeriesHelper.IsStack(chart.series))
                 {
                     DrawLinePoint(vh, serie);
                     DrawLineArrow(vh, serie);
                 }
-            }
         }
 
         public override void RefreshEndLabelInternal()
@@ -70,13 +66,13 @@ namespace XCharts.Runtime
             var endLabelList = m_SerieGrid.context.endLabelList;
             if (endLabelList.Count <= 1) return;
 
-            endLabelList.Sort(delegate (ChartLabel a, ChartLabel b)
+            endLabelList.Sort(delegate(ChartLabel a, ChartLabel b)
             {
                 if (a == null || b == null) return 1;
                 return b.transform.position.y.CompareTo(a.transform.position.y);
             });
             var lastY = float.NaN;
-            for (int i = 0; i < endLabelList.Count; i++)
+            for (var i = 0; i < endLabelList.Count; i++)
             {
                 var label = endLabelList[i];
                 if (label == null) continue;
@@ -90,9 +86,7 @@ namespace XCharts.Runtime
                 {
                     var labelHeight = label.GetTextHeight();
                     if (labelPosition.y + labelHeight > lastY)
-                    {
                         label.SetPosition(new Vector3(labelPosition.x, lastY - labelHeight, labelPosition.z));
-                    }
                     lastY = label.transform.localPosition.y;
                 }
             }

@@ -7,7 +7,8 @@ namespace XCharts.Editor
     [CustomPropertyDrawer(typeof(DebugInfo), true)]
     public class DebugInfoDrawer : BasePropertyDrawer
     {
-        public override string ClassName { get { return "Debug"; } }
+        public override string ClassName => "Debug";
+
         public override void OnGUI(Rect pos, SerializedProperty prop, GUIContent label)
         {
             base.OnGUI(pos, prop, label);

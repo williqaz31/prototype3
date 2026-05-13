@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -5,498 +6,733 @@ using UnityEngine.UI;
 namespace XCharts.Runtime
 {
     /// <summary>
-    /// Tooltip component.
-    /// ||提示框组件。
+    ///     Tooltip component.
+    ///     ||提示框组件。
     /// </summary>
-    [System.Serializable]
+    [Serializable]
     [ComponentHandler(typeof(TooltipHandler), true)]
     public class Tooltip : MainComponent
     {
         /// <summary>
-        /// Indicator type.
-        /// ||指示器类型。
+        ///     Position type.
+        ///     ||坐标类型。
         /// </summary>
-        public enum Type
+        public enum Position
         {
             /// <summary>
-            /// line indicator.
-            /// ||直线指示器
+            ///     Auto. The mobile platform is displayed at the top, and the non-mobile platform follows the mouse position.
+            ///     ||自适应。移动平台靠顶部显示，非移动平台跟随鼠标位置。
             /// </summary>
-            Line,
+            Auto,
+
             /// <summary>
-            /// shadow crosshair indicator.
-            /// ||阴影指示器
+            ///     Custom. Fully customize display position (x,y).
+            ///     ||自定义。完全自定义显示位置(x,y)。
             /// </summary>
-            Shadow,
+            Custom,
+
             /// <summary>
-            /// no indicator displayed.
-            /// ||无指示器
+            ///     Just fix the coordinate X. Y follows the mouse position.
+            ///     ||只固定坐标X。Y跟随鼠标位置。
+            /// </summary>
+            FixedX,
+
+            /// <summary>
+            ///     Just fix the coordinate Y. X follows the mouse position.
+            ///     ||只固定坐标Y。X跟随鼠标位置。
+            FixedY
+        }
+
+        /// <summary>
+        ///     Trigger strategy.
+        ///     ||触发类型。
+        /// </summary>
+        public enum Trigger
+        {
+            /// <summary>
+            ///     Triggered by data item, which is mainly used for charts that don't have a category axis like scatter charts or pie
+            ///     charts.
+            ///     ||数据项图形触发，主要在散点图，饼图等无类目轴的图表中使用。
+            /// </summary>
+            Item,
+
+            /// <summary>
+            ///     Triggered by axes, which is mainly used for charts that have category axes, like bar charts or line charts.
+            ///     ||坐标轴触发，主要在柱状图，折线图等会使用类目轴的图表中使用。
+            /// </summary>
+            Axis,
+
+            /// <summary>
+            ///     Trigger nothing.
+            ///     ||什么都不触发。
             /// </summary>
             None,
+
             /// <summary>
-            /// crosshair indicator, which is actually the shortcut of enable two axisPointers of two orthometric axes.
-            /// ||十字准星指示器。坐标轴显示Label和交叉线。
-            /// </summary>
-            Cross,
-            /// <summary>
-            /// Auto select indicator according to serie type.
-            /// ||根据serie的类型自动选择显示指示器。
+            ///     Auto select trigger according to serie type.
+            ///     ||根据serie的类型自动选择触发类型。
             /// </summary>
             Auto
         }
 
         /// <summary>
-        /// Trigger strategy.
-        /// ||触发类型。
-        /// </summary>
-        public enum Trigger
-        {
-            /// <summary>
-            /// Triggered by data item, which is mainly used for charts that don't have a category axis like scatter charts or pie charts.
-            /// ||数据项图形触发，主要在散点图，饼图等无类目轴的图表中使用。
-            /// </summary>
-            Item,
-            /// <summary>
-            /// Triggered by axes, which is mainly used for charts that have category axes, like bar charts or line charts.
-            /// ||坐标轴触发，主要在柱状图，折线图等会使用类目轴的图表中使用。
-            /// </summary>
-            Axis,
-            /// <summary>
-            /// Trigger nothing.
-            /// ||什么都不触发。
-            /// </summary>
-            None,
-            /// <summary>
-            /// Auto select trigger according to serie type.
-            /// ||根据serie的类型自动选择触发类型。
-            /// </summary>
-            Auto
-        }
-        /// <summary>
-        /// the condition of trigger tooltip.
-        /// ||触发条件。
+        ///     the condition of trigger tooltip.
+        ///     ||触发条件。
         /// </summary>
         public enum TriggerOn
         {
             /// <summary>
-            /// Trigger when mouse move.
-            /// ||鼠标移动时触发。
+            ///     Trigger when mouse move.
+            ///     ||鼠标移动时触发。
             /// </summary>
             MouseMove,
+
             /// <summary>
-            /// Trigger when mouse click.
-            /// ||鼠标点击时触发。
+            ///     Trigger when mouse click.
+            ///     ||鼠标点击时触发。
             /// </summary>
-            Click,
+            Click
         }
+
         /// <summary>
-        /// Position type.
-        /// ||坐标类型。
+        ///     Indicator type.
+        ///     ||指示器类型。
         /// </summary>
-        public enum Position
+        public enum Type
         {
             /// <summary>
-            /// Auto. The mobile platform is displayed at the top, and the non-mobile platform follows the mouse position.
-            /// ||自适应。移动平台靠顶部显示，非移动平台跟随鼠标位置。
+            ///     line indicator.
+            ///     ||直线指示器
             /// </summary>
-            Auto,
+            Line,
+
             /// <summary>
-            /// Custom. Fully customize display position (x,y).
-            /// ||自定义。完全自定义显示位置(x,y)。
+            ///     shadow crosshair indicator.
+            ///     ||阴影指示器
             /// </summary>
-            Custom,
+            Shadow,
+
             /// <summary>
-            /// Just fix the coordinate X. Y follows the mouse position.
-            /// ||只固定坐标X。Y跟随鼠标位置。
+            ///     no indicator displayed.
+            ///     ||无指示器
             /// </summary>
-            FixedX,
+            None,
+
             /// <summary>
-            /// Just fix the coordinate Y. X follows the mouse position.
-            /// ||只固定坐标Y。X跟随鼠标位置。
-            FixedY
+            ///     crosshair indicator, which is actually the shortcut of enable two axisPointers of two orthometric axes.
+            ///     ||十字准星指示器。坐标轴显示Label和交叉线。
+            /// </summary>
+            Cross,
+
+            /// <summary>
+            ///     Auto select indicator according to serie type.
+            ///     ||根据serie的类型自动选择显示指示器。
+            /// </summary>
+            Auto
         }
 
         [SerializeField] private bool m_Show = true;
         [SerializeField] private Type m_Type = Type.Auto;
         [SerializeField] private Trigger m_Trigger = Trigger.Auto;
-        [SerializeField][Since("v3.11.0")] private TriggerOn m_TriggerOn = TriggerOn.MouseMove;
-        [SerializeField][Since("v3.3.0")] private Position m_Position = Position.Auto;
+        [SerializeField] [Since("v3.11.0")] private TriggerOn m_TriggerOn = TriggerOn.MouseMove;
+        [SerializeField] [Since("v3.3.0")] private Position m_Position = Position.Auto;
         [SerializeField] private string m_ItemFormatter;
         [SerializeField] private string m_TitleFormatter;
         [SerializeField] private string m_Marker = "●";
-        [SerializeField] private float m_FixedWidth = 0;
-        [SerializeField] private float m_FixedHeight = 0;
-        [SerializeField] private float m_MinWidth = 0;
-        [SerializeField] private float m_MinHeight = 0;
+        [SerializeField] private float m_FixedWidth;
+        [SerializeField] private float m_FixedHeight;
+        [SerializeField] private float m_MinWidth;
+        [SerializeField] private float m_MinHeight;
         [SerializeField] private string m_NumericFormatter = "";
         [SerializeField] private int m_PaddingLeftRight = 10;
         [SerializeField] private int m_PaddingTopBottom = 10;
-        [SerializeField] private bool m_IgnoreDataShow = false;
+        [SerializeField] private bool m_IgnoreDataShow;
         [SerializeField] private string m_IgnoreDataDefaultContent = "-";
         [SerializeField] private bool m_ShowContent = true;
-        [SerializeField] private bool m_AlwayShowContent = false;
-        [SerializeField] private Vector2 m_Offset = new Vector2(18f, -25f);
+        [SerializeField] private bool m_AlwayShowContent;
+        [SerializeField] private Vector2 m_Offset = new(18f, -25f);
         [SerializeField] private Sprite m_BackgroundImage;
         [SerializeField] private Image.Type m_BackgroundType = Image.Type.Simple;
         [SerializeField] private Color m_BackgroundColor;
         [SerializeField] private float m_BorderWidth = 2f;
-        [SerializeField] private float m_FixedX = 0f;
+        [SerializeField] private float m_FixedX;
         [SerializeField] private float m_FixedY = 0.7f;
         [SerializeField] private float m_TitleHeight = 25f;
         [SerializeField] private float m_ItemHeight = 25f;
-        [SerializeField] private Color32 m_BorderColor = new Color32(230, 230, 230, 255);
-        [SerializeField][Since("v3.14.0")] private List<float> m_ColumnGapWidths = new List<float>{15};
-        [SerializeField] private LineStyle m_LineStyle = new LineStyle(LineStyle.Type.None);
-        [SerializeField]
-        private LabelStyle m_TitleLabelStyle = new LabelStyle()
+        [SerializeField] private Color32 m_BorderColor = new(230, 230, 230, 255);
+        [SerializeField] [Since("v3.14.0")] private List<float> m_ColumnGapWidths = new() { 15 };
+        [SerializeField] private LineStyle m_LineStyle = new(LineStyle.Type.None);
+
+        [SerializeField] private LabelStyle m_TitleLabelStyle = new()
         {
-            textStyle = new TextStyle() { alignment = TextAnchor.MiddleLeft }
-        };
-        [SerializeField]
-        private List<LabelStyle> m_ContentLabelStyles = new List<LabelStyle>()
-        {
-            new LabelStyle() { textPadding = new TextPadding(0, 5, 0, 0), textStyle = new TextStyle() { alignment = TextAnchor.MiddleCenter } },
-            new LabelStyle() { textPadding = new TextPadding(0, 20, 0, 0), textStyle = new TextStyle() { alignment = TextAnchor.MiddleLeft } },
-            new LabelStyle() { textPadding = new TextPadding(0, 0, 0, 0), textStyle = new TextStyle() { alignment = TextAnchor.MiddleRight } }
+            textStyle = new TextStyle { alignment = TextAnchor.MiddleLeft }
         };
 
-        public TooltipContext context = new TooltipContext();
+        [SerializeField] private List<LabelStyle> m_ContentLabelStyles = new()
+        {
+            new LabelStyle
+            {
+                textPadding = new TextPadding(0, 5, 0, 0),
+                textStyle = new TextStyle { alignment = TextAnchor.MiddleCenter }
+            },
+            new LabelStyle
+            {
+                textPadding = new TextPadding(0, 20, 0, 0),
+                textStyle = new TextStyle { alignment = TextAnchor.MiddleLeft }
+            },
+            new LabelStyle
+            {
+                textPadding = new TextPadding(0, 0, 0, 0),
+                textStyle = new TextStyle { alignment = TextAnchor.MiddleRight }
+            }
+        };
+
+        public TooltipContext context = new();
+        private List<int> m_RuntimeDateIndex = new() { -1, -1 };
+
+        /// <summary>
+        ///     当前提示框所指示的Serie索引（目前只对散点图有效）。
+        /// </summary>
+        public Dictionary<int, List<int>> runtimeSerieIndex = new();
+
         public TooltipView view;
 
         /// <summary>
-        /// the callback of tooltip click index.
-        /// ||Tooltip为Click触发时，点击的X轴索引的回调。
+        ///     the callback of tooltip click index.
+        ///     ||Tooltip为Click触发时，点击的X轴索引的回调。
         /// </summary>
-        public System.Action<int> onClickIndex { get; set; }
+        public Action<int> onClickIndex { get; set; }
 
         /// <summary>
-        /// Whether to show the tooltip component.
-        /// ||是否显示提示框组件。
+        ///     Whether to show the tooltip component.
+        ///     ||是否显示提示框组件。
         /// </summary>
         public bool show
         {
-            get { return m_Show; }
-            set { if (PropertyUtil.SetStruct(ref m_Show, value)) { SetAllDirty(); SetActive(value); } }
+            get => m_Show;
+            set
+            {
+                if (PropertyUtil.SetStruct(ref m_Show, value))
+                {
+                    SetAllDirty();
+                    SetActive(value);
+                }
+            }
         }
+
         /// <summary>
-        /// Indicator type.
-        /// ||提示框指示器类型。
+        ///     Indicator type.
+        ///     ||提示框指示器类型。
         /// </summary>
         public Type type
         {
-            get { return m_Type; }
-            set { if (PropertyUtil.SetStruct(ref m_Type, value)) SetAllDirty(); }
+            get => m_Type;
+            set
+            {
+                if (PropertyUtil.SetStruct(ref m_Type, value)) SetAllDirty();
+            }
         }
+
         /// <summary>
-        /// Type of triggering.
-        /// ||触发类型。
+        ///     Type of triggering.
+        ///     ||触发类型。
         /// </summary>
         public Trigger trigger
         {
-            get { return m_Trigger; }
-            set { if (PropertyUtil.SetStruct(ref m_Trigger, value)) SetAllDirty(); }
+            get => m_Trigger;
+            set
+            {
+                if (PropertyUtil.SetStruct(ref m_Trigger, value)) SetAllDirty();
+            }
         }
+
         /// <summary>
-        /// Condition of trigger tooltip.
-        /// ||触发条件。
+        ///     Condition of trigger tooltip.
+        ///     ||触发条件。
         /// </summary>
         public TriggerOn triggerOn
         {
-            get { return m_TriggerOn; }
-            set { if (PropertyUtil.SetStruct(ref m_TriggerOn, value)) SetAllDirty(); }
+            get => m_TriggerOn;
+            set
+            {
+                if (PropertyUtil.SetStruct(ref m_TriggerOn, value)) SetAllDirty();
+            }
         }
+
         /// <summary>
-        /// Type of position.
-        /// ||显示位置类型。
+        ///     Type of position.
+        ///     ||显示位置类型。
         /// </summary>
         public Position position
         {
-            get { return m_Position; }
-            set { if (PropertyUtil.SetStruct(ref m_Position, value)) SetAllDirty(); }
+            get => m_Position;
+            set
+            {
+                if (PropertyUtil.SetStruct(ref m_Position, value)) SetAllDirty();
+            }
         }
+
         /// <summary>
-        /// String template formatter for tooltip title content. \n line wrapping is supported. The placeholder {i} can be set separately to indicate that title is ignored and not displayed.
-        /// Template variables are {.}, {a}, {b}, {c}, {d}, {e}, {f}, and {g}. <br />
-        /// {.} is the dot of the corresponding color of serie currently indicated or index 0. <br />
-        /// {a} is the series name name of serie currently indicated or index 0. <br />
-        /// {b} is the name of the serie data item serieData currently indicated or index 0, or the category value (such as the X-axis of a line chart). <br />
-        /// {c} is the value of the serie y-dimension (dimesion is 1) currently indicated or index is 0. <br />
-        /// {d} is the serie y-dimensional (dimesion 1) percentage value of the currently indicated or index 0, note without the % sign. <br />
-        /// {e} is the name of the serie data item serieData currently indicated or whose index is 0. <br />
-        /// {h} is the hexadecimal color value of serieData for the serie data item currently indicated or index 0. <br />
-        /// {f} is the sum of data. <br />
-        /// {g} indicates the total number of data. <br />
-        /// {y} is category value of y axis. <br />
-        /// {.1} represents a dot of the corresponding color with serie specified as index 1. <br />
-        /// The 1 in {a1}, {b1}, {c1} represents serie where index is specified as 1. <br />
-        /// {c1:2} represents the third data of the current indicator data item in serie with index 1 (one data item has multiple data, index 2 represents the third data). <br />
-        /// {c1:2-2} represents the third data of serie third data item with index 1 (that is, the number of data items must be specified when specifying the number of data items). <br />
-        /// {d1:2:f2} indicates that a format string with a single value is f2 (numericFormatter is used if no value is specified). <br />
-        /// {d:0.##} indicates that the format string with a value specified alone is 0.## # (for percentages, preserving a 2-digit significant number while avoiding the "100.00%" situation with f2). <br />
-        /// example: "{a}, {c}", "{a1}, {c1: f1}", "{a1}, {c1:0: f1}", "{a1}, {c1:1-1: f1}"
-        /// ||提示框标题内容的字符串模版格式器。支持用 \n 换行。可以单独设置占位符{i}表示忽略不显示title。
-        /// 模板变量有{.}、{a}、{b}、{c}、{d}、{e}、{f}、{g}。<br/>
-        /// {.}为当前所指示或index为0的serie的对应颜色的圆点。<br/>
-        /// {a}为当前所指示或index为0的serie的系列名name。<br/>
-        /// {b}为当前所指示或index为0的serie的数据项serieData的name，或者类目值（如折线图的X轴）。<br/>
-        /// {c}为当前所指示或index为0的serie的y维（dimesion为1）的数值。<br/>
-        /// {d}为当前所指示或index为0的serie的y维（dimesion为1）百分比值，注意不带%号。<br/>
-        /// {e}为当前所指示或index为0的serie的数据项serieData的name。<br/>
-        /// {h}为当前所指示或index为0的serie的数据项serieData的十六进制颜色值。<br/>
-        /// {f}为数据总和。<br/>
-        /// {g}为数据总个数。<br/>
-        /// {y}为value所对应的y轴的类目值。<br/>
-        /// {.1}表示指定index为1的serie对应颜色的圆点。<br/>
-        /// {a1}、{b1}、{c1}中的1表示指定index为1的serie。<br/>
-        /// {c1:2}表示索引为1的serie的当前指示数据项的第3个数据（一个数据项有多个数据，index为2表示第3个数据）。<br/>
-        /// {c1:2-2}表示索引为1的serie的第3个数据项的第3个数据（也就是要指定第几个数据项时必须要指定第几个数据）。<br/>
-        /// {d1:2:f2}表示单独指定了数值的格式化字符串为f2（不指定时用numericFormatter）。<br/>
-        /// {d:0.##} 表示单独指定了数值的格式化字符串为 0.## （用于百分比，保留2位有效数同时又能避免使用 f2 而出现的类似于"100.00%"的情况 ）。<br/>
-        /// 示例："{a}:{c}"、"{a1}:{c1:f1}"、"{a1}:{c1:0:f1}"、"{a1}:{c1:1-1:f1}"
+        ///     String template formatter for tooltip title content. \n line wrapping is supported. The placeholder {i} can be set
+        ///     separately to indicate that title is ignored and not displayed.
+        ///     Template variables are {.}, {a}, {b}, {c}, {d}, {e}, {f}, and {g}. <br />
+        ///     {.} is the dot of the corresponding color of serie currently indicated or index 0. <br />
+        ///     {a} is the series name name of serie currently indicated or index 0. <br />
+        ///     {b} is the name of the serie data item serieData currently indicated or index 0, or the category value (such as the
+        ///     X-axis of a line chart). <br />
+        ///     {c} is the value of the serie y-dimension (dimesion is 1) currently indicated or index is 0. <br />
+        ///     {d} is the serie y-dimensional (dimesion 1) percentage value of the currently indicated or index 0, note without
+        ///     the % sign. <br />
+        ///     {e} is the name of the serie data item serieData currently indicated or whose index is 0. <br />
+        ///     {h} is the hexadecimal color value of serieData for the serie data item currently indicated or index 0. <br />
+        ///     {f} is the sum of data. <br />
+        ///     {g} indicates the total number of data. <br />
+        ///     {y} is category value of y axis. <br />
+        ///     {.1} represents a dot of the corresponding color with serie specified as index 1. <br />
+        ///     The 1 in {a1}, {b1}, {c1} represents serie where index is specified as 1. <br />
+        ///     {c1:2} represents the third data of the current indicator data item in serie with index 1 (one data item has
+        ///     multiple data, index 2 represents the third data). <br />
+        ///     {c1:2-2} represents the third data of serie third data item with index 1 (that is, the number of data items must be
+        ///     specified when specifying the number of data items). <br />
+        ///     {d1:2:f2} indicates that a format string with a single value is f2 (numericFormatter is used if no value is
+        ///     specified). <br />
+        ///     {d:0.##} indicates that the format string with a value specified alone is 0.## # (for percentages, preserving a
+        ///     2-digit significant number while avoiding the "100.00%" situation with f2). <br />
+        ///     example: "{a}, {c}", "{a1}, {c1: f1}", "{a1}, {c1:0: f1}", "{a1}, {c1:1-1: f1}"
+        ///     ||提示框标题内容的字符串模版格式器。支持用 \n 换行。可以单独设置占位符{i}表示忽略不显示title。
+        ///     模板变量有{.}、{a}、{b}、{c}、{d}、{e}、{f}、{g}。<br />
+        ///     {.}为当前所指示或index为0的serie的对应颜色的圆点。<br />
+        ///     {a}为当前所指示或index为0的serie的系列名name。<br />
+        ///     {b}为当前所指示或index为0的serie的数据项serieData的name，或者类目值（如折线图的X轴）。<br />
+        ///     {c}为当前所指示或index为0的serie的y维（dimesion为1）的数值。<br />
+        ///     {d}为当前所指示或index为0的serie的y维（dimesion为1）百分比值，注意不带%号。<br />
+        ///     {e}为当前所指示或index为0的serie的数据项serieData的name。<br />
+        ///     {h}为当前所指示或index为0的serie的数据项serieData的十六进制颜色值。<br />
+        ///     {f}为数据总和。<br />
+        ///     {g}为数据总个数。<br />
+        ///     {y}为value所对应的y轴的类目值。<br />
+        ///     {.1}表示指定index为1的serie对应颜色的圆点。<br />
+        ///     {a1}、{b1}、{c1}中的1表示指定index为1的serie。<br />
+        ///     {c1:2}表示索引为1的serie的当前指示数据项的第3个数据（一个数据项有多个数据，index为2表示第3个数据）。<br />
+        ///     {c1:2-2}表示索引为1的serie的第3个数据项的第3个数据（也就是要指定第几个数据项时必须要指定第几个数据）。<br />
+        ///     {d1:2:f2}表示单独指定了数值的格式化字符串为f2（不指定时用numericFormatter）。<br />
+        ///     {d:0.##} 表示单独指定了数值的格式化字符串为 0.## （用于百分比，保留2位有效数同时又能避免使用 f2 而出现的类似于"100.00%"的情况 ）。<br />
+        ///     示例："{a}:{c}"、"{a1}:{c1:f1}"、"{a1}:{c1:0:f1}"、"{a1}:{c1:1-1:f1}"
         /// </summary>
-        public string titleFormatter { get { return m_TitleFormatter; } set { m_TitleFormatter = value; } }
+        public string titleFormatter
+        {
+            get => m_TitleFormatter;
+            set => m_TitleFormatter = value;
+        }
+
         /// <summary>
-        /// a string template formatter for a single Serie or data item content. Support for wrapping lines with \n.
-        /// Template variables are {.}, {a}, {b}, {c}, {d}.<br/>
-        /// {.} is the dot of the corresponding color of a Serie that is currently indicated or whose index is 0.<br/>
-        /// {a} is the series name of the serie that is currently indicated or whose index is 0.<br/>
-        /// {b} is the name of the data item serieData that is currently indicated or whose index is 0, or a category value (such as the X-axis of a line chart).<br/>
-        /// {c} is the value of a Y-dimension (dimesion is 1) from a Serie that is currently indicated or whose index is 0.<br/>
-        /// {d} is the percentage value of Y-dimensions (dimesion is 1) from serie that is currently indicated or whose index is 0, with no % sign.<br/>
-        /// {e} is the name of the data item serieData that is currently indicated or whose index is 0.<br/>
-        /// {f} is sum of data.<br/>
-        /// {y} is category value of y axis.<br/>
-        /// {.1} represents a dot from serie corresponding color that specifies index as 1.<br/>
-        /// 1 in {a1}, {b1}, {c1} represents a serie that specifies an index of 1.<br/>
-        /// {c1:2} represents the third data from serie's current indication data item indexed to 1 (a data item has multiple data, index 2 represents the third data).<br/>
-        /// {c1:2-2} represents the third data item from serie's third data item indexed to 1 (i.e., which data item must be specified to specify).<br/>
-        /// {d1:2: F2} indicates that a formatted string with a value specified separately is F2 (numericFormatter is used when numericFormatter is not specified).<br/>
-        /// {d:0.##} indicates that a formatted string with a value specified separately is 0.##   (used for percentage, reserved 2 valid digits while avoiding the situation similar to "100.00%" when using f2 ).<br/>
-        /// Example: "{a}, {c}", "{a1}, {c1: f1}", "{a1}, {c1:0: f1}", "{a1} : {c1:1-1: f1}"<br/>
-        /// ||提示框单个serie或数据项内容的字符串模版格式器。支持用 \n 换行。用|来表示多个列的分隔。
-        /// 模板变量有{.}、{a}、{b}、{c}、{d}、{e}、{f}、{g}。<br/>
-        /// {i}或-表示忽略当前项。
-        /// {.}为当前所指示的serie或数据项的对应颜色的圆点。<br/>
-        /// {a}为当前所指示的serie或数据项的系列名name。<br/>
-        /// {b}为当前所指示的serie或数据项的数据项serieData的name，或者类目值（如折线图的X轴）。<br/>
-        /// {c}为当前所指示的serie或数据项的y维（dimesion为1）的数值。<br/>
-        /// {d}为当前所指示的serie或数据项的y维（dimesion为1）百分比值，注意不带%号。<br/>
-        /// {e}为当前所指示的serie或数据项的数据项serieData的name。<br/>
-        /// {f}为当前所指示的serie的默认维度的数据总和。<br/>
-        /// {g}为当前所指示的serie的数据总个数。<br/>
-        /// {h}为当前所指示的serie的十六进制颜色值。<br/>
-        /// {y}为当前所指示的serie的y轴的类目值。<br/>
-        /// {c0}表示当前数据项维度为0的数据。<br/>
-        /// {c1}表示当前数据项维度为1的数据。<br/>
-        /// {d3}表示维度3的数据的百分比。它的分母是默认维度（一般是1维度）数据。<br/>
-        /// |表示多个列的分隔。<br/>
-        /// 示例："{i}", "{.}|{a}|{c}", "{.}|{b}|{c2:f2}", "{.}|{b}|{y}"
+        ///     a string template formatter for a single Serie or data item content. Support for wrapping lines with \n.
+        ///     Template variables are {.}, {a}, {b}, {c}, {d}.<br />
+        ///     {.} is the dot of the corresponding color of a Serie that is currently indicated or whose index is 0.<br />
+        ///     {a} is the series name of the serie that is currently indicated or whose index is 0.<br />
+        ///     {b} is the name of the data item serieData that is currently indicated or whose index is 0, or a category value
+        ///     (such as the X-axis of a line chart).<br />
+        ///     {c} is the value of a Y-dimension (dimesion is 1) from a Serie that is currently indicated or whose index is 0.
+        ///     <br />
+        ///     {d} is the percentage value of Y-dimensions (dimesion is 1) from serie that is currently indicated or whose index
+        ///     is 0, with no % sign.<br />
+        ///     {e} is the name of the data item serieData that is currently indicated or whose index is 0.<br />
+        ///     {f} is sum of data.<br />
+        ///     {y} is category value of y axis.<br />
+        ///     {.1} represents a dot from serie corresponding color that specifies index as 1.<br />
+        ///     1 in {a1}, {b1}, {c1} represents a serie that specifies an index of 1.<br />
+        ///     {c1:2} represents the third data from serie's current indication data item indexed to 1 (a data item has multiple
+        ///     data, index 2 represents the third data).<br />
+        ///     {c1:2-2} represents the third data item from serie's third data item indexed to 1 (i.e., which data item must be
+        ///     specified to specify).<br />
+        ///     {d1:2: F2} indicates that a formatted string with a value specified separately is F2 (numericFormatter is used when
+        ///     numericFormatter is not specified).<br />
+        ///     {d:0.##} indicates that a formatted string with a value specified separately is 0.##   (used for percentage,
+        ///     reserved 2 valid digits while avoiding the situation similar to "100.00%" when using f2 ).<br />
+        ///     Example: "{a}, {c}", "{a1}, {c1: f1}", "{a1}, {c1:0: f1}", "{a1} : {c1:1-1: f1}"<br />
+        ///     ||提示框单个serie或数据项内容的字符串模版格式器。支持用 \n 换行。用|来表示多个列的分隔。
+        ///     模板变量有{.}、{a}、{b}、{c}、{d}、{e}、{f}、{g}。<br />
+        ///     {i}或-表示忽略当前项。
+        ///     {.}为当前所指示的serie或数据项的对应颜色的圆点。<br />
+        ///     {a}为当前所指示的serie或数据项的系列名name。<br />
+        ///     {b}为当前所指示的serie或数据项的数据项serieData的name，或者类目值（如折线图的X轴）。<br />
+        ///     {c}为当前所指示的serie或数据项的y维（dimesion为1）的数值。<br />
+        ///     {d}为当前所指示的serie或数据项的y维（dimesion为1）百分比值，注意不带%号。<br />
+        ///     {e}为当前所指示的serie或数据项的数据项serieData的name。<br />
+        ///     {f}为当前所指示的serie的默认维度的数据总和。<br />
+        ///     {g}为当前所指示的serie的数据总个数。<br />
+        ///     {h}为当前所指示的serie的十六进制颜色值。<br />
+        ///     {y}为当前所指示的serie的y轴的类目值。<br />
+        ///     {c0}表示当前数据项维度为0的数据。<br />
+        ///     {c1}表示当前数据项维度为1的数据。<br />
+        ///     {d3}表示维度3的数据的百分比。它的分母是默认维度（一般是1维度）数据。<br />
+        ///     |表示多个列的分隔。<br />
+        ///     示例："{i}", "{.}|{a}|{c}", "{.}|{b}|{c2:f2}", "{.}|{b}|{y}"
         /// </summary>
-        public string itemFormatter { get { return m_ItemFormatter; } set { m_ItemFormatter = value; } }
+        public string itemFormatter
+        {
+            get => m_ItemFormatter;
+            set => m_ItemFormatter = value;
+        }
+
         /// <summary>
-        /// Standard number and date format string. Used to format a Double value or a DateTime date as a string. 
-        /// numericFormatter is used as an argument to either `Double.ToString ()` or `DateTime.ToString()`. <br />
-        /// The number format uses the Axx format: A is a single-character format specifier that supports C currency, 
-        /// D decimal, E exponent, F fixed-point number, G regular, N digit, P percentage, R round trip, and X hexadecimal. 
-        /// xx is precision specification, from 0-99. E.g. F1, E2<br />
-        /// Date format: Starts with `date`, which is used to format DateTime. Common date formats are: 
-        /// yyyy year, MM month, dd day, HH hour, mm minute, ss second, fff millisecond. For example: date:yyyy-MM-dd HH:mm:ss<br />
-        /// Time format: Starts with `time`, which is used to format TimeSpan. Common time formats are: 
-        /// d day, HH hour, mm minute, ss second, fffffff fractional part. 
-        /// Only the version of Unity2018 or later can support formatting, and the characters inside should be escaped.
-        /// For example: time:HH\:mm\:ss<br />
-        /// number format reference: https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-numeric-format-strings<br/>
-        /// date format reference: https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-numeric-format-strings<br/>
-        /// Note: The date and time formats are only supported by 'v3.12.0' or later.<br/>
-        /// ||标准数字和日期格式字符串。用于将Double数值或DateTime日期格式化显示为字符串。numericFormatter用来作为Double.ToString()或DateTime.ToString()的参数。<br/>
-        /// 数字格式使用Axx的形式：A是格式说明符的单字符，支持C货币、D十进制、E指数、F定点数、G常规、N数字、P百分比、R往返、X十六进制的。xx是精度说明，从0-99。如：F1, E2<br/>
-        /// 日期格式：以`date`开头，用来格式化DateTime，常见格式有：yyyy年，MM月，dd日，HH时，mm分，ss秒，fff毫秒。如：date:yyyy-MM-dd HH:mm:ss<br/>
-        /// 时间格式：以`time`开头，用来格式化TimeSpan，常见格式有：d日，HH时，mm分，ss秒，fffffff小数部分。
-        /// 需要Unity2018以上版本才支持格式化，并且里面的字符要转义。如：time:d\.HH\:mm\:ss<br/>
-        /// 数值格式化参考：https://docs.microsoft.com/zh-cn/dotnet/standard/base-types/standard-numeric-format-strings <br/>
-        /// 日期格式化参考：https://learn.microsoft.com/zh-cn/dotnet/standard/base-types/standard-date-and-time-format-strings <br/>
-        /// 时间格式化参考：https://learn.microsoft.com/zh-cn/dotnet/standard/base-types/standard-timespan-format-strings <br/>
-        /// 注意：date和time格式需要`v3.12.0`以上版本才支持。
+        ///     Standard number and date format string. Used to format a Double value or a DateTime date as a string.
+        ///     numericFormatter is used as an argument to either `Double.ToString ()` or `DateTime.ToString()`. <br />
+        ///     The number format uses the Axx format: A is a single-character format specifier that supports C currency,
+        ///     D decimal, E exponent, F fixed-point number, G regular, N digit, P percentage, R round trip, and X hexadecimal.
+        ///     xx is precision specification, from 0-99. E.g. F1, E2<br />
+        ///     Date format: Starts with `date`, which is used to format DateTime. Common date formats are:
+        ///     yyyy year, MM month, dd day, HH hour, mm minute, ss second, fff millisecond. For example: date:yyyy-MM-dd HH:mm:ss
+        ///     <br />
+        ///     Time format: Starts with `time`, which is used to format TimeSpan. Common time formats are:
+        ///     d day, HH hour, mm minute, ss second, fffffff fractional part.
+        ///     Only the version of Unity2018 or later can support formatting, and the characters inside should be escaped.
+        ///     For example: time:HH\:mm\:ss<br />
+        ///     number format reference:
+        ///     https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-numeric-format-strings<br />
+        ///     date format reference: https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-numeric-format-strings
+        ///     <br />
+        ///     Note: The date and time formats are only supported by 'v3.12.0' or later.<br />
+        ///     ||标准数字和日期格式字符串。用于将Double数值或DateTime日期格式化显示为字符串。numericFormatter用来作为Double.ToString()或DateTime.ToString()的参数。<br />
+        ///     数字格式使用Axx的形式：A是格式说明符的单字符，支持C货币、D十进制、E指数、F定点数、G常规、N数字、P百分比、R往返、X十六进制的。xx是精度说明，从0-99。如：F1, E2<br />
+        ///     日期格式：以`date`开头，用来格式化DateTime，常见格式有：yyyy年，MM月，dd日，HH时，mm分，ss秒，fff毫秒。如：date:yyyy-MM-dd HH:mm:ss<br />
+        ///     时间格式：以`time`开头，用来格式化TimeSpan，常见格式有：d日，HH时，mm分，ss秒，fffffff小数部分。
+        ///     需要Unity2018以上版本才支持格式化，并且里面的字符要转义。如：time:d\.HH\:mm\:ss<br />
+        ///     数值格式化参考：https://docs.microsoft.com/zh-cn/dotnet/standard/base-types/standard-numeric-format-strings <br />
+        ///     日期格式化参考：https://learn.microsoft.com/zh-cn/dotnet/standard/base-types/standard-date-and-time-format-strings <br />
+        ///     时间格式化参考：https://learn.microsoft.com/zh-cn/dotnet/standard/base-types/standard-timespan-format-strings <br />
+        ///     注意：date和time格式需要`v3.12.0`以上版本才支持。
         /// </summary>
         public string numericFormatter
         {
-            get { return m_NumericFormatter; }
-            set { if (PropertyUtil.SetClass(ref m_NumericFormatter, value)) SetComponentDirty(); }
+            get => m_NumericFormatter;
+            set
+            {
+                if (PropertyUtil.SetClass(ref m_NumericFormatter, value)) SetComponentDirty();
+            }
         }
+
         /// <summary>
-        /// the marker of serie.
-        /// ||serie的符号标志。
+        ///     the marker of serie.
+        ///     ||serie的符号标志。
         /// </summary>
-        public string marker { get { return m_Marker; } set { m_Marker = value; } }
+        public string marker
+        {
+            get => m_Marker;
+            set => m_Marker = value;
+        }
+
         /// <summary>
-        /// Fixed width. Higher priority than minWidth.
-        /// ||固定宽度。比 minWidth 优先。
+        ///     Fixed width. Higher priority than minWidth.
+        ///     ||固定宽度。比 minWidth 优先。
         /// </summary>
-        public float fixedWidth { get { return m_FixedWidth; } set { m_FixedWidth = value; } }
+        public float fixedWidth
+        {
+            get => m_FixedWidth;
+            set => m_FixedWidth = value;
+        }
+
         /// <summary>
-        /// Fixed height. Higher priority than minHeight.
-        /// ||固定高度。比 minHeight 优先。
+        ///     Fixed height. Higher priority than minHeight.
+        ///     ||固定高度。比 minHeight 优先。
         /// </summary>
-        public float fixedHeight { get { return m_FixedHeight; } set { m_FixedHeight = value; } }
+        public float fixedHeight
+        {
+            get => m_FixedHeight;
+            set => m_FixedHeight = value;
+        }
+
         /// <summary>
-        /// Minimum width. If fixedWidth has a value, get fixedWidth first.
-        /// ||最小宽度。如若 fixedWidth 设有值，优先取 fixedWidth。
+        ///     Minimum width. If fixedWidth has a value, get fixedWidth first.
+        ///     ||最小宽度。如若 fixedWidth 设有值，优先取 fixedWidth。
         /// </summary>
-        public float minWidth { get { return m_MinWidth; } set { m_MinWidth = value; } }
+        public float minWidth
+        {
+            get => m_MinWidth;
+            set => m_MinWidth = value;
+        }
+
         /// <summary>
-        /// Minimum height. If fixedHeight has a value, take priority over fixedHeight.
-        /// ||最小高度。如若 fixedHeight 设有值，优先取 fixedHeight。
+        ///     Minimum height. If fixedHeight has a value, take priority over fixedHeight.
+        ///     ||最小高度。如若 fixedHeight 设有值，优先取 fixedHeight。
         /// </summary>
-        public float minHeight { get { return m_MinHeight; } set { m_MinHeight = value; } }
+        public float minHeight
+        {
+            get => m_MinHeight;
+            set => m_MinHeight = value;
+        }
+
         /// <summary>
-        /// the text padding of left and right. defaut:5.
-        /// ||左右边距。
+        ///     the text padding of left and right. defaut:5.
+        ///     ||左右边距。
         /// </summary>
-        public int paddingLeftRight { get { return m_PaddingLeftRight; } set { m_PaddingLeftRight = value; } }
+        public int paddingLeftRight
+        {
+            get => m_PaddingLeftRight;
+            set => m_PaddingLeftRight = value;
+        }
+
         /// <summary>
-        /// the text padding of top and bottom. defaut:5.
-        /// ||上下边距。
+        ///     the text padding of top and bottom. defaut:5.
+        ///     ||上下边距。
         /// </summary>
-        public int paddingTopBottom { get { return m_PaddingTopBottom; } set { m_PaddingTopBottom = value; } }
+        public int paddingTopBottom
+        {
+            get => m_PaddingTopBottom;
+            set => m_PaddingTopBottom = value;
+        }
+
         /// <summary>
-        /// Whether to show ignored data on tooltip.
-        /// ||是否显示忽略数据在tooltip上。
+        ///     Whether to show ignored data on tooltip.
+        ///     ||是否显示忽略数据在tooltip上。
         /// </summary>
-        public bool ignoreDataShow { get { return m_IgnoreDataShow; } set { m_IgnoreDataShow = value; } }
+        public bool ignoreDataShow
+        {
+            get => m_IgnoreDataShow;
+            set => m_IgnoreDataShow = value;
+        }
+
         /// <summary>
-        /// The default display character information for ignored data.
-        /// ||被忽略数据的默认显示字符信息。如果设置为空，则表示完全不显示忽略数据。
+        ///     The default display character information for ignored data.
+        ///     ||被忽略数据的默认显示字符信息。如果设置为空，则表示完全不显示忽略数据。
         /// </summary>
-        public string ignoreDataDefaultContent { get { return m_IgnoreDataDefaultContent; } set { m_IgnoreDataDefaultContent = value; } }
+        public string ignoreDataDefaultContent
+        {
+            get => m_IgnoreDataDefaultContent;
+            set => m_IgnoreDataDefaultContent = value;
+        }
+
         /// <summary>
-        /// The background image of tooltip.
-        /// ||提示框的背景图片。
+        ///     The background image of tooltip.
+        ///     ||提示框的背景图片。
         /// </summary>
-        public Sprite backgroundImage { get { return m_BackgroundImage; } set { m_BackgroundImage = value; SetComponentDirty(); } }
+        public Sprite backgroundImage
+        {
+            get => m_BackgroundImage;
+            set
+            {
+                m_BackgroundImage = value;
+                SetComponentDirty();
+            }
+        }
+
         /// <summary>
-        /// The background type of tooltip.
-        /// ||提示框的背景图片显示类型。
+        ///     The background type of tooltip.
+        ///     ||提示框的背景图片显示类型。
         /// </summary>
-        public Image.Type backgroundType { get { return m_BackgroundType; } set { m_BackgroundType = value; SetComponentDirty(); } }
+        public Image.Type backgroundType
+        {
+            get => m_BackgroundType;
+            set
+            {
+                m_BackgroundType = value;
+                SetComponentDirty();
+            }
+        }
+
         /// <summary>
-        /// The background color of tooltip.
-        /// ||提示框的背景颜色。
+        ///     The background color of tooltip.
+        ///     ||提示框的背景颜色。
         /// </summary>
-        public Color backgroundColor { get { return m_BackgroundColor; } set { m_BackgroundColor = value; SetComponentDirty(); } }
+        public Color backgroundColor
+        {
+            get => m_BackgroundColor;
+            set
+            {
+                m_BackgroundColor = value;
+                SetComponentDirty();
+            }
+        }
+
         /// <summary>
-        /// Whether to trigger after always display.
-        /// ||是否触发后一直显示提示框浮层。
+        ///     Whether to trigger after always display.
+        ///     ||是否触发后一直显示提示框浮层。
         /// </summary>
-        public bool alwayShowContent { get { return m_AlwayShowContent; } set { m_AlwayShowContent = value; } }
+        public bool alwayShowContent
+        {
+            get => m_AlwayShowContent;
+            set => m_AlwayShowContent = value;
+        }
+
         /// <summary>
-        /// Whether to show the tooltip floating layer, whose default value is true.
-        /// It should be configurated to be false, if you only need tooltip to trigger the event or show the axisPointer without content.
-        /// ||是否显示提示框浮层，默认显示。只需tooltip触发事件或显示axisPointer而不需要显示内容时可配置该项为false。
+        ///     Whether to show the tooltip floating layer, whose default value is true.
+        ///     It should be configurated to be false, if you only need tooltip to trigger the event or show the axisPointer
+        ///     without content.
+        ///     ||是否显示提示框浮层，默认显示。只需tooltip触发事件或显示axisPointer而不需要显示内容时可配置该项为false。
         /// </summary>
-        public bool showContent { get { return m_ShowContent; } set { m_ShowContent = value; } }
+        public bool showContent
+        {
+            get => m_ShowContent;
+            set => m_ShowContent = value;
+        }
+
         /// <summary>
-        /// The position offset of tooltip relative to the mouse position.
-        /// ||提示框相对于鼠标位置的偏移。
+        ///     The position offset of tooltip relative to the mouse position.
+        ///     ||提示框相对于鼠标位置的偏移。
         /// </summary>
-        public Vector2 offset { get { return m_Offset; } set { m_Offset = value; } }
+        public Vector2 offset
+        {
+            get => m_Offset;
+            set => m_Offset = value;
+        }
+
         /// <summary>
-        /// the width of tooltip border.
-        /// ||边框线宽。
+        ///     the width of tooltip border.
+        ///     ||边框线宽。
         /// </summary>
         public float borderWidth
         {
-            get { return m_BorderWidth; }
-            set { if (PropertyUtil.SetStruct(ref m_BorderWidth, value)) SetVerticesDirty(); }
+            get => m_BorderWidth;
+            set
+            {
+                if (PropertyUtil.SetStruct(ref m_BorderWidth, value)) SetVerticesDirty();
+            }
         }
+
         /// <summary>
-        /// the color of tooltip border.
-        /// ||边框颜色。
+        ///     the color of tooltip border.
+        ///     ||边框颜色。
         /// </summary>
         public Color32 borderColor
         {
-            get { return m_BorderColor; }
-            set { if (PropertyUtil.SetColor(ref m_BorderColor, value)) SetVerticesDirty(); }
+            get => m_BorderColor;
+            set
+            {
+                if (PropertyUtil.SetColor(ref m_BorderColor, value)) SetVerticesDirty();
+            }
         }
+
         /// <summary>
-        /// the x positionn of fixedX.
-        /// ||固定X位置的坐标。
+        ///     the x positionn of fixedX.
+        ///     ||固定X位置的坐标。
         /// </summary>
         public float fixedX
         {
-            get { return m_FixedX; }
-            set { if (PropertyUtil.SetStruct(ref m_FixedX, value)) SetVerticesDirty(); }
+            get => m_FixedX;
+            set
+            {
+                if (PropertyUtil.SetStruct(ref m_FixedX, value)) SetVerticesDirty();
+            }
         }
+
         /// <summary>
-        /// the y position of fixedY.
-        /// ||固定Y位置的坐标。
+        ///     the y position of fixedY.
+        ///     ||固定Y位置的坐标。
         /// </summary>
         public float fixedY
         {
-            get { return m_FixedY; }
-            set { if (PropertyUtil.SetStruct(ref m_FixedY, value)) SetVerticesDirty(); }
+            get => m_FixedY;
+            set
+            {
+                if (PropertyUtil.SetStruct(ref m_FixedY, value)) SetVerticesDirty();
+            }
         }
+
         /// <summary>
-        /// height of title text.
-        /// ||标题文本的高。
+        ///     height of title text.
+        ///     ||标题文本的高。
         /// </summary>
         public float titleHeight
         {
-            get { return m_TitleHeight; }
-            set { if (PropertyUtil.SetStruct(ref m_TitleHeight, value)) SetComponentDirty(); }
+            get => m_TitleHeight;
+            set
+            {
+                if (PropertyUtil.SetStruct(ref m_TitleHeight, value)) SetComponentDirty();
+            }
         }
+
         /// <summary>
-        /// height of content text.
-        /// ||数据项文本的高。
+        ///     height of content text.
+        ///     ||数据项文本的高。
         /// </summary>
         public float itemHeight
         {
-            get { return m_ItemHeight; }
-            set { if (PropertyUtil.SetStruct(ref m_ItemHeight, value)) SetComponentDirty(); }
+            get => m_ItemHeight;
+            set
+            {
+                if (PropertyUtil.SetStruct(ref m_ItemHeight, value)) SetComponentDirty();
+            }
         }
+
         /// <summary>
-        /// the column gap width of content. When there is only one column, it only represents the gap width of the second column.
-        /// ||内容部分的列间距。当只有一列时，只表示第二列的间距。
+        ///     the column gap width of content. When there is only one column, it only represents the gap width of the second
+        ///     column.
+        ///     ||内容部分的列间距。当只有一列时，只表示第二列的间距。
         /// </summary>
         public List<float> columnGapWidths
         {
-            get { return m_ColumnGapWidths; }
-            set { if (value != null) { m_ColumnGapWidths = value; SetComponentDirty(); } }
+            get => m_ColumnGapWidths;
+            set
+            {
+                if (value != null)
+                {
+                    m_ColumnGapWidths = value;
+                    SetComponentDirty();
+                }
+            }
         }
+
         /// <summary>
-        /// the textstyle of title.
-        /// ||标题的文本样式。
+        ///     the textstyle of title.
+        ///     ||标题的文本样式。
         /// </summary>
         public LabelStyle titleLabelStyle
         {
-            get { return m_TitleLabelStyle; }
-            set { if (value != null) { m_TitleLabelStyle = value; SetComponentDirty(); } }
+            get => m_TitleLabelStyle;
+            set
+            {
+                if (value != null)
+                {
+                    m_TitleLabelStyle = value;
+                    SetComponentDirty();
+                }
+            }
         }
+
         /// <summary>
-        /// the column text style list of content. The first represents the text style of the first column, and so on.
-        /// ||内容部分的列文本样式列表。第一个表示第一列的文本样式，以此类推。
+        ///     the column text style list of content. The first represents the text style of the first column, and so on.
+        ///     ||内容部分的列文本样式列表。第一个表示第一列的文本样式，以此类推。
         /// </summary>
         public List<LabelStyle> contentLabelStyles
         {
-            get { return m_ContentLabelStyles; }
-            set { if (value != null) { m_ContentLabelStyles = value; SetComponentDirty(); } }
+            get => m_ContentLabelStyles;
+            set
+            {
+                if (value != null)
+                {
+                    m_ContentLabelStyles = value;
+                    SetComponentDirty();
+                }
+            }
         }
 
         /// <summary>
-        /// the line style of indicator line.
-        /// ||指示线样式。
+        ///     the line style of indicator line.
+        ///     ||指示线样式。
         /// </summary>
         public LineStyle lineStyle
         {
-            get { return m_LineStyle; }
-            set { if (value != null) m_LineStyle = value; SetComponentDirty(); }
+            get => m_LineStyle;
+            set
+            {
+                if (value != null) m_LineStyle = value;
+                SetComponentDirty();
+            }
         }
 
         /// <summary>
-        /// 组件是否需要刷新
+        ///     组件是否需要刷新
         /// </summary>
-        public override bool componentDirty
+        public override bool componentDirty => m_ComponentDirty || lineStyle.componentDirty;
+
+        /// <summary>
+        ///     The data index currently indicated by Tooltip.
+        ///     ||当前提示框所指示的数据项索引。
+        /// </summary>
+        public List<int> runtimeDataIndex
         {
-            get { return m_ComponentDirty || lineStyle.componentDirty; }
+            get => m_RuntimeDateIndex;
+            internal set => m_RuntimeDateIndex = value;
         }
 
         public override void ClearComponentDirty()
@@ -504,20 +740,10 @@ namespace XCharts.Runtime
             base.ClearComponentDirty();
             lineStyle.ClearComponentDirty();
         }
-        /// <summary>
-        /// 当前提示框所指示的Serie索引（目前只对散点图有效）。
-        /// </summary>
-        public Dictionary<int, List<int>> runtimeSerieIndex = new Dictionary<int, List<int>>();
-        /// <summary>
-        /// The data index currently indicated by Tooltip.
-        /// ||当前提示框所指示的数据项索引。
-        /// </summary>
-        public List<int> runtimeDataIndex { get { return m_RuntimeDateIndex; } internal set { m_RuntimeDateIndex = value; } }
-        private List<int> m_RuntimeDateIndex = new List<int>() { -1, -1 };
 
         /// <summary>
-        /// Keep Tooltiop displayed at the top.
-        /// ||保持Tooltiop显示在最顶上
+        ///     Keep Tooltiop displayed at the top.
+        ///     ||保持Tooltiop显示在最顶上
         /// </summary>
         public void KeepTop()
         {
@@ -530,15 +756,15 @@ namespace XCharts.Runtime
         }
 
         /// <summary>
-        /// 清除提示框指示数据
+        ///     清除提示框指示数据
         /// </summary>
         internal void ClearValue()
         {
-            for (int i = 0; i < runtimeDataIndex.Count; i++) runtimeDataIndex[i] = -1;
+            for (var i = 0; i < runtimeDataIndex.Count; i++) runtimeDataIndex[i] = -1;
         }
 
         /// <summary>
-        /// 提示框是否显示
+        ///     提示框是否显示
         /// </summary>
         /// <returns></returns>
         public bool IsActive()
@@ -547,20 +773,18 @@ namespace XCharts.Runtime
         }
 
         /// <summary>
-        /// 设置Tooltip组件是否显示
+        ///     设置Tooltip组件是否显示
         /// </summary>
         /// <param name="flag"></param>
         public void SetActive(bool flag)
         {
             if (gameObject && gameObject.activeInHierarchy != flag)
-            {
                 gameObject.SetActive(alwayShowContent ? true : flag);
-            }
             SetContentActive(flag);
         }
 
         /// <summary>
-        /// 设置文本框是否显示
+        ///     设置文本框是否显示
         /// </summary>
         /// <param name="flag"></param>
         public void SetContentActive(bool flag)
@@ -572,51 +796,46 @@ namespace XCharts.Runtime
         }
 
         /// <summary>
-        /// 当前提示框是否选中数据项
+        ///     当前提示框是否选中数据项
         /// </summary>
         /// <returns></returns>
         public bool IsSelected()
         {
             foreach (var index in runtimeDataIndex)
-                if (index >= 0) return true;
+                if (index >= 0)
+                    return true;
             return false;
         }
 
         /// <summary>
-        /// 指定索引的数据项是否被提示框选中
+        ///     指定索引的数据项是否被提示框选中
         /// </summary>
         /// <param name="index"></param>
         /// <returns></returns>
         public bool IsSelected(int index)
         {
             foreach (var temp in runtimeDataIndex)
-                if (temp == index) return true;
+                if (temp == index)
+                    return true;
             return false;
         }
 
         public void ClearSerieDataIndex()
         {
-            foreach (var kv in runtimeSerieIndex)
-            {
-                kv.Value.Clear();
-            }
+            foreach (var kv in runtimeSerieIndex) kv.Value.Clear();
         }
 
         public void AddSerieDataIndex(int serieIndex, int dataIndex)
         {
-            if (!runtimeSerieIndex.ContainsKey(serieIndex))
-            {
-                runtimeSerieIndex[serieIndex] = new List<int>();
-            }
+            if (!runtimeSerieIndex.ContainsKey(serieIndex)) runtimeSerieIndex[serieIndex] = new List<int>();
             runtimeSerieIndex[serieIndex].Add(dataIndex);
         }
 
         public bool isAnySerieDataIndex()
         {
             foreach (var kv in runtimeSerieIndex)
-            {
-                if (kv.Value.Count > 0) return true;
-            }
+                if (kv.Value.Count > 0)
+                    return true;
             return false;
         }
 

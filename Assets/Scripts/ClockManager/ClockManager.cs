@@ -1,62 +1,53 @@
 using TMPro;
-using UnityEditor;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.UI;
 
-
 public class ClockManager : MonoBehaviour
 {
+    private const float SECONDS_IN_DAY = 86400f;
+    private const int WEEKLY_PAUSE = 7;
+    private const int MONTHLY_PAUSE = 30;
     [SerializeField] private TMP_Text clock;
     public float elapsedTime;
     [SerializeField] private Slider slider;
     [SerializeField] private PausePlay pausePlay;
-    [SerializeField] private ToggleManager  UpdateCycle;
+    [SerializeField] private ToggleManager UpdateCycle;
 
     public bool fromLoad;
-    
-    private float multiplier = 1.0f;
     public PopCounter popCounter;
-    
-    
-    private const float SECONDS_IN_DAY = 86400f;
-    public int day = 0;
-    private int week = 0;
-    private int month = 0;
-    private bool newWeek;
-    private bool newMonth;
+    public int day;
 
 
     private int? intervalPauseAuto;
-    const int WEEKLY_PAUSE = 7;
-    const int MONTHLY_PAUSE = 30;
+    private bool isWeekly;
+    private int month;
+    private string monthInfo;
+
+    private float multiplier = 1.0f;
+    private bool newMonth;
+    private bool newWeek;
+    private int week;
 
     private string weeklyInfo;
-    private string monthInfo;
-    private bool isWeekly;
-        
+
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    private void Start()
     {
-        if (fromLoad)
-        {
-            elapsedTime = day * SECONDS_IN_DAY;
-        }
+        if (fromLoad) elapsedTime = day * SECONDS_IN_DAY;
     }
 
     // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        elapsedTime += Time.deltaTime *  multiplier;
-     
-        UpdateClockUI();
+        elapsedTime += Time.deltaTime * multiplier;
 
+        UpdateClockUI();
     }
 
-    void UpdateClockUI()
+    private void UpdateClockUI()
     {
-        int days = Mathf.FloorToInt(elapsedTime / SECONDS_IN_DAY);
+        var days = Mathf.FloorToInt(elapsedTime / SECONDS_IN_DAY);
         if (days > day)
         {
             day = days;
@@ -69,9 +60,8 @@ public class ClockManager : MonoBehaviour
             {
                 week++;
                 newWeek = true;
-              
-             
-             
+
+
                 if (intervalPauseAuto == WEEKLY_PAUSE)
                 {
                     isWeekly = true;
@@ -81,18 +71,19 @@ public class ClockManager : MonoBehaviour
                 {
                     isWeekly = false;
                 }
+
                 popCounter.NouvelleSemaine(isWeekly);
-                
-
-
             }
-            else newWeek = false;
-            
+            else
+            {
+                newWeek = false;
+            }
+
             if (days % 30 == 0 && days / 30 != month)
             {
                 month++;
                 newMonth = true;
-                
+
                 if (intervalPauseAuto == MONTHLY_PAUSE)
                 {
                     isWeekly = false;
@@ -102,17 +93,17 @@ public class ClockManager : MonoBehaviour
                 {
                     isWeekly = true;
                 }
-                popCounter.NouveauMois(isWeekly);
-                
 
-            } 
-            else newMonth = false;
-            
-            
+                popCounter.NouveauMois(isWeekly);
+            }
+            else
+            {
+                newMonth = false;
+            }
         }
-       
-        
-        if (intervalPauseAuto != null && days % intervalPauseAuto== 0 && (newWeek || newMonth))
+
+
+        if (intervalPauseAuto != null && days % intervalPauseAuto == 0 && (newWeek || newMonth))
         {
             switch (intervalPauseAuto)
             {
@@ -123,52 +114,46 @@ public class ClockManager : MonoBehaviour
                     pausePlay.PopUp.Information = monthInfo;
                     break;
             }
-            
-            pausePlay.TogglePopUp();
-           
-            
-        }
-       
-       
-        int hours = Mathf.FloorToInt(((elapsedTime - (days * 24f) * 3600f) / 3600f));
-       
-        
-        int minutes = Mathf.FloorToInt((elapsedTime - (days * 24f + hours )*3600f)/ 60f);
-        int seconds = Mathf.FloorToInt((elapsedTime -(days * 24f + hours )*3600f) - (minutes * 60f));
 
-        
-       // string clockString = string.Format("{0:00}:{1:00}:{2:00}:{3:00}", days, hours, minutes, seconds);
-        string clockString = string.Format("{0:0000}",days);
+            pausePlay.TogglePopUp();
+        }
+
+
+        var hours = Mathf.FloorToInt((elapsedTime - days * 24f * 3600f) / 3600f);
+
+
+        var minutes = Mathf.FloorToInt((elapsedTime - (days * 24f + hours) * 3600f) / 60f);
+        var seconds = Mathf.FloorToInt(elapsedTime - (days * 24f + hours) * 3600f - minutes * 60f);
+
+
+        // string clockString = string.Format("{0:00}:{1:00}:{2:00}:{3:00}", days, hours, minutes, seconds);
+        var clockString = string.Format("{0:0000}", days);
         clock.text = clockString;
-        
-        
     }
 
     public void UpdateAutoPause(string name)
-    
+
     {
         switch (name)
         {
             case "Mensuel":
-                pausePlay.PopUp.Titre = $"Bilan du  mois";
+                pausePlay.PopUp.Titre = "Bilan du  mois";
                 intervalPauseAuto = MONTHLY_PAUSE;
-                
+
                 break;
             case "Hebdomadaire":
-                pausePlay.PopUp.Titre =  $"Bilan de la semaine ";
+                pausePlay.PopUp.Titre = "Bilan de la semaine ";
                 intervalPauseAuto = WEEKLY_PAUSE;
-                
+
                 break;
-           case "None":
+            case "None":
                 intervalPauseAuto = null;
                 break;
         }
-        
     }
 
     public void OnSliderValueChanged()
     {
-       if (slider.value > 0) multiplier = slider.value;
-        
+        if (slider.value > 0) multiplier = slider.value;
     }
 }

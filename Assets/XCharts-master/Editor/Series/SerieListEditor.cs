@@ -10,22 +10,23 @@ namespace XCharts.Editor
 {
     public sealed class SerieListEditor
     {
-        public BaseChart chart { get; private set; }
-        BaseChartEditor m_BaseEditor;
+        private readonly BaseChartEditor m_BaseEditor;
+        private List<SerieBaseEditor> m_Editors;
 
-        SerializedObject m_SerializedObject;
-        List<SerializedProperty> m_SeriesProperty;
-        SerializedProperty m_EnableProperty;
+        private Dictionary<Type, Type> m_EditorTypes;
+        private SerializedProperty m_EnableProperty;
 
-        Dictionary<Type, Type> m_EditorTypes;
-        List<SerieBaseEditor> m_Editors;
+        private SerializedObject m_SerializedObject;
         private bool m_SerieFoldout;
+        private List<SerializedProperty> m_SeriesProperty;
 
         public SerieListEditor(BaseChartEditor editor)
         {
             Assert.IsNotNull(editor);
             m_BaseEditor = editor;
         }
+
+        public BaseChart chart { get; private set; }
 
         public void Init(BaseChart chart, SerializedObject serializedObject, List<SerializedProperty> componentProps)
         {
@@ -75,10 +76,7 @@ namespace XCharts.Editor
             if (chart.debug.foldSeries)
             {
                 m_SerieFoldout = ChartEditorHelper.DrawHeader("Series", m_SerieFoldout, false, null, null);
-                if (m_SerieFoldout)
-                {
-                    DrawSeries();
-                }
+                if (m_SerieFoldout) DrawSeries();
             }
             else
             {
@@ -86,29 +84,24 @@ namespace XCharts.Editor
             }
         }
 
-        void DrawSeries()
+        private void DrawSeries()
         {
-            for (int i = 0; i < m_Editors.Count; i++)
+            for (var i = 0; i < m_Editors.Count; i++)
             {
                 var editor = m_Editors[i];
-                string title = editor.GetDisplayTitle();
-                bool displayContent = ChartEditorHelper.DrawHeader(
+                var title = editor.GetDisplayTitle();
+                var displayContent = ChartEditorHelper.DrawHeader(
                     title,
                     editor.baseProperty,
                     editor.showProperty,
                     editor.menus);
-                if (displayContent)
-                {
-                    editor.OnInternalInspectorGUI();
-                }
+                if (displayContent) editor.OnInternalInspectorGUI();
             }
-            if (m_Editors.Count <= 0)
-            {
-                EditorGUILayout.HelpBox("No serie.", MessageType.Info);
-            }
+
+            if (m_Editors.Count <= 0) EditorGUILayout.HelpBox("No serie.", MessageType.Info);
         }
 
-        void RefreshEditors()
+        private void RefreshEditors()
         {
             m_SerializedObject.UpdateIfRequiredOrScript();
             foreach (var editor in m_Editors)
@@ -116,17 +109,14 @@ namespace XCharts.Editor
 
             m_Editors.Clear();
 
-            for (int i = 0; i < chart.series.Count; i++)
+            for (var i = 0; i < chart.series.Count; i++)
             {
                 var serie = chart.series[i];
-                if (serie != null)
-                {
-                    CreateEditor(serie, m_SeriesProperty[i]);
-                }
+                if (serie != null) CreateEditor(serie, m_SeriesProperty[i]);
             }
         }
 
-        void CreateEditor(Serie serie, SerializedProperty property, int index = -1)
+        private void CreateEditor(Serie serie, SerializedProperty property, int index = -1)
         {
             var id = index >= 0 ? index : m_Editors.Count;
             var settingsType = serie.GetType();
@@ -134,13 +124,10 @@ namespace XCharts.Editor
 
             if (!m_EditorTypes.TryGetValue(settingsType, out editorType))
                 editorType = typeof(SerieBaseEditor);
-            var editor = (SerieBaseEditor) Activator.CreateInstance(editorType);
+            var editor = (SerieBaseEditor)Activator.CreateInstance(editorType);
             editor.Init(chart, serie, property, m_BaseEditor);
             editor.menus.Clear();
-            editor.menus.Add(new HeaderMenuInfo("Clone", () =>
-            {
-                CloneSerie(editor.serie);
-            }));
+            editor.menus.Add(new HeaderMenuInfo("Clone", () => { CloneSerie(editor.serie); }));
             editor.menus.Add(new HeaderMenuInfo("Remove", () =>
             {
                 if (EditorUtility.DisplayDialog("", "Sure remove serie?", "Yes", "Cancel"))
@@ -164,18 +151,11 @@ namespace XCharts.Editor
             }));
             editor.menus.Add(new HeaderMenuInfo("Reset Data Index", () =>
             {
-                if (chart.ResetDataIndex(id))
-                {
-                    RefreshEditors();
-                }
+                if (chart.ResetDataIndex(id)) RefreshEditors();
             }));
             foreach (var type in GetConvertToSerie(editor.serie.GetType()))
-            {
-                editor.menus.Add(new HeaderMenuInfo("Convert to " + type.Name, () =>
-                {
-                    ConvertSerie(editor.serie, type);
-                }));
-            }
+                editor.menus.Add(new HeaderMenuInfo("Convert to " + type.Name,
+                    () => { ConvertSerie(editor.serie, type); }));
             if (editor.serie.GetType().IsDefined(typeof(SerieComponentAttribute), false))
             {
                 var attribute = editor.serie.GetType().GetAttribute<SerieComponentAttribute>();
@@ -190,6 +170,7 @@ namespace XCharts.Editor
                         EditorUtility.SetDirty(chart);
                     }, size == 0));
                 }
+
                 foreach (var type in attribute.types)
                 {
                     var size = editor.FindProperty(Serie.extraComponentMap[type]).arraySize;
@@ -202,6 +183,7 @@ namespace XCharts.Editor
                     }, size > 0));
                 }
             }
+
             if (index < 0)
                 m_Editors.Add(editor);
             else
@@ -268,6 +250,7 @@ namespace XCharts.Editor
                         list.Add(type);
                 }
             }
+
             list.Sort((a, b) => { return a.Name.CompareTo(b.Name); });
             return list;
         }

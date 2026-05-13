@@ -1,18 +1,18 @@
 using System.Text;
-using UnityEngine;
+using UnityEngine.Scripting;
 using UnityEngine.UI;
 using XUGL;
 
 namespace XCharts.Runtime
 {
-    [UnityEngine.Scripting.Preserve]
+    [Preserve]
     internal sealed class GridCoord3DHandler : MainComponentHandler<GridCoord3D>
     {
         public override void InitComponent()
         {
             var grid = component;
             grid.painter = chart.painter;
-            grid.refreshComponent = delegate ()
+            grid.refreshComponent = delegate
             {
                 grid.UpdateRuntimeData(chart);
                 chart.OnCoordinateChanged();
@@ -40,13 +40,9 @@ namespace XCharts.Runtime
         public override void Update()
         {
             if (chart.isPointerInChart)
-            {
                 component.context.isPointerEnter = component.Contains(chart.pointerPos);
-            }
             else
-            {
                 component.context.isPointerEnter = false;
-            }
         }
 
         public override void DrawUpper(VertexHelper vh)

@@ -1,44 +1,44 @@
 using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
+using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using Object = UnityEngine.Object;
 #if dUI_TextMeshPro
 using TMPro;
 #endif
 #if UNITY_EDITOR
-using UnityEditor;
 #endif
 
 namespace XCharts.Runtime
 {
     public static class ChartHelper
     {
-        private static StringBuilder s_Builder = new StringBuilder();
-        private static Vector3 s_DefaultIngoreDataVector3 = Vector3.zero;
+        public static StringBuilder sb { get; } = new();
 
-        public static StringBuilder sb { get { return s_Builder; } }
-        public static Vector3 ignoreVector3 { get { return s_DefaultIngoreDataVector3; } }
+        public static Vector3 ignoreVector3 { get; } = Vector3.zero;
 
         public static bool IsIngore(Vector3 pos)
         {
-            return pos == s_DefaultIngoreDataVector3;
+            return pos == ignoreVector3;
         }
+
         public static string Cancat(string str1, string str2)
         {
-            s_Builder.Length = 0;
-            s_Builder.Append(str1).Append(str2);
-            return s_Builder.ToString();
+            sb.Length = 0;
+            sb.Append(str1).Append(str2);
+            return sb.ToString();
         }
 
         public static string Cancat(string str1, int i)
         {
-            s_Builder.Length = 0;
-            s_Builder.Append(str1).Append(ChartCached.IntToStr(i));
-            return s_Builder.ToString();
+            sb.Length = 0;
+            sb.Append(str1).Append(ChartCached.IntToStr(i));
+            return sb.ToString();
         }
 
         public static bool IsActiveByScale(GameObject gameObject)
@@ -77,10 +77,10 @@ namespace XCharts.Runtime
         }
 
         /// <summary>
-        /// 通过设置scale实现是否显示，优化性能，减少GC
+        ///     通过设置scale实现是否显示，优化性能，减少GC
         /// </summary>
         /// <param name="transform"></param>
-        /// <param name="active"></param>   
+        /// <param name="active"></param>
         public static bool SetActive(Transform transform, bool active)
         {
             if (transform == null) return false;
@@ -104,32 +104,26 @@ namespace XCharts.Runtime
         public static void ActiveAllObject(Transform parent, bool active, string match = null)
         {
             if (parent == null) return;
-            for (int i = 0; i < parent.childCount; i++)
-            {
+            for (var i = 0; i < parent.childCount; i++)
                 if (match == null)
+                {
                     SetActive(parent.GetChild(i), active);
+                }
                 else
                 {
                     var go = parent.GetChild(i);
-                    if (go.name.StartsWith(match))
-                    {
-                        SetActive(go, active);
-                    }
+                    if (go.name.StartsWith(match)) SetActive(go, active);
                 }
-            }
         }
 
         public static void DestroyAllChildren(Transform parent)
         {
             if (parent == null) return;
             var childCount = parent.childCount;
-            for (int i = childCount - 1; i >= 0; i--)
+            for (var i = childCount - 1; i >= 0; i--)
             {
                 var go = parent.GetChild(i);
-                if (go != null)
-                {
-                    GameObject.DestroyImmediate(go.gameObject, true);
-                }
+                if (go != null) GameObject.DestroyImmediate(go.gameObject, true);
             }
         }
 
@@ -137,22 +131,17 @@ namespace XCharts.Runtime
         {
             if (parent == null) return;
             var go = parent.Find(childName);
-            if (go != null)
-            {
-                GameObject.DestroyImmediate(go.gameObject, true);
-            }
+            if (go != null) GameObject.DestroyImmediate(go.gameObject, true);
         }
+
         public static void DestoryGameObjectByMatch(Transform parent, string containString)
         {
             if (parent == null) return;
             var childCount = parent.childCount;
-            for (int i = childCount - 1; i >= 0; i--)
+            for (var i = childCount - 1; i >= 0; i--)
             {
                 var go = parent.GetChild(i);
-                if (go != null && go.name.Contains(containString))
-                {
-                    GameObject.DestroyImmediate(go.gameObject, true);
-                }
+                if (go != null && go.name.Contains(containString)) GameObject.DestroyImmediate(go.gameObject, true);
             }
         }
 
@@ -161,13 +150,10 @@ namespace XCharts.Runtime
             if (parent == null) return;
             if (children == null || children.Count == 0) return;
             var childCount = parent.childCount;
-            for (int i = childCount - 1; i >= 0; i--)
+            for (var i = childCount - 1; i >= 0; i--)
             {
                 var go = parent.GetChild(i);
-                if (go != null && children.Contains(go.name))
-                {
-                    GameObject.DestroyImmediate(go.gameObject, true);
-                }
+                if (go != null && children.Contains(go.name)) GameObject.DestroyImmediate(go.gameObject, true);
             }
         }
 
@@ -178,13 +164,14 @@ namespace XCharts.Runtime
 
         public static string GetFullName(Transform transform)
         {
-            string name = transform.name;
-            Transform obj = transform;
+            var name = transform.name;
+            var obj = transform;
             while (obj.transform.parent)
             {
                 name = obj.transform.parent.name + "/" + name;
                 obj = obj.transform.parent;
             }
+
             return name;
         }
 
@@ -195,9 +182,9 @@ namespace XCharts.Runtime
             {
 #if UNITY_EDITOR
                 if (!Application.isPlaying)
-                    GameObject.DestroyImmediate(component as UnityEngine.Object);
+                    GameObject.DestroyImmediate(component as Object);
                 else
-                    GameObject.Destroy(component as UnityEngine.Object);
+                    GameObject.Destroy(component as Object);
 #else
                 GameObject.Destroy(component as UnityEngine.Object);
 #endif
@@ -208,36 +195,34 @@ namespace XCharts.Runtime
         {
             var coms = gameObject.GetComponents<Component>();
             foreach (var com in coms)
-            {
                 if (com.GetType().FullName.Contains("TMPro"))
                 {
 #if UNITY_EDITOR
                     if (!Application.isPlaying)
-                        GameObject.DestroyImmediate(com as UnityEngine.Object);
+                        GameObject.DestroyImmediate(com);
                     else
-                        GameObject.Destroy(com as UnityEngine.Object);
+                        GameObject.Destroy(com);
 #else
                     GameObject.Destroy(com as UnityEngine.Object);
 #endif
                 }
-            }
         }
 
-        [System.Obsolete("Use EnsureComponent instead")]
+        [Obsolete("Use EnsureComponent instead")]
         public static T GetOrAddComponent<T>(Transform transform) where T : Component
         {
             return EnsureComponent<T>(transform.gameObject);
         }
 
-        [System.Obsolete("Use EnsureComponent instead")]
+        [Obsolete("Use EnsureComponent instead")]
         public static T GetOrAddComponent<T>(GameObject gameObject) where T : Component
         {
             return EnsureComponent<T>(gameObject);
         }
 
         /// <summary>
-        /// Ensure that the transform has the specified component, add it if not.
-        /// ||确保对象有指定的组件，如果没有则添加。
+        ///     Ensure that the transform has the specified component, add it if not.
+        ///     ||确保对象有指定的组件，如果没有则添加。
         /// </summary>
         /// <param name="transform"></param>
         /// <typeparam name="T"></typeparam>
@@ -248,8 +233,8 @@ namespace XCharts.Runtime
         }
 
         /// <summary>
-        /// Ensure that the game object has the specified component, add it if not.
-        /// || 确保对象有指定的组件，如果没有则添加。
+        ///     Ensure that the game object has the specified component, add it if not.
+        ///     || 确保对象有指定的组件，如果没有则添加。
         /// </summary>
         /// <param name="gameObject"></param>
         /// <typeparam name="T"></typeparam>
@@ -264,12 +249,11 @@ namespace XCharts.Runtime
                     RemoveTMPComponents(gameObject);
                     return gameObject.AddComponent<T>();
                 }
+
                 return com;
             }
-            else
-            {
-                return gameObject.GetComponent<T>();
-            }
+
+            return gameObject.GetComponent<T>();
         }
 
         public static GameObject AddObject(string name, Transform parent, Vector2 anchorMin,
@@ -300,7 +284,8 @@ namespace XCharts.Runtime
                 obj.transform.localRotation = Quaternion.Euler(0, 0, 0);
                 obj.layer = parent.gameObject.layer;
             }
-            RectTransform rect = EnsureComponent<RectTransform>(obj);
+
+            var rect = EnsureComponent<RectTransform>(obj);
             rect.localPosition = Vector3.zero;
             rect.sizeDelta = sizeDelta;
             rect.anchorMin = anchorMin;
@@ -316,7 +301,7 @@ namespace XCharts.Runtime
             Vector2 anchorMax, Vector2 pivot, Vector2 sizeDelta)
         {
             if (obj == null) return;
-            RectTransform rect = EnsureComponent<RectTransform>(obj);
+            var rect = EnsureComponent<RectTransform>(obj);
             rect.sizeDelta = sizeDelta;
             rect.anchorMin = anchorMin;
             rect.anchorMax = anchorMax;
@@ -327,7 +312,7 @@ namespace XCharts.Runtime
             Vector2 pivot, Vector2 sizeDelta, TextStyle textStyle, ComponentTheme theme, Color autoColor,
             TextAnchor autoAlignment, ChartText chartText = null)
         {
-            GameObject txtObj = AddObject(objectName, parent, anchorMin, anchorMax, pivot, sizeDelta);
+            var txtObj = AddObject(objectName, parent, anchorMin, anchorMax, pivot, sizeDelta);
             txtObj.transform.localEulerAngles = new Vector3(0, 0, textStyle.rotate);
             txtObj.layer = parent.gameObject.layer;
             if (chartText == null)
@@ -340,7 +325,8 @@ namespace XCharts.Runtime
             chartText.tmpText.richText = true;
             chartText.tmpText.raycastTarget = false;
 #if UNITY_2023_2_OR_NEWER
-            chartText.tmpText.textWrappingMode = textStyle.autoWrap ? TextWrappingModes.Normal : TextWrappingModes.NoWrap;
+            chartText.tmpText.textWrappingMode =
+ textStyle.autoWrap ? TextWrappingModes.Normal : TextWrappingModes.NoWrap;
 #else
             chartText.tmpText.enableWordWrapping = textStyle.autoWrap;
 #endif
@@ -348,7 +334,8 @@ namespace XCharts.Runtime
             chartText.text = EnsureComponent<Text>(txtObj);
             chartText.text.font = textStyle.font == null ? theme.font : textStyle.font;
             chartText.text.fontStyle = textStyle.fontStyle;
-            chartText.text.horizontalOverflow = textStyle.autoWrap ? HorizontalWrapMode.Wrap : HorizontalWrapMode.Overflow;
+            chartText.text.horizontalOverflow =
+                textStyle.autoWrap ? HorizontalWrapMode.Wrap : HorizontalWrapMode.Overflow;
             chartText.text.verticalOverflow = VerticalWrapMode.Overflow;
             chartText.text.supportRichText = true;
             chartText.text.raycastTarget = false;
@@ -364,7 +351,7 @@ namespace XCharts.Runtime
             chartText.SetLineSpacing(textStyle.lineSpacing);
             chartText.SetActive(textStyle.show);
 
-            RectTransform rect = EnsureComponent<RectTransform>(txtObj);
+            var rect = EnsureComponent<RectTransform>(txtObj);
             rect.anchoredPosition3D = Vector3.zero;
             rect.sizeDelta = sizeDelta;
             rect.anchorMin = anchorMin;
@@ -376,10 +363,10 @@ namespace XCharts.Runtime
         public static Painter AddPainterObject(string name, Transform parent, Vector2 anchorMin, Vector2 anchorMax,
             Vector2 pivot, Vector2 sizeDelta, HideFlags hideFlags, int siblingIndex, List<string> childNodeNames)
         {
-            var painterObj = ChartHelper.AddObject(name, parent, anchorMin, anchorMax, pivot, sizeDelta, -1, childNodeNames);
+            var painterObj = AddObject(name, parent, anchorMin, anchorMax, pivot, sizeDelta, -1, childNodeNames);
             painterObj.hideFlags = hideFlags;
             painterObj.transform.SetSiblingIndex(siblingIndex);
-            return ChartHelper.EnsureComponent<Painter>(painterObj);
+            return EnsureComponent<Painter>(painterObj);
         }
 
         public static Image AddIcon(string name, Transform parent, IconStyle iconStyle)
@@ -394,20 +381,18 @@ namespace XCharts.Runtime
             var anchorMin = new Vector2(0.5f, 0.5f);
             var pivot = new Vector2(0.5f, 0.5f);
             var sizeDelta = new Vector2(width, height);
-            GameObject iconObj = AddObject(name, parent, anchorMin, anchorMax, pivot, sizeDelta);
+            var iconObj = AddObject(name, parent, anchorMin, anchorMax, pivot, sizeDelta);
             var img = EnsureComponent<Image>(iconObj);
-            if (img.raycastTarget != false)
+            if (img.raycastTarget)
                 img.raycastTarget = false;
             if (img.type != type)
                 img.type = type;
             if (sprite != null && img.sprite != sprite)
             {
                 img.sprite = sprite;
-                if (width == 0 || height == 0)
-                {
-                    img.SetNativeSize();
-                }
+                if (width == 0 || height == 0) img.SetNativeSize();
             }
+
             return img;
         }
 
@@ -421,9 +406,7 @@ namespace XCharts.Runtime
                 background.color = imageStyle.color;
                 background.type = imageStyle.type;
                 if (imageStyle.width > 0 && imageStyle.height > 0)
-                {
                     background.rectTransform.sizeDelta = new Vector2(imageStyle.width, imageStyle.height);
-                }
             }
             else
             {
@@ -443,9 +426,7 @@ namespace XCharts.Runtime
                 background.color = imageStyle.imageColor;
                 background.type = imageStyle.imageType;
                 if (imageStyle.imageWidth > 0 && imageStyle.imageHeight > 0)
-                {
                     background.rectTransform.sizeDelta = new Vector2(imageStyle.imageWidth, imageStyle.imageHeight);
-                }
             }
             else
             {
@@ -457,7 +438,8 @@ namespace XCharts.Runtime
 
         public static ChartLabel AddAxisLabelObject(int total, int index, string name, Transform parent,
             Vector2 sizeDelta, Axis axis, ComponentTheme theme,
-            string content, Color autoColor, TextAnchor autoAlignment = TextAnchor.MiddleCenter, Color32 iconDefaultColor = default(Color32))
+            string content, Color autoColor, TextAnchor autoAlignment = TextAnchor.MiddleCenter,
+            Color32 iconDefaultColor = default)
         {
             var textStyle = axis.axisLabel.textStyle;
             var label = AddChartLabel(name, parent, axis.axisLabel, theme, content, autoColor, autoAlignment);
@@ -479,21 +461,21 @@ namespace XCharts.Runtime
             var labelObj = AddObject(name, parent, anchorMin, anchorMax, pivot, sizeDelta);
             //ChartHelper.RemoveComponent<Text>(labelObj);
             var label = EnsureComponent<ChartLabel>(labelObj);
-            if(isObjectAnchor)
-            {
-                UpdateAnchorAndPivotByTextAlignment(textStyle.GetAlignment(autoAlignment), out anchorMin, out anchorMax, out pivot);
-            }
+            if (isObjectAnchor)
+                UpdateAnchorAndPivotByTextAlignment(textStyle.GetAlignment(autoAlignment), out anchorMin, out anchorMax,
+                    out pivot);
             label.text = AddTextObject("Text", label.gameObject.transform, anchorMin, anchorMax, pivot,
                 sizeDelta, textStyle, theme, autoColor, autoAlignment, label.text);
-            label.icon = ChartHelper.AddIcon("Icon", label.gameObject.transform, labelStyle.icon);
+            label.icon = AddIcon("Icon", label.gameObject.transform, labelStyle.icon);
             label.SetSize(labelStyle.width, labelStyle.height);
             label.SetTextPadding(labelStyle.textPadding);
             label.SetText(content);
             label.UpdateIcon(labelStyle.icon);
             if (labelStyle.background.show)
             {
-                label.color = (!labelStyle.background.autoColor || autoColor == Color.clear) ?
-                    labelStyle.background.color : autoColor;
+                label.color = !labelStyle.background.autoColor || autoColor == Color.clear
+                    ? labelStyle.background.color
+                    : autoColor;
                 label.sprite = labelStyle.background.sprite;
                 label.type = labelStyle.background.type;
             }
@@ -502,6 +484,7 @@ namespace XCharts.Runtime
                 label.color = Color.clear;
                 label.sprite = null;
             }
+
             label.transform.localEulerAngles = new Vector3(0, 0, labelStyle.rotate);
             label.transform.localPosition = labelStyle.offset;
             return label;
@@ -520,15 +503,16 @@ namespace XCharts.Runtime
             var label = EnsureComponent<ChartLabel>(labelObj);
             label.text = AddTextObject("Text", label.gameObject.transform, anchorMin, anchorMax, pivot,
                 sizeDelta, textStyle, theme, autoColor, autoAlignment, label.text);
-            label.icon = ChartHelper.AddIcon("Icon", label.gameObject.transform, labelStyle.icon);
+            label.icon = AddIcon("Icon", label.gameObject.transform, labelStyle.icon);
             label.SetSize(labelStyle.width, labelStyle.height);
             label.SetTextPadding(labelStyle.textPadding);
             label.SetText(content);
             label.UpdateIcon(labelStyle.icon);
             if (labelStyle.background.show)
             {
-                label.color = (!labelStyle.background.autoColor || autoColor == Color.clear) ?
-                    labelStyle.background.color : autoColor;
+                label.color = !labelStyle.background.autoColor || autoColor == Color.clear
+                    ? labelStyle.background.color
+                    : autoColor;
                 label.sprite = labelStyle.background.sprite;
                 if (label.type != labelStyle.background.type)
                     label.type = labelStyle.background.type;
@@ -538,12 +522,14 @@ namespace XCharts.Runtime
                 label.color = Color.clear;
                 label.sprite = null;
             }
+
             label.transform.localEulerAngles = new Vector3(0, 0, labelStyle.rotate);
             label.transform.localPosition = labelStyle.offset;
             return label;
         }
 
-        public static void UpdateAnchorAndPivotByTextAlignment(TextAnchor alignment, out Vector2 anchorMin, out Vector2 anchorMax,
+        public static void UpdateAnchorAndPivotByTextAlignment(TextAnchor alignment, out Vector2 anchorMin,
+            out Vector2 anchorMax,
             out Vector2 pivot)
         {
             switch (alignment)
@@ -604,7 +590,7 @@ namespace XCharts.Runtime
         internal static ChartLabel AddTooltipIndicatorLabel(Tooltip tooltip, string name, Transform parent,
             ThemeStyle theme, TextAnchor alignment, LabelStyle labelStyle)
         {
-            var label = ChartHelper.AddChartLabel(name, parent, labelStyle, theme.tooltip,
+            var label = AddChartLabel(name, parent, labelStyle, theme.tooltip,
                 "", Color.clear, alignment);
             label.SetActive(tooltip.show && labelStyle.show, true);
             return label;
@@ -612,39 +598,36 @@ namespace XCharts.Runtime
 
         public static void GetPointList(ref List<Vector3> posList, Vector3 sp, Vector3 ep, float k = 30f)
         {
-            Vector3 dir = (ep - sp).normalized;
-            float dist = Vector3.Distance(sp, ep);
-            int segment = (int)(dist / k);
+            var dir = (ep - sp).normalized;
+            var dist = Vector3.Distance(sp, ep);
+            var segment = (int)(dist / k);
             posList.Clear();
             posList.Add(sp);
-            for (int i = 1; i < segment; i++)
-            {
-                posList.Add(sp + dir * dist * i / segment);
-            }
+            for (var i = 1; i < segment; i++) posList.Add(sp + dir * dist * i / segment);
             posList.Add(ep);
         }
 
         public static bool IsValueEqualsColor(Color32 color1, Color32 color2)
         {
             return color1.a == color2.a &&
-                color1.b == color2.b &&
-                color1.g == color2.g &&
-                color1.r == color2.r;
+                   color1.b == color2.b &&
+                   color1.g == color2.g &&
+                   color1.r == color2.r;
         }
 
         public static bool IsValueEqualsColor(Color color1, Color color2)
         {
             return color1.a == color2.a &&
-                color1.b == color2.b &&
-                color1.g == color2.g &&
-                color1.r == color2.r;
+                   color1.b == color2.b &&
+                   color1.g == color2.g &&
+                   color1.r == color2.r;
         }
 
         public static bool IsValueEqualsString(string str1, string str2)
         {
             if (str1 == null && str2 == null) return true;
-            else if (str1 != null && str2 != null) return str1.Equals(str2);
-            else return false;
+            if (str1 != null && str2 != null) return str1.Equals(str2);
+            return false;
         }
 
         public static bool IsValueEqualsVector2(Vector2 v1, Vector2 v2)
@@ -661,9 +644,10 @@ namespace XCharts.Runtime
         {
             if (list1 == null || list2 == null) return false;
             if (list1.Count != list2.Count) return false;
-            for (int i = 0; i < list1.Count; i++)
-            {
-                if (list1[i] == null && list2[i] == null) { }
+            for (var i = 0; i < list1.Count; i++)
+                if (list1[i] == null && list2[i] == null)
+                {
+                }
                 else
                 {
                     if (list1[i] != null)
@@ -675,7 +659,7 @@ namespace XCharts.Runtime
                         if (!list2[i].Equals(list1[i])) return false;
                     }
                 }
-            }
+
             return true;
         }
 
@@ -711,57 +695,47 @@ namespace XCharts.Runtime
             foreach (var item in fromList) toList.Add(item);
             return true;
         }
+
         public static bool CopyArray<T>(T[] toList, T[] fromList)
         {
             if (toList == null || fromList == null) return false;
-            if (toList.Length != fromList.Length)
-            {
-                toList = new T[fromList.Length];
-            }
-            for (int i = 0; i < fromList.Length; i++) toList[i] = fromList[i];
+            if (toList.Length != fromList.Length) toList = new T[fromList.Length];
+            for (var i = 0; i < fromList.Length; i++) toList[i] = fromList[i];
             return true;
         }
 
         public static List<float> ParseFloatFromString(string jsonData)
         {
-            List<float> list = new List<float>();
+            var list = new List<float>();
             if (string.IsNullOrEmpty(jsonData)) return list;
-            int startIndex = jsonData.IndexOf("[");
-            int endIndex = jsonData.IndexOf("]");
-            string temp = jsonData.Substring(startIndex + 1, endIndex - startIndex - 1);
+            var startIndex = jsonData.IndexOf("[");
+            var endIndex = jsonData.IndexOf("]");
+            var temp = jsonData.Substring(startIndex + 1, endIndex - startIndex - 1);
             if (temp.IndexOf("],") > -1 || temp.IndexOf("] ,") > -1)
             {
-                string[] datas = temp.Split(new string[] { "],", "] ," }, StringSplitOptions.RemoveEmptyEntries);
-                for (int i = 0; i < datas.Length; i++)
-                {
-                    temp = datas[i];
-                }
+                var datas = temp.Split(new[] { "],", "] ," }, StringSplitOptions.RemoveEmptyEntries);
+                for (var i = 0; i < datas.Length; i++) temp = datas[i];
                 return list;
             }
             else
             {
-                string[] datas = temp.Split(',');
-                for (int i = 0; i < datas.Length; i++)
-                {
-                    list.Add(float.Parse(datas[i].Trim()));
-                }
+                var datas = temp.Split(',');
+                for (var i = 0; i < datas.Length; i++) list.Add(float.Parse(datas[i].Trim()));
                 return list;
             }
         }
 
         public static List<string> ParseStringFromString(string jsonData)
         {
-            List<string> list = new List<string>();
+            var list = new List<string>();
             if (string.IsNullOrEmpty(jsonData)) return list;
-            string pattern = "[\"'](.*?)[\"']";
+            var pattern = "[\"'](.*?)[\"']";
             if (Regex.IsMatch(jsonData, pattern))
             {
-                MatchCollection m = Regex.Matches(jsonData, pattern);
-                foreach (Match match in m)
-                {
-                    list.Add(match.Groups[1].Value);
-                }
+                var m = Regex.Matches(jsonData, pattern);
+                foreach (Match match in m) list.Add(match.Groups[1].Value);
             }
+
             return list;
         }
 
@@ -769,7 +743,7 @@ namespace XCharts.Runtime
         {
             Color color;
             ColorUtility.TryParseHtmlString(hexColorStr, out color);
-            return (Color32)color;
+            return color;
         }
 
         public static double GetMaxDivisibleValue(double max, double ceilRate)
@@ -781,15 +755,13 @@ namespace XCharts.Runtime
                 pow = Mathf.Pow(10, MathUtil.GetPrecision(max));
                 max *= pow;
             }
+
             if (ceilRate == 0)
             {
                 var bigger = Math.Ceiling(Math.Abs(max));
-                int n = 1;
-                while (bigger / (Mathf.Pow(10, n)) > 10)
-                {
-                    n++;
-                }
-                double mm = bigger;
+                var n = 1;
+                while (bigger / Mathf.Pow(10, n) > 10) n++;
+                var mm = bigger;
                 var pown = Mathf.Pow(10, n);
                 var powmax = Mathf.Pow(10, n + 1);
                 var aliquot = mm % pown == 0;
@@ -799,25 +771,24 @@ namespace XCharts.Runtime
                     if (!aliquot)
                         mm += max > 0 ? pown : -pown;
                 }
+
                 var mmm = mm;
-                if (max > 100 && !aliquot && (max / mm < 0.8f))
+                if (max > 100 && !aliquot && max / mm < 0.8f)
                     mmm -= Mathf.Pow(10, n) / 2;
-                if (mmm >= (powmax - pown) && mmm < powmax)
+                if (mmm >= powmax - pown && mmm < powmax)
                     mmm = powmax;
                 if (max < 0) return -Math.Ceiling(mmm > -max ? mmm : mm);
-                else return Math.Ceiling(mmm > max ? mmm : mm) / pow;
+                return Math.Ceiling(mmm > max ? mmm : mm) / pow;
             }
-            else
-            {
-                return GetMaxCeilRate(max, ceilRate) / pow;
-            }
+
+            return GetMaxCeilRate(max, ceilRate) / pow;
         }
 
         public static double GetMaxCeilRate(double value, double ceilRate)
         {
             if (ceilRate == 0) return value;
             var mod = value % ceilRate;
-            int rate = (int)(value / ceilRate);
+            var rate = (int)(value / ceilRate);
             return mod == 0 ? value : (value < 0 ? rate : rate + 1) * ceilRate;
         }
 
@@ -825,7 +796,7 @@ namespace XCharts.Runtime
         {
             if (ceilRate == 0) return value;
             var mod = value % ceilRate;
-            int rate = (int)(value / ceilRate);
+            var rate = (int)(value / ceilRate);
             return mod == 0 ? value : (value < 0 ? rate : rate + 1) * ceilRate;
         }
 
@@ -833,7 +804,7 @@ namespace XCharts.Runtime
         {
             if (ceilRate == 0) return value;
             var mod = value % ceilRate;
-            int rate = (int)(value / ceilRate);
+            var rate = (int)(value / ceilRate);
             return mod == 0 ? value : (value < 0 ? rate - 1 : rate) * ceilRate;
         }
 
@@ -841,7 +812,7 @@ namespace XCharts.Runtime
         {
             if (ceilRate == 0) return value;
             var mod = value % ceilRate;
-            int rate = (int)(value / ceilRate);
+            var rate = (int)(value / ceilRate);
             return mod == 0 ? value : (value < 0 ? rate - 1 : rate) * ceilRate;
         }
 
@@ -854,39 +825,37 @@ namespace XCharts.Runtime
                 pow = Mathf.Pow(10, MathUtil.GetPrecision(min));
                 min *= pow;
             }
+
             if (ceilRate == 0)
             {
                 var bigger = min < 0 ? Math.Ceiling(Math.Abs(min)) : Math.Floor(Math.Abs(min));
-                int n = 1;
-                while (bigger / (Mathf.Pow(10, n)) > 10)
-                {
-                    n++;
-                }
-                double mm = bigger;
+                var n = 1;
+                while (bigger / Mathf.Pow(10, n) > 10) n++;
+                var mm = bigger;
                 if (mm > 10 && n < 38)
                 {
-                    mm = bigger - bigger % (Mathf.Pow(10, n));
+                    mm = bigger - bigger % Mathf.Pow(10, n);
                     mm += min < 0 ? Mathf.Pow(10, n) : -Mathf.Pow(10, n);
                 }
+
                 if (min < 0) return -Math.Floor(mm) / pow;
-                else return Math.Floor(mm) / pow;
+                return Math.Floor(mm) / pow;
             }
-            else
-            {
-                return GetMinCeilRate(min, ceilRate) / pow;
-            }
+
+            return GetMinCeilRate(min, ceilRate) / pow;
         }
 
         public static double GetMaxLogValue(double value, float logBase, bool isLogBaseE, out int splitNumber)
         {
             splitNumber = 1;
             if (value <= 0) return 0;
-            double max = isLogBaseE ? Math.Exp(splitNumber) : Math.Pow(logBase, splitNumber);
+            var max = isLogBaseE ? Math.Exp(splitNumber) : Math.Pow(logBase, splitNumber);
             while (max < value)
             {
                 splitNumber++;
                 max = isLogBaseE ? Math.Exp(splitNumber) : Math.Pow(logBase, splitNumber);
             }
+
             return max;
         }
 
@@ -895,20 +864,21 @@ namespace XCharts.Runtime
             splitNumber = 0;
             if (value <= 0) return 0;
             if (value > 1) return 1;
-            double min = isLogBaseE ? Math.Exp(-splitNumber) : Math.Pow(logBase, -splitNumber);
+            var min = isLogBaseE ? Math.Exp(-splitNumber) : Math.Pow(logBase, -splitNumber);
             while (min > value)
             {
                 splitNumber++;
                 min = isLogBaseE ? Math.Exp(-splitNumber) : Math.Pow(logBase, -splitNumber);
             }
+
             return min;
         }
 
         public static void AddEventListener(GameObject obj, EventTriggerType type,
-            UnityEngine.Events.UnityAction<BaseEventData> call)
+            UnityAction<BaseEventData> call)
         {
-            EventTrigger trigger = EnsureComponent<EventTrigger>(obj.gameObject);
-            EventTrigger.Entry entry = new EventTrigger.Entry();
+            var trigger = EnsureComponent<EventTrigger>(obj.gameObject);
+            var entry = new EventTrigger.Entry();
             entry.eventID = type;
             entry.callback = new EventTrigger.TriggerEvent();
             entry.callback.AddListener(call);
@@ -917,17 +887,14 @@ namespace XCharts.Runtime
 
         public static void ClearEventListener(GameObject obj)
         {
-            EventTrigger trigger = obj.GetComponent<EventTrigger>();
-            if (trigger != null)
-            {
-                trigger.triggers.Clear();
-            }
+            var trigger = obj.GetComponent<EventTrigger>();
+            if (trigger != null) trigger.triggers.Clear();
         }
 
         public static Vector3 RotateRound(Vector3 position, Vector3 center, Vector3 axis, float angle)
         {
-            Vector3 point = Quaternion.AngleAxis(angle, axis) * (position - center);
-            Vector3 resultVec3 = center + point;
+            var point = Quaternion.AngleAxis(angle, axis) * (position - center);
+            var resultVec3 = center + point;
             return resultVec3;
         }
 
@@ -940,7 +907,7 @@ namespace XCharts.Runtime
         }
 
         /// <summary>
-        /// 获得0-360的角度（12点钟方向为0度）
+        ///     获得0-360的角度（12点钟方向为0度）
         /// </summary>
         /// <param name="from"></param>
         /// <param name="to"></param>
@@ -949,7 +916,7 @@ namespace XCharts.Runtime
         {
             float angle;
 
-            Vector3 cross = Vector3.Cross(from, to);
+            var cross = Vector3.Cross(from, to);
             angle = Vector2.Angle(from, to);
             angle = cross.z > 0 ? -angle : angle;
             angle = (angle + 360) % 360;
@@ -970,32 +937,21 @@ namespace XCharts.Runtime
 
         public static Vector3 GetVertialDire(Vector3 dire)
         {
-            if (dire.x == 0)
-            {
-                return new Vector3(-1, 0, 0);
-            }
-            if (dire.y == 0)
-            {
-                return new Vector3(0, -1, 0);
-            }
-            else
-            {
-                return new Vector3(-dire.y / dire.x, 1, 0).normalized;
-            }
+            if (dire.x == 0) return new Vector3(-1, 0, 0);
+            if (dire.y == 0) return new Vector3(0, -1, 0);
+
+            return new Vector3(-dire.y / dire.x, 1, 0).normalized;
         }
 
         public static Vector3 GetLastValue(List<Vector3> list)
         {
             if (list.Count <= 0) return Vector3.zero;
-            else return list[list.Count - 1];
+            return list[list.Count - 1];
         }
 
         public static void SetColorOpacity(ref Color32 color, float opacity)
         {
-            if (color.a != 0 && opacity != 1)
-            {
-                color.a = (byte)(color.a * opacity);
-            }
+            if (color.a != 0 && opacity != 1) color.a = (byte)(color.a * opacity);
         }
 
         public static Color32 GetHighlightColor(Color32 color, float rate = 0.8f)
@@ -1025,18 +981,13 @@ namespace XCharts.Runtime
 
         public static bool IsPointInQuadrilateral(Vector3 P, Vector3 A, Vector3 B, Vector3 C, Vector3 D)
         {
-            Vector3 v0 = Vector3.Cross(A - D, P - D);
-            Vector3 v1 = Vector3.Cross(B - A, P - A);
-            Vector3 v2 = Vector3.Cross(C - B, P - B);
-            Vector3 v3 = Vector3.Cross(D - C, P - C);
-            if (Vector3.Dot(v0, v1) < 0 || Vector3.Dot(v0, v2) < 0 || Vector3.Dot(v0, v3) < 0)
-            {
-                return false;
-            }
-            else
-            {
-                return true;
-            }
+            var v0 = Vector3.Cross(A - D, P - D);
+            var v1 = Vector3.Cross(B - A, P - A);
+            var v2 = Vector3.Cross(C - B, P - B);
+            var v3 = Vector3.Cross(D - C, P - C);
+            if (Vector3.Dot(v0, v1) < 0 || Vector3.Dot(v0, v2) < 0 || Vector3.Dot(v0, v3) < 0) return false;
+
+            return true;
         }
 
         public static bool IsInRect(Vector3 pos, float xMin, float xMax, float yMin, float yMax)
@@ -1046,13 +997,13 @@ namespace XCharts.Runtime
 
         public static bool IsColorAlphaZero(Color color)
         {
-            return !ChartHelper.IsClearColor(color) && color.a == 0;
+            return !IsClearColor(color) && color.a == 0;
         }
 
         public static float GetActualValue(float valueOrRate, float total, float maxRate = 1.5f)
         {
             if (valueOrRate >= -maxRate && valueOrRate <= maxRate) return valueOrRate * total;
-            else return valueOrRate;
+            return valueOrRate;
         }
 
 #if UNITY_WEBGL
@@ -1060,7 +1011,8 @@ namespace XCharts.Runtime
         private static extern void Download(string base64str, string fileName);
 #endif
 
-        public static Texture2D SaveAsImage(RectTransform rectTransform, Canvas canvas, string imageType = "png", string path = "")
+        public static Texture2D SaveAsImage(RectTransform rectTransform, Canvas canvas, string imageType = "png",
+            string path = "")
         {
             var cam = canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera;
             var pos = RectTransformUtility.WorldToScreenPoint(cam, rectTransform.position);
@@ -1088,6 +1040,7 @@ namespace XCharts.Runtime
                     Debug.LogError("SaveAsImage ERROR: not support image type:" + imageType);
                     return null;
             }
+
             var fileName = rectTransform.name + "." + imageType;
 #if UNITY_WEBGL
             string base64str = Convert.ToBase64String(bytes);
@@ -1103,13 +1056,11 @@ namespace XCharts.Runtime
 #else
                 dir = Application.persistentDataPath + "/SavedImage";
 #endif
-                if (!System.IO.Directory.Exists(dir))
-                {
-                    System.IO.Directory.CreateDirectory(dir);
-                }
+                if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
                 path = dir + "/" + fileName;
             }
-            System.IO.File.WriteAllBytes(path, bytes);
+
+            File.WriteAllBytes(path, bytes);
             Debug.Log("SaveAsImage:" + path);
             return tex;
 #endif

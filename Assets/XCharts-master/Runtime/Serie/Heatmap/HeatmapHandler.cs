@@ -1,17 +1,18 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Scripting;
 using UnityEngine.UI;
 using XUGL;
 
 namespace XCharts.Runtime
 {
-    [UnityEngine.Scripting.Preserve]
+    [Preserve]
     internal sealed partial class HeatmapHandler : SerieHandler<Heatmap>
     {
+        private readonly Dictionary<int, int> m_CountDict = new();
         private GridCoord m_SerieGrid;
-        private Dictionary<int, int> m_CountDict = new Dictionary<int, int>();
 
-        public override int defaultDimension { get { return 2; } }
+        public override int defaultDimension => 2;
 
         public static int GetGridKey(int x, int y)
         {
@@ -32,17 +33,14 @@ namespace XCharts.Runtime
         public override void DrawSerie(VertexHelper vh)
         {
             if (serie.heatmapType == HeatmapType.Count)
+            {
                 DrawCountHeatmapSerie(vh, serie);
+            }
             else
             {
                 if (serie.IsUseCoord<PolarCoord>())
-                {
                     DrawPolarHeatmap(vh, serie);
-                }
-                else if (serie.IsUseCoord<GridCoord>())
-                {
-                    DrawDataHeatmapSerie(vh, serie);
-                }
+                else if (serie.IsUseCoord<GridCoord>()) DrawDataHeatmapSerie(vh, serie);
             }
         }
 
@@ -67,7 +65,7 @@ namespace XCharts.Runtime
                 if (itemFormatter == null) itemFormatter = "";
                 itemFormatter = itemFormatter.Replace("\\n", "\n");
                 var temp = itemFormatter.Split('\n');
-                for (int i = 0; i < temp.Length; i++)
+                for (var i = 0; i < temp.Length; i++)
                 {
                     var formatter = temp[i];
                     var param = i == 0 ? serie.context.param : new SerieParams();
@@ -107,6 +105,7 @@ namespace XCharts.Runtime
                     if (xAxis != null)
                         category = xAxis.GetData((int)serieData.GetData(0));
                 }
+
                 title = serie.serieName;
                 itemFormatter = SerieHelper.GetItemFormatter(serie, serieData, itemFormatter);
                 numericFormatter = SerieHelper.GetNumericFormatter(serie, serieData, numericFormatter);
@@ -115,7 +114,7 @@ namespace XCharts.Runtime
                 if (itemFormatter == null) itemFormatter = "";
                 itemFormatter = itemFormatter.Replace("\\n", "\n");
                 var temp = itemFormatter.Split('\n');
-                for (int i = 0; i < temp.Length; i++)
+                for (var i = 0; i < temp.Length; i++)
                 {
                     var formatter = temp[i];
                     var param = i == 0 ? serie.context.param : new SerieParams();
@@ -162,31 +161,26 @@ namespace XCharts.Runtime
                     m_LastCheckContextFlag = needCheck;
                     serie.context.pointerItemDataIndex = -1;
                     serie.context.pointerEnter = false;
-                    foreach (var serieData in serie.data)
-                    {
-                        serieData.context.highlight = false;
-                    }
+                    foreach (var serieData in serie.data) serieData.context.highlight = false;
                     chart.RefreshPainter(serie);
                 }
+
                 return;
             }
+
             if (serie.heatmapType == HeatmapType.Count)
                 return;
             m_LastCheckContextFlag = needCheck;
             if (m_LegendEnter)
             {
                 serie.context.pointerEnter = true;
-                foreach (var serieData in serie.data)
-                {
-                    serieData.context.highlight = true;
-                }
+                foreach (var serieData in serie.data) serieData.context.highlight = true;
             }
             else
             {
                 serie.context.pointerItemDataIndex = -1;
                 serie.context.pointerEnter = false;
                 foreach (var serieData in serie.data)
-                {
                     if (!needInteract && serieData.context.rect.Contains(chart.pointerPos))
                     {
                         serie.context.pointerItemDataIndex = serieData.index;
@@ -198,12 +192,9 @@ namespace XCharts.Runtime
                     {
                         serieData.context.highlight = false;
                     }
-                }
             }
-            if (needInteract)
-            {
-                chart.RefreshPainter(serie);
-            }
+
+            if (needInteract) chart.RefreshPainter(serie);
         }
 
         private void DrawDataHeatmapSerie(VertexHelper vh, Heatmap serie)
@@ -211,8 +202,8 @@ namespace XCharts.Runtime
             if (!serie.show || serie.animation.HasFadeOut()) return;
             XAxis xAxis;
             YAxis yAxis;
-            if (!chart.TryGetChartComponent<XAxis>(out xAxis, serie.xAxisIndex)) return;
-            if (!chart.TryGetChartComponent<YAxis>(out yAxis, serie.yAxisIndex)) return;
+            if (!chart.TryGetChartComponent(out xAxis, serie.xAxisIndex)) return;
+            if (!chart.TryGetChartComponent(out yAxis, serie.yAxisIndex)) return;
             var visualMap = chart.GetVisualMapOfSerie(serie);
             if (visualMap == null) return;
             m_SerieGrid = chart.GetChartComponent<GridCoord>(xAxis.gridIndex);
@@ -247,13 +238,14 @@ namespace XCharts.Runtime
                 SerieHelper.GetMinMaxData(serie, dimension, out minValue, out maxValue);
                 VisualMapHelper.SetMinMax(visualMap, minValue, maxValue);
             }
+
             var rangeMin = visualMap.rangeMin;
             var rangeMax = visualMap.rangeMax;
             var color = chart.theme.GetColor(serie.index);
-            float symbolBorder = 0f;
+            var symbolBorder = 0f;
             float[] cornerRadius = null;
             Color32 borderColor;
-            for (int n = 0; n < serie.dataCount; n++)
+            for (var n = 0; n < serie.dataCount; n++)
             {
                 var serieData = serie.data[n];
                 var xValue = serieData.GetData(0);
@@ -267,10 +259,12 @@ namespace XCharts.Runtime
                     serie.context.dataIndexs.Add(serieData.index);
                     continue;
                 }
+
                 var state = SerieHelper.GetSerieState(serie, serieData, true);
                 var symbol = SerieHelper.GetSerieSymbol(serie, serieData, state);
                 var isRectSymbol = symbol.type == SymbolType.Rect;
-                SerieHelper.GetSymbolInfo(out borderColor, out symbolBorder, out cornerRadius, serie, serieData, chart.theme, state);
+                SerieHelper.GetSymbolInfo(out borderColor, out symbolBorder, out cornerRadius, serie, serieData,
+                    chart.theme, state);
                 var value = serieData.GetCurrData(dimension, dataAddDuration, dataChangeDuration, yAxis.inverse,
                     0, 0, unscaledTime);
                 if (serieData.IsDataChanged()) dataChanging = true;
@@ -283,9 +277,7 @@ namespace XCharts.Runtime
 
                 if ((value < rangeMin && rangeMin != visualMap.min) ||
                     (value > rangeMax && rangeMax != visualMap.max))
-                {
                     continue;
-                }
                 if (!visualMap.IsInSelectedValue(value)) continue;
                 if (animationIndex >= 0 && i > animationIndex) continue;
                 color = visualMap.GetColor(value);
@@ -295,8 +287,8 @@ namespace XCharts.Runtime
                 serieData.context.canShowLabel = true;
                 serieData.context.color = color;
 
-                var highlight = (serieData.context.highlight) ||
-                    visualMap.context.pointerIndex > 0;
+                var highlight = serieData.context.highlight ||
+                                visualMap.context.pointerIndex > 0;
                 var rectWid = 0f;
                 var rectHig = 0f;
                 if (isRectSymbol)
@@ -312,19 +304,20 @@ namespace XCharts.Runtime
                         rectWid = symbolSize;
                         rectHig = symbolSize;
                     }
+
                     serieData.context.rect = new Rect(pos.x - rectWid / 2, pos.y - rectHig / 2, rectWid, rectHig);
                     UGL.DrawRectangle(vh, serieData.context.rect, color);
 
                     if (borderWidth > 0 && !ChartHelper.IsClearColor(borderColor))
-                    {
                         UGL.DrawBorder(vh, pos, rectWid, rectHig, borderWidth, borderColor, borderColor);
-                    }
                 }
                 else
                 {
                     var symbolSize = SerieHelper.GetSysmbolSize(serie, serieData, defaultSymbolSize, state);
-                    var emptyColor = SerieHelper.GetItemBackgroundColor(serie, serieData, chart.theme, serie.context.colorIndex, state);
-                    serieData.context.rect = new Rect(pos.x - symbolSize / 2, pos.y - symbolSize / 2, symbolSize, symbolSize);
+                    var emptyColor = SerieHelper.GetItemBackgroundColor(serie, serieData, chart.theme,
+                        serie.context.colorIndex, state);
+                    serieData.context.rect = new Rect(pos.x - symbolSize / 2, pos.y - symbolSize / 2, symbolSize,
+                        symbolSize);
                     chart.DrawSymbol(vh, symbol.type, symbolSize, symbolBorder, pos,
                         color, color, emptyColor, borderColor, symbol.gap, cornerRadius, symbol.size2);
                 }
@@ -334,24 +327,24 @@ namespace XCharts.Runtime
                 {
                     var emphasisItemStyle = emphasisStyle.itemStyle;
                     var emphasisBorderWidth = emphasisItemStyle.borderWidth;
-                    var emphasisBorderColor = emphasisItemStyle.opacity > 0 ?
-                        emphasisItemStyle.borderColor : ChartConst.clearColor32;
-                    var emphasisBorderToColor = emphasisItemStyle.opacity > 0 ?
-                        emphasisItemStyle.borderToColor : ChartConst.clearColor32;
+                    var emphasisBorderColor = emphasisItemStyle.opacity > 0
+                        ? emphasisItemStyle.borderColor
+                        : ChartConst.clearColor32;
+                    var emphasisBorderToColor = emphasisItemStyle.opacity > 0
+                        ? emphasisItemStyle.borderToColor
+                        : ChartConst.clearColor32;
                     UGL.DrawBorder(vh, pos, rectWid, rectHig, emphasisBorderWidth, emphasisBorderColor,
                         emphasisBorderToColor);
                 }
-
             }
+
             if (!serie.animation.IsFinish())
             {
                 serie.animation.CheckProgress(xCount);
                 chart.RefreshPainter(serie);
             }
-            if (dataChanging)
-            {
-                chart.RefreshPainter(serie);
-            }
+
+            if (dataChanging) chart.RefreshPainter(serie);
         }
 
         private void DrawCountHeatmapSerie(VertexHelper vh, Heatmap serie)
@@ -359,8 +352,8 @@ namespace XCharts.Runtime
             if (!serie.show || serie.animation.HasFadeOut()) return;
             XAxis xAxis;
             YAxis yAxis;
-            if (!chart.TryGetChartComponent<XAxis>(out xAxis, serie.xAxisIndex)) return;
-            if (!chart.TryGetChartComponent<YAxis>(out yAxis, serie.yAxisIndex)) return;
+            if (!chart.TryGetChartComponent(out xAxis, serie.xAxisIndex)) return;
+            if (!chart.TryGetChartComponent(out yAxis, serie.yAxisIndex)) return;
             m_SerieGrid = chart.GetChartComponent<GridCoord>(xAxis.gridIndex);
             xAxis.boundaryGap = true;
             yAxis.boundaryGap = true;
@@ -404,47 +397,38 @@ namespace XCharts.Runtime
                 m_CountDict[key] = count;
             }
 
-            if (visualMap.autoMinMax)
-            {
-                VisualMapHelper.SetMinMax(visualMap, minCount, maxCount);
-            }
+            if (visualMap.autoMinMax) VisualMapHelper.SetMinMax(visualMap, minCount, maxCount);
             var rangeMin = visualMap.rangeMin;
             var rangeMax = visualMap.rangeMax;
 
-            int highlightX = -1;
-            int highlightY = -1;
+            var highlightX = -1;
+            var highlightY = -1;
             if (serie.context.pointerItemDataIndex > 0)
-            {
                 if (m_CountDict.ContainsKey(serie.context.pointerItemDataIndex))
-                {
                     GetGridXYByKey(serie.context.pointerItemDataIndex, out highlightX, out highlightY);
-                }
-            }
+
             var state = SerieHelper.GetSerieState(serie, null, true);
             var symbol = SerieHelper.GetSerieSymbol(serie, null, state);
             var symbolSize = SerieHelper.GetSysmbolSize(serie, null, defaultSymbolSize, state);
             var isRectSymbol = symbol.type == SymbolType.Rect;
-            float symbolBorder = 0f;
+            var symbolBorder = 0f;
             float[] cornerRadius = null;
             Color32 color, toColor, emptyColor, borderColor;
-            SerieHelper.GetItemColor(out color, out toColor, out emptyColor, serie, null, chart.theme, serie.context.colorIndex, state);
-            SerieHelper.GetSymbolInfo(out borderColor, out symbolBorder, out cornerRadius, serie, null, chart.theme, state);
+            SerieHelper.GetItemColor(out color, out toColor, out emptyColor, serie, null, chart.theme,
+                serie.context.colorIndex, state);
+            SerieHelper.GetSymbolInfo(out borderColor, out symbolBorder, out cornerRadius, serie, null, chart.theme,
+                state);
             foreach (var kv in m_CountDict)
             {
                 int i, j;
                 GetGridXYByKey(kv.Key, out i, out j);
                 var value = kv.Value;
 
-                if (serie.IsIgnoreValue(value))
-                {
-                    continue;
-                }
+                if (serie.IsIgnoreValue(value)) continue;
 
                 if ((value < rangeMin && rangeMin != visualMap.min) ||
                     (value > rangeMax && rangeMax != visualMap.max))
-                {
                     continue;
-                }
                 if (!visualMap.IsInSelectedValue(value))
                     continue;
                 if (animationIndex >= 0 && i > animationIndex)
@@ -473,13 +457,12 @@ namespace XCharts.Runtime
                         rectWid = symbolSize;
                         rectHig = symbolSize;
                     }
+
                     var rect = new Rect(pos.x - rectWid / 2, pos.y - rectHig / 2, rectWid, rectHig);
                     UGL.DrawRectangle(vh, rect, color);
 
                     if (borderWidth > 0 && !ChartHelper.IsClearColor(borderColor))
-                    {
                         UGL.DrawBorder(vh, pos, rectWid, rectHig, borderWidth, borderColor, borderColor);
-                    }
                 }
                 else
                 {
@@ -492,24 +475,24 @@ namespace XCharts.Runtime
                 {
                     var emphasisItemStyle = emphasisStyle.itemStyle;
                     var emphasisBorderWidth = emphasisItemStyle.borderWidth;
-                    var emphasisBorderColor = emphasisItemStyle.opacity > 0 ?
-                        emphasisItemStyle.borderColor : ChartConst.clearColor32;
-                    var emphasisBorderToColor = emphasisItemStyle.opacity > 0 ?
-                        emphasisItemStyle.borderToColor : ChartConst.clearColor32;
+                    var emphasisBorderColor = emphasisItemStyle.opacity > 0
+                        ? emphasisItemStyle.borderColor
+                        : ChartConst.clearColor32;
+                    var emphasisBorderToColor = emphasisItemStyle.opacity > 0
+                        ? emphasisItemStyle.borderToColor
+                        : ChartConst.clearColor32;
                     UGL.DrawBorder(vh, pos, rectWid, rectHig, emphasisBorderWidth, emphasisBorderColor,
                         emphasisBorderToColor);
                 }
-
             }
+
             if (!serie.animation.IsFinish())
             {
                 serie.animation.CheckProgress(xCount);
                 chart.RefreshPainter(serie);
             }
-            if (dataChanging)
-            {
-                chart.RefreshPainter(serie);
-            }
+
+            if (dataChanging) chart.RefreshPainter(serie);
         }
     }
 }

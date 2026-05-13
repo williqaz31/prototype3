@@ -10,39 +10,37 @@ public class CameraControl : MonoBehaviour
     private Camera cam;
     private Vector3 dragOrigin;
 
-    void Start()
+    private void Start()
     {
         cam = GetComponent<Camera>();
     }
 
-    void Update()
+    private void Update()
     {
         HandleZoom();
         HandlePan();
     }
 
-    void HandleZoom()
+    private void HandleZoom()
     {
-        float scroll = Input.GetAxis("Mouse ScrollWheel");
+        var scroll = Input.GetAxis("Mouse ScrollWheel");
         if (scroll != 0)
         {
             // Ajuste la taille orthographique
-            float newSize = cam.orthographicSize - scroll * zoomSpeed;
+            var newSize = cam.orthographicSize - scroll * zoomSpeed;
             cam.orthographicSize = Mathf.Clamp(newSize, minSize, maxSize);
         }
     }
 
-    void HandlePan()
+    private void HandlePan()
     {
         // Permet de déplacer la caméra avec le clic droit ou molette cliquée
         if (Input.GetMouseButtonDown(1) || Input.GetMouseButtonDown(2))
-        {
             dragOrigin = cam.ScreenToWorldPoint(Input.mousePosition);
-        }
 
         if (Input.GetMouseButton(1) || Input.GetMouseButton(2))
         {
-            Vector3 difference = dragOrigin - cam.ScreenToWorldPoint(Input.mousePosition);
+            var difference = dragOrigin - cam.ScreenToWorldPoint(Input.mousePosition);
             transform.position += difference;
         }
     }

@@ -8,15 +8,15 @@ namespace XCharts.Example
     public class Example20_BarChart : MonoBehaviour
     {
         private BarChart chart;
+        private readonly int m_DataNum = 5;
         private Serie serie, serie2;
-        private int m_DataNum = 5;
 
         private void OnEnable()
         {
             StartCoroutine(PieDemo());
         }
 
-        IEnumerator PieDemo()
+        private IEnumerator PieDemo()
         {
             while (true)
             {
@@ -35,7 +35,7 @@ namespace XCharts.Example
             }
         }
 
-        IEnumerator AddSimpleBar()
+        private IEnumerator AddSimpleBar()
         {
             chart = gameObject.GetComponent<BarChart>();
             if (chart == null)
@@ -43,6 +43,7 @@ namespace XCharts.Example
                 chart = gameObject.AddComponent<BarChart>();
                 chart.Init();
             }
+
             chart.EnsureChartComponent<Title>().text = "BarChart - 柱状图";
             chart.EnsureChartComponent<Title>().subText = "普通柱状图";
 
@@ -52,19 +53,20 @@ namespace XCharts.Example
             chart.RemoveData();
             serie = chart.AddSerie<Bar>("Bar1");
 
-            for (int i = 0; i < m_DataNum; i++)
+            for (var i = 0; i < m_DataNum; i++)
             {
                 chart.AddXAxisData("x" + (i + 1));
-                chart.AddData(0, UnityEngine.Random.Range(30, 90));
+                chart.AddData(0, Random.Range(30, 90));
             }
+
             yield return new WaitForSeconds(1);
         }
 
-        IEnumerator BarMutilSerie()
+        private IEnumerator BarMutilSerie()
         {
             chart.EnsureChartComponent<Title>().subText = "多条柱状图";
 
-            float now = serie.barWidth - 0.35f;
+            var now = serie.barWidth - 0.35f;
             while (serie.barWidth > 0.35f)
             {
                 serie.barWidth -= now * Time.deltaTime;
@@ -75,14 +77,11 @@ namespace XCharts.Example
             serie2 = chart.AddSerie<Bar>("Bar2");
             serie2.lineType = LineType.Normal;
             serie2.barWidth = 0.35f;
-            for (int i = 0; i < m_DataNum; i++)
-            {
-                chart.AddData(1, UnityEngine.Random.Range(20, 90));
-            }
+            for (var i = 0; i < m_DataNum; i++) chart.AddData(1, Random.Range(20, 90));
             yield return new WaitForSeconds(1);
         }
 
-        IEnumerator ZebraBar()
+        private IEnumerator ZebraBar()
         {
             chart.EnsureChartComponent<Title>().subText = "斑马柱状图";
             serie.barType = BarType.Zebra;
@@ -93,7 +92,7 @@ namespace XCharts.Example
             yield return new WaitForSeconds(1);
         }
 
-        IEnumerator SameBarAndNotStack()
+        private IEnumerator SameBarAndNotStack()
         {
             chart.EnsureChartComponent<Title>().subText = "非堆叠同柱";
             serie.barType = serie2.barType = BarType.Normal;
@@ -104,14 +103,14 @@ namespace XCharts.Example
             yield return new WaitForSeconds(1);
         }
 
-        IEnumerator SameBarAndStack()
+        private IEnumerator SameBarAndStack()
         {
             chart.EnsureChartComponent<Title>().subText = "堆叠同柱";
             serie.barType = serie2.barType = BarType.Normal;
             serie.stack = "samename";
             serie2.stack = "samename";
             yield return new WaitForSeconds(1);
-            float now = 0.6f - serie.barWidth;
+            var now = 0.6f - serie.barWidth;
             while (serie.barWidth < 0.6f)
             {
                 serie.barWidth += now * Time.deltaTime;
@@ -119,12 +118,13 @@ namespace XCharts.Example
                 chart.RefreshChart();
                 yield return null;
             }
+
             serie.barWidth = serie2.barWidth;
             chart.RefreshChart();
             yield return new WaitForSeconds(1);
         }
 
-        IEnumerator SameBarAndPercentStack()
+        private IEnumerator SameBarAndPercentStack()
         {
             chart.EnsureChartComponent<Title>().subText = "百分比堆叠同柱";
             serie.barType = serie2.barType = BarType.Normal;
@@ -132,19 +132,13 @@ namespace XCharts.Example
             serie2.stack = "samename";
 
             serie.barPercentStack = true;
-            if (null == serie.label)
-            {
-                serie.EnsureComponent<LabelStyle>();
-            }
+            if (null == serie.label) serie.EnsureComponent<LabelStyle>();
             serie.label.show = true;
             serie.label.position = LabelStyle.Position.Center;
             serie.label.textStyle.color = Color.white;
             serie.label.formatter = "{d:f0}%";
 
-            if (null == serie2.label)
-            {
-                serie2.EnsureComponent<LabelStyle>();
-            }
+            if (null == serie2.label) serie2.EnsureComponent<LabelStyle>();
             serie2.label.show = true;
             serie2.label.position = LabelStyle.Position.Center;
             serie2.label.textStyle.color = Color.white;

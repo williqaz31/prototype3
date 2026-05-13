@@ -1,3 +1,4 @@
+using System;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -8,18 +9,19 @@ namespace XCharts.Editor
     public class MainComponentBaseEditor
     {
         protected const string MORE = "More";
-        protected bool m_MoreFoldout = false;
+
+        public SerializedProperty baseProperty;
+        protected bool m_MoreFoldout;
+        public SerializedProperty showProperty;
         public BaseChart chart { get; private set; }
         public MainComponent component { get; private set; }
 
-        public SerializedProperty baseProperty;
-        public SerializedProperty showProperty;
-
-        internal void Init(BaseChart chart, MainComponent target, SerializedProperty property, UnityEditor.Editor inspector)
+        internal void Init(BaseChart chart, MainComponent target, SerializedProperty property,
+            UnityEditor.Editor inspector)
         {
             this.chart = chart;
-            this.component = target;
-            this.baseProperty = property;
+            component = target;
+            baseProperty = property;
             showProperty = baseProperty.FindPropertyRelative("m_Show");
             if (showProperty == null)
                 showProperty = baseProperty.FindPropertyRelative("m_Enable");
@@ -27,10 +29,12 @@ namespace XCharts.Editor
         }
 
         public virtual void OnEnable()
-        { }
+        {
+        }
 
         public virtual void OnDisable()
-        { }
+        {
+        }
 
         internal void OnInternalInspectorGUI()
         {
@@ -39,18 +43,19 @@ namespace XCharts.Editor
         }
 
         public virtual void OnInspectorGUI()
-        { }
+        {
+        }
 
         protected virtual void DrawExtendeds()
-        { }
+        {
+        }
 
         public virtual string GetDisplayTitle()
         {
             var num = chart.GetChartComponentNum(component.GetType());
             if (num > 1)
                 return ObjectNames.NicifyVariableName(component.GetType().Name) + " " + component.index;
-            else
-                return ObjectNames.NicifyVariableName(component.GetType().Name);
+            return ObjectNames.NicifyVariableName(component.GetType().Name);
         }
 
         protected SerializedProperty FindProperty(string path)
@@ -72,13 +77,12 @@ namespace XCharts.Editor
             }
         }
 
-        protected void PropertyFiledMore(System.Action action)
+        protected void PropertyFiledMore(Action action)
         {
             m_MoreFoldout = ChartEditorHelper.DrawHeader(MORE, m_MoreFoldout, false, null, null);
             if (m_MoreFoldout)
-            {
-                if (action != null) action();
-            }
+                if (action != null)
+                    action();
         }
 
         protected void PropertyField(SerializedProperty property)
@@ -100,10 +104,7 @@ namespace XCharts.Editor
             var prop = FindProperty(relativePropName);
             prop.isExpanded = ChartEditorHelper.MakeListWithFoldout(ref m_DrawRect, ref height,
                 prop, prop.isExpanded, showOrder, true, menus);
-            if (prop.isExpanded)
-            {
-                GUILayoutUtility.GetRect(1f, height - 17);
-            }
+            if (prop.isExpanded) GUILayoutUtility.GetRect(1f, height - 17);
         }
 
         protected void PropertyTwoFiled(string relativePropName)

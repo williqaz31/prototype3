@@ -1,27 +1,31 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace XCharts.Runtime
 {
     /// <summary>
-    /// Angle axis of Polar Coordinate.
-    /// ||极坐标系的角度轴。
+    ///     Angle axis of Polar Coordinate.
+    ///     ||极坐标系的角度轴。
     /// </summary>
-    [System.Serializable]
+    [Serializable]
     [RequireChartComponent(typeof(PolarCoord))]
     [ComponentHandler(typeof(AngleAxisHandler), true)]
     public class AngleAxis : Axis
     {
-        [SerializeField] private float m_StartAngle = 0;
+        [SerializeField] private float m_StartAngle;
 
         /// <summary>
-        /// Starting angle of axis. 0 degrees by default, standing for right position of center.
-        /// ||起始刻度的角度，默认为 0 度，即圆心的正右方。
+        ///     Starting angle of axis. 0 degrees by default, standing for right position of center.
+        ///     ||起始刻度的角度，默认为 0 度，即圆心的正右方。
         /// </summary>
         public float startAngle
         {
-            get { return m_StartAngle; }
-            set { if (PropertyUtil.SetStruct(ref m_StartAngle, value)) SetAllDirty(); }
+            get => m_StartAngle;
+            set
+            {
+                if (PropertyUtil.SetStruct(ref m_StartAngle, value)) SetAllDirty();
+            }
         }
 
         public float GetValueAngle(float value)
@@ -31,7 +35,7 @@ namespace XCharts.Runtime
 
         public float GetValueAngle(double value)
         {
-            return (float) (value + context.startAngle + 360) % 360;
+            return (float)(value + context.startAngle + 360) % 360;
         }
 
         public override void SetDefaultValue()

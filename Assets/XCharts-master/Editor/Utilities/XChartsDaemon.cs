@@ -1,28 +1,11 @@
 using System.IO;
 using UnityEditor;
-using UnityEngine;
 using XCharts.Runtime;
 
 namespace XCharts.Editor
 {
     internal static class XChartsDaemon
     {
-        public class XChartsAssetPostprocessor : AssetPostprocessor
-        {
-            static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets,
-                string[] movedFromAssetsPaths)
-            {
-                foreach (var assetPath in importedAssets)
-                {
-                    CheckAddedAsset(assetPath);
-                }
-                foreach (var assetPath in deletedAssets)
-                {
-                    CheckDeletedAsset(assetPath);
-                }
-            }
-        }
-
         public static void CheckAddedAsset(string assetPath)
         {
             var fileName = Path.GetFileName(assetPath);
@@ -34,10 +17,7 @@ namespace XCharts.Editor
             else if (IsThemeAsset(assetPath))
             {
                 var theme = AssetDatabase.LoadAssetAtPath<Theme>(assetPath);
-                if (XCSettings.AddCustomTheme(theme))
-                {
-                    XCThemeMgr.ReloadThemeList();
-                }
+                if (XCSettings.AddCustomTheme(theme)) XCThemeMgr.ReloadThemeList();
             }
         }
 
@@ -65,18 +45,14 @@ namespace XCharts.Editor
             var themes = XCSettings.customThemes;
             var changed = false;
 
-            for (int i = themes.Count - 1; i >= 0; i--)
-            {
+            for (var i = themes.Count - 1; i >= 0; i--)
                 if (themes[i] == null)
                 {
                     themes.RemoveAt(i);
                     changed = true;
                 }
-            }
-            if (changed)
-            {
-                XCThemeMgr.ReloadThemeList();
-            }
+
+            if (changed) XCThemeMgr.ReloadThemeList();
         }
 
         private static bool IsThemeAsset(string assetPath)
@@ -85,6 +61,17 @@ namespace XCharts.Editor
             var assetName = Path.GetFileNameWithoutExtension(assetPath);
             if (!assetName.StartsWith(XCSettings.THEME_ASSET_NAME_PREFIX)) return false;
             return true;
+        }
+
+        public class XChartsAssetPostprocessor : AssetPostprocessor
+        {
+            private static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets,
+                string[] movedAssets,
+                string[] movedFromAssetsPaths)
+            {
+                foreach (var assetPath in importedAssets) CheckAddedAsset(assetPath);
+                foreach (var assetPath in deletedAssets) CheckDeletedAsset(assetPath);
+            }
         }
     }
 }

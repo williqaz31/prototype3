@@ -1,21 +1,22 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using UnityEditor.Callbacks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using System.Linq;
 #if UNITY_EDITOR
 using ADB = UnityEditor.AssetDatabase;
 #endif
 
 namespace XCharts.Runtime
 {
-    class XChartsVersion
+    internal class XChartsVersion
     {
-        public string version = "";
-        public int date = 0;
         public int checkdate = 0;
+        public int date = 0;
         public string desc = "";
         public string homepage = "";
+        public string version = "";
     }
 
     [ExecuteInEditMode]
@@ -23,11 +24,10 @@ namespace XCharts.Runtime
     {
         public static readonly string version = "3.14.0";
         public static readonly int versionDate = 20250315;
-        public static string fullVersion { get { return version + "-" + versionDate; } }
 
-        internal static List<BaseChart> chartList = new List<BaseChart>();
-        internal static Dictionary<string, Theme> themes = new Dictionary<string, Theme>();
-        internal static List<string> themeNames = new List<string>();
+        internal static List<BaseChart> chartList = new();
+        internal static Dictionary<string, Theme> themes = new();
+        internal static List<string> themeNames = new();
 
         static XChartsMgr()
         {
@@ -38,7 +38,9 @@ namespace XCharts.Runtime
             SceneManager.sceneUnloaded += OnSceneLoaded;
         }
 
-        static void OnSceneLoaded(Scene scene)
+        public static string fullVersion => version + "-" + versionDate;
+
+        private static void OnSceneLoaded(Scene scene)
         {
             SerieLabelPool.ClearAll();
         }
@@ -52,10 +54,8 @@ namespace XCharts.Runtime
                 Debug.LogError("A chart named `" + chart.chartName + "` already exists:" + path);
                 RemoveChart(chart.chartName);
             }
-            if (!ContainsChart(chart))
-            {
-                chartList.Add(chart);
-            }
+
+            if (!ContainsChart(chart)) chartList.Add(chart);
         }
 
         public static BaseChart GetChart(string chartName)
@@ -95,10 +95,8 @@ namespace XCharts.Runtime
             if (string.IsNullOrEmpty(chartName))
                 return false;
             foreach (var temp in chartList)
-            {
                 if (temp != chart && chartName.Equals(temp.chartName))
                     return true;
-            }
             return false;
         }
 
@@ -106,50 +104,40 @@ namespace XCharts.Runtime
         {
             if (string.IsNullOrEmpty(chartName))
                 return string.Empty;
-            string result = "";
+            var result = "";
             foreach (var temp in chartList)
-            {
                 if (temp != chart && chartName.Equals(temp.chartName))
                     result += ChartHelper.GetFullName(temp.transform) + "\n";
-            }
             return result;
         }
 
         public static void RemoveAllChartObject()
         {
-            if (chartList.Count == 0)
-            {
-                return;
-            }
+            if (chartList.Count == 0) return;
             foreach (var chart in chartList)
-            {
                 if (chart != null)
                     chart.RebuildChartObject();
-            }
         }
 
 #if UNITY_EDITOR
 
         public static string GetPackageFullPath()
         {
-            string packagePath = Path.GetFullPath("Packages/com.monitor1394.xcharts");
-            if (Directory.Exists(packagePath))
-            {
-                return packagePath;
-            }
+            var packagePath = Path.GetFullPath("Packages/com.monitor1394.xcharts");
+            if (Directory.Exists(packagePath)) return packagePath;
             packagePath = ADB.FindAssets("t:Script")
-                                              .Where(v => Path.GetFileNameWithoutExtension(ADB.GUIDToAssetPath(v)) == "XChartsMgr")
-                                              .Select(id => ADB.GUIDToAssetPath(id))
-                                              .FirstOrDefault();
+                .Where(v => Path.GetFileNameWithoutExtension(ADB.GUIDToAssetPath(v)) == "XChartsMgr")
+                .Select(id => ADB.GUIDToAssetPath(id))
+                .FirstOrDefault();
             packagePath = Path.GetDirectoryName(packagePath);
             packagePath = packagePath.Substring(0, packagePath.LastIndexOf("Runtime"));
             return packagePath;
         }
 
-        [UnityEditor.Callbacks.DidReloadScripts]
-        static void OnEditorReload()
+        [DidReloadScripts]
+        private static void OnEditorReload()
         {
-            for (int i = chartList.Count - 1; i >= 0; i--)
+            for (var i = chartList.Count - 1; i >= 0; i--)
             {
                 var chart = chartList[i];
                 if (chart == null)

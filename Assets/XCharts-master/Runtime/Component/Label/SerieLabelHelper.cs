@@ -1,21 +1,15 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace XCharts.Runtime
 {
     public static class SerieLabelHelper
     {
-
         public static Color GetLabelColor(Serie serie, ThemeStyle theme, int index)
         {
             if (serie.label != null && !ChartHelper.IsClearColor(serie.label.textStyle.color))
-            {
                 return serie.label.textStyle.color;
-            }
-            else
-            {
-                return theme.GetColor(index);
-            }
+
+            return theme.GetColor(index);
         }
 
         public static bool CanShowLabel(Serie serie, SerieData serieData, LabelStyle label, int dimesion)
@@ -26,10 +20,7 @@ namespace XCharts.Runtime
         public static string GetFormatterContent(Serie serie, SerieData serieData,
             double dataValue, double dataTotal, LabelStyle serieLabel, Color color, BaseChart chart = null)
         {
-            if (serieLabel == null)
-            {
-                serieLabel = SerieHelper.GetSerieLabel(serie, serieData);
-            }
+            if (serieLabel == null) serieLabel = SerieHelper.GetSerieLabel(serie, serieData);
             var numericFormatter = serieLabel == null ? "" : serieLabel.numericFormatter;
             var serieName = serie.serieName;
             var dataName = serieData != null ? serieData.name : null;
@@ -38,19 +29,15 @@ namespace XCharts.Runtime
                 var currentContent = ChartCached.NumberToStr(dataValue, numericFormatter);
                 if (serieLabel.formatterFunction == null)
                     return currentContent;
-                else
-                    return serieLabel.formatterFunction(serieData.index, dataValue, null, currentContent);
+                return serieLabel.formatterFunction(serieData.index, dataValue, null, currentContent);
             }
-            else
-            {
-                var content = serieLabel.formatter;
-                FormatterHelper.ReplaceSerieLabelContent(ref content, numericFormatter, serie.dataCount, dataValue,
-                    dataTotal, serieName, dataName, dataName, color, serieData, chart, serie.index, serie.useSortData);
-                if (serieLabel.formatterFunction == null)
-                    return content;
-                else
-                    return serieLabel.formatterFunction(serieData.index, dataValue, null, content);
-            }
+
+            var content = serieLabel.formatter;
+            FormatterHelper.ReplaceSerieLabelContent(ref content, numericFormatter, serie.dataCount, dataValue,
+                dataTotal, serieName, dataName, dataName, color, serieData, chart, serie.index, serie.useSortData);
+            if (serieLabel.formatterFunction == null)
+                return content;
+            return serieLabel.formatterFunction(serieData.index, dataValue, null, content);
         }
 
         public static string GetTitleFormatterContent(Serie serie, SerieData serieData,
@@ -64,8 +51,10 @@ namespace XCharts.Runtime
             else
             {
                 content = titleStyle.formatter;
-                FormatterHelper.ReplaceContent(ref content, dataIndex, titleStyle.numericFormatter, serie, chart, null, serieData);
+                FormatterHelper.ReplaceContent(ref content, dataIndex, titleStyle.numericFormatter, serie, chart, null,
+                    serieData);
             }
+
             return content;
         }
 
@@ -78,13 +67,11 @@ namespace XCharts.Runtime
             if (label == null) return;
             var value = serieData.GetData(1);
             var total = serie.max;
-            var content = SerieLabelHelper.GetFormatterContent(serie, serieData, value, total, null, Color.clear);
+            var content = GetFormatterContent(serie, serieData, value, total, null, Color.clear);
             serieData.labelObject.SetText(content);
             serieData.labelObject.SetPosition(serie.context.center + label.offset);
             if (!ChartHelper.IsClearColor(label.textStyle.color))
-            {
                 serieData.labelObject.text.SetColor(label.textStyle.color);
-            }
         }
     }
 }

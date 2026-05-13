@@ -10,13 +10,13 @@ public class UIGraph : MonoBehaviour
     public int maxPoints = 100;
     public float yMax = 200f;
 
-    private List<GameObject> points = new List<GameObject>();
-    private Queue<float> values = new Queue<float>();
+    private readonly List<GameObject> points = new();
+    private readonly Queue<float> values = new();
 
-    void Update()
+    private void Update()
     {
         // TEST : remplace par ta population
-        float population = Mathf.PerlinNoise(Time.time, 0f) * 150f;
+        var population = Mathf.PerlinNoise(Time.time, 0f) * 150f;
         AddPoint(population);
     }
 
@@ -31,32 +31,32 @@ public class UIGraph : MonoBehaviour
 
         values.Enqueue(value);
 
-        float graphWidth = graphContainer.sizeDelta.x;
-        float graphHeight = graphContainer.sizeDelta.y;
+        var graphWidth = graphContainer.sizeDelta.x;
+        var graphHeight = graphContainer.sizeDelta.y;
 
-        float xSpacing = graphWidth / maxPoints;
+        var xSpacing = graphWidth / maxPoints;
 
-        int index = values.Count - 1;
+        var index = values.Count - 1;
 
-        float xPos = index * xSpacing;
-        float yPos = (value / yMax) * graphHeight;
+        var xPos = index * xSpacing;
+        var yPos = value / yMax * graphHeight;
 
-        GameObject dot = CreateDot(new Vector2(xPos, yPos));
+        var dot = CreateDot(new Vector2(xPos, yPos));
         points.Add(dot);
 
         UpdatePositions(xSpacing);
     }
 
-    GameObject CreateDot(Vector2 anchoredPosition)
+    private GameObject CreateDot(Vector2 anchoredPosition)
     {
-        GameObject obj = new GameObject("dot", typeof(Image));
+        var obj = new GameObject("dot", typeof(Image));
         obj.transform.SetParent(graphContainer, false);
 
-        Image image = obj.GetComponent<Image>();
+        var image = obj.GetComponent<Image>();
         image.sprite = dotSprite;
         image.color = Color.green;
 
-        RectTransform rectTransform = obj.GetComponent<RectTransform>();
+        var rectTransform = obj.GetComponent<RectTransform>();
         rectTransform.anchoredPosition = anchoredPosition;
         rectTransform.sizeDelta = new Vector2(5, 5);
         rectTransform.anchorMin = new Vector2(0, 0);
@@ -65,11 +65,11 @@ public class UIGraph : MonoBehaviour
         return obj;
     }
 
-    void UpdatePositions(float xSpacing)
+    private void UpdatePositions(float xSpacing)
     {
-        for (int i = 0; i < points.Count; i++)
+        for (var i = 0; i < points.Count; i++)
         {
-            RectTransform rt = points[i].GetComponent<RectTransform>();
+            var rt = points[i].GetComponent<RectTransform>();
             rt.anchoredPosition = new Vector2(i * xSpacing, rt.anchoredPosition.y);
         }
     }

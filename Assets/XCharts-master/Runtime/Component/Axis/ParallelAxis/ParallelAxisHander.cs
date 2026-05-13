@@ -1,15 +1,16 @@
 using UnityEngine;
+using UnityEngine.Scripting;
 using UnityEngine.UI;
 
 namespace XCharts.Runtime
 {
-    [UnityEngine.Scripting.Preserve]
+    [Preserve]
     internal sealed class ParallelAxisHander : AxisHandler<ParallelAxis>
     {
         private Orient m_Orient;
         private ParallelCoord m_Parallel;
 
-        protected override Orient orient { get { return m_Orient; } }
+        protected override Orient orient => m_Orient;
 
         public override void InitComponent()
         {
@@ -43,18 +44,19 @@ namespace XCharts.Runtime
             {
                 var each = axisCount > 1 ? parallel.context.height / (axisCount - 1) : 0;
                 axis.context.x = parallel.context.x;
-                axis.context.y = parallel.context.y + (axis.index) * each;
+                axis.context.y = parallel.context.y + axis.index * each;
                 axis.context.width = parallel.context.width;
                 axis.context.length = parallel.context.width;
             }
             else
             {
                 var each = axisCount > 1 ? parallel.context.width / (axisCount - 1) : 0;
-                axis.context.x = parallel.context.x + (axis.index) * each;
+                axis.context.x = parallel.context.x + axis.index * each;
                 axis.context.y = parallel.context.y;
                 axis.context.width = parallel.context.height;
                 axis.context.length = parallel.context.height;
             }
+
             axis.context.orient = m_Orient;
             axis.context.height = 0;
             axis.context.position = new Vector3(axis.context.x, axis.context.y);
@@ -65,7 +67,7 @@ namespace XCharts.Runtime
             var theme = chart.theme;
             var xAxisIndex = axis.index;
             axis.painter = chart.painter;
-            axis.refreshComponent = delegate()
+            axis.refreshComponent = delegate
             {
                 UpdateContext(axis);
                 InitAxis(null,
@@ -82,8 +84,7 @@ namespace XCharts.Runtime
         {
             base.UpdateAxisLabelText(axis);
             if (axis.IsTime() || axis.IsValue())
-            {
-                for (int i = 0; i < axis.context.labelObjectList.Count; i++)
+                for (var i = 0; i < axis.context.labelObjectList.Count; i++)
                 {
                     var label = axis.context.labelObjectList[i];
                     if (label != null)
@@ -93,7 +94,6 @@ namespace XCharts.Runtime
                         CheckValueLabelActive(component, i, label, pos);
                     }
                 }
-            }
         }
 
         protected override Vector3 GetLabelPosition(float scaleWid, int i)

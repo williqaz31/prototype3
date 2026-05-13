@@ -12,7 +12,7 @@ namespace XCharts.Editor
             PropertyField("m_Layer");
             PropertyField("m_LabelStyle");
             //PropertyField("m_MarkStyle");
-            PropertyListField("m_Items", true);
+            PropertyListField("m_Items");
             --EditorGUI.indentLevel;
         }
     }

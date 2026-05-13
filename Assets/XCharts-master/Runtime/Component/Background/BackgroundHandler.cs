@@ -1,18 +1,18 @@
-using System;
-using UnityEngine;
+using UnityEngine.Scripting;
 using UnityEngine.UI;
 using XUGL;
 
 namespace XCharts.Runtime
 {
-    [UnityEngine.Scripting.Preserve]
+    [Preserve]
     internal sealed class BackgroundHandler : MainComponentHandler<Background>
     {
         private readonly string s_BackgroundObjectName = "background";
+
         public override void InitComponent()
         {
             component.painter = chart.painter;
-            component.refreshComponent = delegate ()
+            component.refreshComponent = delegate
             {
                 var backgroundObj = ChartHelper.AddObject(s_BackgroundObjectName, chart.transform, chart.chartMinAnchor,
                     chart.chartMaxAnchor, chart.chartPivot, chart.chartSizeDelta, -1, chart.childrenNodeNames);

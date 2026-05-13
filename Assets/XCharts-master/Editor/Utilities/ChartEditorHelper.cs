@@ -8,26 +8,30 @@ namespace XCharts.Editor
 {
     public class HeaderCallbackContext
     {
+        public int dimension;
         public int fieldCount = 0;
+        public int index;
+        public SerializedProperty listProp;
         public SerializedProperty serieData;
         public bool showName;
-        public int index;
-        public int dimension;
-        public SerializedProperty listProp;
     }
 
     public class HeaderMenuInfo
     {
-        public string name;
         public Action action;
         public bool enable = true;
+        public string name;
 
-        public HeaderMenuInfo() { }
+        public HeaderMenuInfo()
+        {
+        }
+
         public HeaderMenuInfo(string name, Action action)
         {
             this.name = name;
             this.action = action;
         }
+
         public HeaderMenuInfo(string name, Action action, bool enable)
         {
             this.name = name;
@@ -55,7 +59,7 @@ namespace XCharts.Editor
 #endif
         public const float ICON_WIDHT = 10;
         public const float ICON_GAP = 0;
-        static Dictionary<string, GUIContent> s_GUIContentCache;
+        private static readonly Dictionary<string, GUIContent> s_GUIContentCache;
 
         static ChartEditorHelper()
         {
@@ -64,7 +68,7 @@ namespace XCharts.Editor
 
         public static void SecondField(Rect drawRect, SerializedProperty prop)
         {
-            RectOffset offset = new RectOffset(-(int)EditorGUIUtility.labelWidth, 0, 0, 0);
+            var offset = new RectOffset(-(int)EditorGUIUtility.labelWidth, 0, 0, 0);
             drawRect = offset.Add(drawRect);
             EditorGUI.PropertyField(drawRect, prop, GUIContent.none);
             drawRect = offset.Remove(drawRect);
@@ -90,16 +94,17 @@ namespace XCharts.Editor
             var gap = 0;
 #endif
             var startX = drawRect.x + EditorGUIUtility.labelWidth - EditorGUI.indentLevel * INDENT_WIDTH + gap;
-            var dataWidTotal = (rectWidth - (startX + INDENT_WIDTH + 1));
+            var dataWidTotal = rectWidth - (startX + INDENT_WIDTH + 1);
             EditorGUI.DrawRect(new Rect(startX, drawRect.y, dataWidTotal, drawRect.height), Color.grey);
             var dataWid = dataWidTotal / showNum;
             var xWid = dataWid - gap;
-            for (int i = 0; i < 1; i++)
+            for (var i = 0; i < 1; i++)
             {
                 drawRect.x = startX + i * xWid;
                 drawRect.width = dataWid + (EditorGUI.indentLevel - 2) * 40.5f;
                 EditorGUI.PropertyField(drawRect, arrayProp.GetArrayElementAtIndex(i), GUIContent.none);
             }
+
             drawRect.y += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
         }
 
@@ -112,7 +117,8 @@ namespace XCharts.Editor
             var offset = diff - INDENT_WIDTH;
             var tempWidth = (rectWidth - startX + diff) / 2;
             var centerXRect = new Rect(startX, drawRect.y, tempWidth, drawRect.height - 1);
-            var centerYRect = new Rect(centerXRect.x + tempWidth - offset + 3.4f, drawRect.y, tempWidth - 1, drawRect.height - 1);
+            var centerYRect = new Rect(centerXRect.x + tempWidth - offset + 3.4f, drawRect.y, tempWidth - 1,
+                drawRect.height - 1);
             EditorGUI.PropertyField(centerXRect, prop1, GUIContent.none);
             EditorGUI.PropertyField(centerYRect, prop2, GUIContent.none);
             drawRect.y += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
@@ -127,8 +133,10 @@ namespace XCharts.Editor
             var offset = diff - INDENT_WIDTH;
             var tempWidth = (rectWidth - startX + diff - (btnSpacing ? (ICON_WIDHT + ICON_GAP) * 4 : 0)) / 3 + 8.5f;
             var centerXRect = new Rect(startX, drawRect.y, tempWidth, drawRect.height - 1);
-            var centerYRect = new Rect(centerXRect.x + tempWidth - offset, drawRect.y, tempWidth - 1, drawRect.height - 1);
-            var centerZRect = new Rect(centerYRect.x + tempWidth - offset, drawRect.y, tempWidth - 1, drawRect.height - 1);
+            var centerYRect = new Rect(centerXRect.x + tempWidth - offset, drawRect.y, tempWidth - 1,
+                drawRect.height - 1);
+            var centerZRect = new Rect(centerYRect.x + tempWidth - offset, drawRect.y, tempWidth - 1,
+                drawRect.height - 1);
             EditorGUI.PropertyField(centerXRect, prop1, GUIContent.none);
             EditorGUI.PropertyField(centerYRect, prop2, GUIContent.none);
             EditorGUI.PropertyField(centerZRect, prop3, GUIContent.none);
@@ -155,9 +163,9 @@ namespace XCharts.Editor
         public static bool MakeFoldout(ref Rect drawRect, ref bool moduleToggle, string content,
             SerializedProperty prop = null, bool bold = false)
         {
-            float defaultWidth = drawRect.width;
-            float defaultX = drawRect.x;
-            var style = bold ? EditorCustomStyles.foldoutStyle : UnityEditor.EditorStyles.foldout;
+            var defaultWidth = drawRect.width;
+            var defaultX = drawRect.x;
+            var style = bold ? EditorCustomStyles.foldoutStyle : EditorStyles.foldout;
             drawRect.width = EditorGUIUtility.labelWidth - EditorGUI.indentLevel * INDENT_WIDTH;
             moduleToggle = EditorGUI.Foldout(drawRect, moduleToggle, content, true, style);
             MakeBool(drawRect, prop);
@@ -167,11 +175,12 @@ namespace XCharts.Editor
         }
 
         public static bool MakeFoldout(ref Rect drawRect, Dictionary<string, float> heights,
-            Dictionary<string, bool> moduleToggle, string key, string content, SerializedProperty prop, bool bold = false)
+            Dictionary<string, bool> moduleToggle, string key, string content, SerializedProperty prop,
+            bool bold = false)
         {
-            float defaultWidth = drawRect.width;
-            float defaultX = drawRect.x;
-            var style = bold ? EditorCustomStyles.foldoutStyle : UnityEditor.EditorStyles.foldout;
+            var defaultWidth = drawRect.width;
+            var defaultX = drawRect.x;
+            var style = bold ? EditorCustomStyles.foldoutStyle : EditorStyles.foldout;
             drawRect.width = EditorGUIUtility.labelWidth;
             moduleToggle[key] = EditorGUI.Foldout(drawRect, moduleToggle[key], content, true, style);
             if (prop != null)
@@ -194,14 +203,15 @@ namespace XCharts.Editor
             heights[key] += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
             return moduleToggle[key];
         }
+
         public static bool MakeComponentFoldout(ref Rect drawRect, Dictionary<string, float> heights,
             Dictionary<string, bool> moduleToggle, string key, string content, SerializedProperty prop,
             SerializedProperty prop2, bool propEnable, params HeaderMenuInfo[] menus)
         {
             var sourRect = drawRect;
-            float defaultWidth = drawRect.width;
-            float defaultX = drawRect.x;
-            float headerHeight = DrawSplitterAndBackground(drawRect);
+            var defaultWidth = drawRect.width;
+            var defaultX = drawRect.x;
+            var headerHeight = DrawSplitterAndBackground(drawRect);
 
             drawRect.width = EditorGUIUtility.labelWidth;
 
@@ -212,12 +222,16 @@ namespace XCharts.Editor
                 {
                     if (!propEnable)
                         using (new EditorGUI.DisabledScope(true))
+                        {
                             MakeBool(drawRect, prop);
+                        }
                     else
                         MakeBool(drawRect, prop);
+
                     if (prop2 != null && !moduleToggle[key])
                     {
-                        drawRect.x = EditorGUIUtility.labelWidth - EditorGUI.indentLevel * INDENT_WIDTH + ARROW_WIDTH + BOOL_WIDTH;
+                        drawRect.x = EditorGUIUtility.labelWidth - EditorGUI.indentLevel * INDENT_WIDTH + ARROW_WIDTH +
+                                     BOOL_WIDTH;
                         drawRect.width = defaultWidth - drawRect.x + ARROW_WIDTH;
                         EditorGUI.PropertyField(drawRect, prop2, GUIContent.none);
                     }
@@ -229,6 +243,7 @@ namespace XCharts.Editor
                     EditorGUI.PropertyField(drawRect, prop, GUIContent.none);
                 }
             }
+
             DrawMenu(sourRect, menus);
             drawRect.width = defaultWidth;
             drawRect.x = defaultX;
@@ -239,9 +254,9 @@ namespace XCharts.Editor
 
         public static void MakeBool(Rect drawRect, SerializedProperty boolProp, int index = 0, string name = null)
         {
-            float defaultWidth = drawRect.width;
-            float defaultX = drawRect.x;
-            float boolWidth = index * (BOOL_WIDTH + GAP_WIDTH);
+            var defaultWidth = drawRect.width;
+            var defaultX = drawRect.x;
+            var boolWidth = index * (BOOL_WIDTH + GAP_WIDTH);
             drawRect.x = EditorGUIUtility.labelWidth - EditorGUI.indentLevel * INDENT_WIDTH + ARROW_WIDTH + boolWidth;
             drawRect.width = (EditorGUI.indentLevel + 1) * BOOL_WIDTH + index * 110;
             if (boolProp != null)
@@ -254,6 +269,7 @@ namespace XCharts.Editor
                     EditorGUI.LabelField(drawRect, name);
                 }
             }
+
             drawRect.width = defaultWidth;
             drawRect.x = defaultX;
         }
@@ -268,44 +284,36 @@ namespace XCharts.Editor
             return flag;
         }
 
-        public static bool MakeFoldout(ref Rect drawRect, ref Dictionary<string, bool> moduleToggle, SerializedProperty prop,
+        public static bool MakeFoldout(ref Rect drawRect, ref Dictionary<string, bool> moduleToggle,
+            SerializedProperty prop,
             string moduleName, SerializedProperty showProp = null, bool bold = false)
         {
             var key = prop.propertyPath;
-            if (!moduleToggle.ContainsKey(key))
-            {
-                moduleToggle.Add(key, false);
-            }
+            if (!moduleToggle.ContainsKey(key)) moduleToggle.Add(key, false);
             var toggle = moduleToggle[key];
 
-            float defaultWidth = drawRect.width;
-            float defaultX = drawRect.x;
+            var defaultWidth = drawRect.width;
+            var defaultX = drawRect.x;
 #if UNITY_2019_3_OR_NEWER
             drawRect.width = EditorGUIUtility.labelWidth - EditorGUI.indentLevel * INDENT_WIDTH;
 #else
             drawRect.width = EditorGUIUtility.labelWidth;
 #endif
             var displayName = string.IsNullOrEmpty(moduleName) ? prop.displayName : moduleName;
-            var foldoutStyle = bold ? EditorCustomStyles.foldoutStyle : UnityEditor.EditorStyles.foldout;
+            var foldoutStyle = bold ? EditorCustomStyles.foldoutStyle : EditorStyles.foldout;
             toggle = EditorGUI.Foldout(drawRect, toggle, displayName, true, foldoutStyle);
 
-            if (moduleToggle[key] != toggle)
-            {
-                moduleToggle[key] = toggle;
-            }
+            if (moduleToggle[key] != toggle) moduleToggle[key] = toggle;
             if (showProp != null)
             {
                 drawRect.x = EditorGUIUtility.labelWidth - EditorGUI.indentLevel * INDENT_WIDTH + ARROW_WIDTH;
                 if (showProp.propertyType == SerializedPropertyType.Boolean)
-                {
                     drawRect.width = (EditorGUI.indentLevel + 1) * BOOL_WIDTH;
-                }
                 else
-                {
                     drawRect.width = defaultWidth - drawRect.x + ARROW_WIDTH - GAP_WIDTH;
-                }
                 EditorGUI.PropertyField(drawRect, showProp, GUIContent.none);
             }
+
             drawRect.width = defaultWidth;
             drawRect.x = defaultX;
             return toggle;
@@ -325,21 +333,20 @@ namespace XCharts.Editor
             var headerHeight = DrawSplitterAndBackground(drawRect);
             var foldoutRect = drawRect;
             foldoutRect.xMax -= 10;
-            bool flag = EditorGUI.Foldout(foldoutRect, foldout, listProp.displayName, true);
+            var flag = EditorGUI.Foldout(foldoutRect, foldout, listProp.displayName, true);
             if (!flag)
             {
-                var startX = drawRect.x + EditorGUIUtility.labelWidth - EditorGUI.indentLevel * INDENT_WIDTH + GAP_WIDTH;
+                var startX = drawRect.x + EditorGUIUtility.labelWidth - EditorGUI.indentLevel * INDENT_WIDTH +
+                             GAP_WIDTH;
                 var sizeRect = new Rect(startX, drawRect.y + 1f, (EditorGUI.indentLevel + 1) * 15, drawRect.height - 1);
                 EditorGUI.IntField(sizeRect, GUIContent.none, listProp.arraySize);
                 DrawMenu(drawRect, menus);
             }
+
             height += headerHeight;
             drawRect.y += headerHeight;
             drawRect.width = rawWidth;
-            if (flag)
-            {
-                MakeList(ref drawRect, ref height, listProp, showOrder, showSize);
-            }
+            if (flag) MakeList(ref drawRect, ref height, listProp, showOrder, showSize);
             return flag;
         }
 
@@ -360,7 +367,8 @@ namespace XCharts.Editor
                 var headerHeight = DrawSplitterAndBackground(drawRect);
                 if (showOrder)
                 {
-                    var elementRect = new Rect(drawRect.x, drawRect.y, drawRect.width - ICON_WIDHT + 2, drawRect.height);
+                    var elementRect = new Rect(drawRect.x, drawRect.y, drawRect.width - ICON_WIDHT + 2,
+                        drawRect.height);
                     var oldColor = GUI.contentColor;
                     GUI.contentColor = Color.black;
                     GUI.contentColor = oldColor;
@@ -371,6 +379,7 @@ namespace XCharts.Editor
                 {
                     listSize = EditorGUI.IntField(drawRect, "Size", listSize);
                 }
+
                 if (listSize < 0) listSize = 0;
                 drawRect.y += headerHeight;
                 height += headerHeight;
@@ -381,11 +390,12 @@ namespace XCharts.Editor
                     while (listSize < listProp.arraySize) listProp.arraySize--;
                 }
             }
+
             if (listSize > 30 && !XCSettings.editorShowAllListData)
             {
                 SerializedProperty element;
-                int num = listSize > 10 ? 10 : listSize;
-                for (int i = 0; i < num; i++)
+                var num = listSize > 10 ? 10 : listSize;
+                for (var i = 0; i < num; i++)
                 {
                     element = listProp.GetArrayElementAtIndex(i);
                     DrawSplitterAndBackground(drawRect);
@@ -393,6 +403,7 @@ namespace XCharts.Editor
                     drawRect.y += EditorGUI.GetPropertyHeight(element);
                     height += EditorGUI.GetPropertyHeight(element);
                 }
+
                 if (num >= 10)
                 {
                     EditorGUI.LabelField(drawRect, "...");
@@ -407,16 +418,17 @@ namespace XCharts.Editor
             }
             else
             {
-                for (int i = 0; i < listProp.arraySize; i++)
+                for (var i = 0; i < listProp.arraySize; i++)
                 {
-                    SerializedProperty element = listProp.GetArrayElementAtIndex(i);
+                    var element = listProp.GetArrayElementAtIndex(i);
                     DrawSplitterAndBackground(drawRect);
                     if (showOrder)
                     {
                         var isSerie = "Serie".Equals(element.type);
-                        var elementRect = isSerie ?
-                            new Rect(drawRect.x, drawRect.y, drawRect.width + INDENT_WIDTH - 2 * ICON_GAP, drawRect.height) :
-                            new Rect(drawRect.x, drawRect.y, drawRect.width - 4 * ICON_WIDHT, drawRect.height);
+                        var elementRect = isSerie
+                            ? new Rect(drawRect.x, drawRect.y, drawRect.width + INDENT_WIDTH - 2 * ICON_GAP,
+                                drawRect.height)
+                            : new Rect(drawRect.x, drawRect.y, drawRect.width - 4 * ICON_WIDHT, drawRect.height);
                         EditorGUI.PropertyField(elementRect, element, new GUIContent("Element " + i));
                         UpDownAddDeleteButton(drawRect, listProp, i);
                         drawRect.y += EditorGUI.GetPropertyHeight(element);
@@ -430,6 +442,7 @@ namespace XCharts.Editor
                     }
                 }
             }
+
             EditorGUI.indentLevel--;
         }
 
@@ -440,24 +453,20 @@ namespace XCharts.Editor
             var oldColor = GUI.contentColor;
             GUI.contentColor = Color.black;
             if (GUI.Button(iconRect, EditorCustomStyles.iconUp, EditorCustomStyles.invisibleButton))
-            {
-                if (i > 0) listProp.MoveArrayElement(i, i - 1);
-            }
+                if (i > 0)
+                    listProp.MoveArrayElement(i, i - 1);
             iconRect = new Rect(drawRect.width - 3 * ICON_WIDHT + temp, drawRect.y, ICON_WIDHT, drawRect.height);
             if (GUI.Button(iconRect, EditorCustomStyles.iconDown, EditorCustomStyles.invisibleButton))
-            {
-                if (i < listProp.arraySize - 1) listProp.MoveArrayElement(i, i + 1);
-            }
+                if (i < listProp.arraySize - 1)
+                    listProp.MoveArrayElement(i, i + 1);
             iconRect = new Rect(drawRect.width - 2 * ICON_WIDHT + temp, drawRect.y, ICON_WIDHT, drawRect.height);
             if (GUI.Button(iconRect, EditorCustomStyles.iconAdd, EditorCustomStyles.invisibleButton))
-            {
-                if (i < listProp.arraySize && i >= 0) listProp.InsertArrayElementAtIndex(i);
-            }
+                if (i < listProp.arraySize && i >= 0)
+                    listProp.InsertArrayElementAtIndex(i);
             iconRect = new Rect(drawRect.width - ICON_WIDHT + temp, drawRect.y, ICON_WIDHT, drawRect.height);
             if (GUI.Button(iconRect, EditorCustomStyles.iconRemove, EditorCustomStyles.invisibleButton))
-            {
-                if (i < listProp.arraySize && i >= 0) listProp.DeleteArrayElementAtIndex(i);
-            }
+                if (i < listProp.arraySize && i >= 0)
+                    listProp.DeleteArrayElementAtIndex(i);
             GUI.contentColor = oldColor;
         }
 
@@ -507,12 +516,14 @@ namespace XCharts.Editor
         {
             return PropertyField(ref drawRect, heights, key, parentProp.FindPropertyRelative(relativeName));
         }
+
         public static bool PropertyFieldWithMinValue(ref Rect drawRect, Dictionary<string, float> heights, string key,
             SerializedProperty parentProp, string relativeName, float minValue)
         {
             var relativeProp = parentProp.FindPropertyRelative(relativeName);
             return PropertyFieldWithMinValue(ref drawRect, heights, key, relativeProp, minValue);
         }
+
         public static bool PropertyFieldWithMaxValue(ref Rect drawRect, Dictionary<string, float> heights, string key,
             SerializedProperty parentProp, string relativeName, float maxValue)
         {
@@ -548,6 +559,7 @@ namespace XCharts.Editor
             rect.width += 4f;
             DrawSplitter(rect);
         }
+
         public static void DrawSplitter(Rect rect)
         {
             if (Event.current.type != EventType.Repaint)
@@ -557,8 +569,8 @@ namespace XCharts.Editor
 
         public static float DrawSplitterAndBackground(Rect drawRect, bool drawBackground = false)
         {
-            float defaultWidth = drawRect.width;
-            float defaultX = drawRect.x;
+            var defaultWidth = drawRect.width;
+            var defaultX = drawRect.x;
 
             var splitRect = drawRect;
             splitRect.y = drawRect.y;
@@ -577,6 +589,7 @@ namespace XCharts.Editor
                 bgRect.height = HEADER_HEIGHT + (EditorGUI.indentLevel < 1 ? 2 : 0);
                 EditorGUI.DrawRect(bgRect, EditorCustomStyles.headerBackground);
             }
+
             return HEADER_HEIGHT;
         }
 
@@ -586,47 +599,37 @@ namespace XCharts.Editor
             var rect = GUILayoutUtility.GetRect(1f, HEADER_HEIGHT);
             var labelRect = DrawHeaderInternal(rect, title, ref state, drawBackground, activeField);
             DrawMenu(rect, menus);
-            if (drawCallback != null)
-            {
-                drawCallback(rect);
-            }
+            if (drawCallback != null) drawCallback(rect);
             var e = Event.current;
             if (e.type == EventType.MouseDown)
-            {
                 if (labelRect.Contains(e.mousePosition))
-                {
                     if (e.button == 0)
                     {
                         state = !state;
                         e.Use();
                     }
-                }
-            }
+
             return state;
         }
 
-        public static bool DrawSerieDataHeader(string title, bool state, bool drawBackground, SerializedProperty activeField,
-            HeaderCallbackContext context, Action<Rect, HeaderCallbackContext> drawCallback, params HeaderMenuInfo[] menus)
+        public static bool DrawSerieDataHeader(string title, bool state, bool drawBackground,
+            SerializedProperty activeField,
+            HeaderCallbackContext context, Action<Rect, HeaderCallbackContext> drawCallback,
+            params HeaderMenuInfo[] menus)
         {
             var rect = GUILayoutUtility.GetRect(1f, HEADER_HEIGHT);
             var labelRect = DrawHeaderInternal(rect, title, ref state, drawBackground, activeField);
             DrawMenu(rect, menus);
-            if (drawCallback != null)
-            {
-                drawCallback(rect, context);
-            }
+            if (drawCallback != null) drawCallback(rect, context);
             var e = Event.current;
             if (e.type == EventType.MouseDown)
-            {
                 if (labelRect.Contains(e.mousePosition))
-                {
                     if (e.button == 0)
                     {
                         state = !state;
                         e.Use();
                     }
-                }
-            }
+
             return state;
         }
 
@@ -636,26 +639,21 @@ namespace XCharts.Editor
             var rect = GUILayoutUtility.GetRect(1f, HEADER_HEIGHT);
             var labelRect = DrawHeaderInternal(rect, title, ref state, drawBackground, activeField);
             DrawMenu(rect, menus);
-            if (drawCallback != null)
-            {
-                drawCallback(rect);
-            }
+            if (drawCallback != null) drawCallback(rect);
             var e = Event.current;
             if (e.type == EventType.MouseDown)
-            {
                 if (labelRect.Contains(e.mousePosition))
-                {
                     if (e.button == 0)
                     {
                         state = !state;
                         e.Use();
                     }
-                }
-            }
+
             return state;
         }
 
-        private static Rect DrawHeaderInternal(Rect rect, string title, ref bool state, bool drawBackground, SerializedProperty activeField)
+        private static Rect DrawHeaderInternal(Rect rect, string title, ref bool state, bool drawBackground,
+            SerializedProperty activeField)
         {
             var splitRect = rect;
             splitRect.x = EditorGUI.indentLevel * INDENT_WIDTH + 4;
@@ -692,6 +690,7 @@ namespace XCharts.Editor
                 toggleRect.height = 13f;
                 activeField.boolValue = GUI.Toggle(toggleRect, activeField.boolValue, GUIContent.none);
             }
+
             return labelRect;
         }
 
@@ -772,30 +771,27 @@ namespace XCharts.Editor
             }
         }
 
-        static void ShowHeaderContextMenu(Vector2 position, params HeaderMenuInfo[] menus)
+        private static void ShowHeaderContextMenu(Vector2 position, params HeaderMenuInfo[] menus)
         {
             if (menus == null || menus.Length <= 0) return;
             var menu = new GenericMenu();
             foreach (var info in menus)
-            {
                 if (info.enable)
                     menu.AddItem(GetContent(info.name), false, () => info.action());
                 else
                     menu.AddDisabledItem(GetContent(info.name));
-            }
             menu.DropDown(new Rect(position, Vector2.zero));
         }
-        static void ShowHeaderContextMenu(Vector2 position, List<HeaderMenuInfo> menus)
+
+        private static void ShowHeaderContextMenu(Vector2 position, List<HeaderMenuInfo> menus)
         {
             if (menus == null || menus.Count <= 0) return;
             var menu = new GenericMenu();
             foreach (var info in menus)
-            {
                 if (info.enable)
                     menu.AddItem(GetContent(info.name), false, () => info.action());
                 else
                     menu.AddDisabledItem(GetContent(info.name));
-            }
             menu.DropDown(new Rect(position, Vector2.zero));
         }
     }

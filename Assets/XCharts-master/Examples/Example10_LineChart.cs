@@ -8,15 +8,15 @@ namespace XCharts.Example
     public class Example10_LineChart : MonoBehaviour
     {
         private LineChart chart;
+        private readonly int m_DataNum = 8;
         private Serie serie;
-        private int m_DataNum = 8;
 
         private void OnEnable()
         {
             StartCoroutine(PieDemo());
         }
 
-        IEnumerator PieDemo()
+        private IEnumerator PieDemo()
         {
             while (true)
             {
@@ -37,13 +37,15 @@ namespace XCharts.Example
             }
         }
 
-        IEnumerator AddSimpleLine()
+        private IEnumerator AddSimpleLine()
         {
             chart = gameObject.GetComponent<LineChart>();
-            if (chart == null){
+            if (chart == null)
+            {
                 chart = gameObject.AddComponent<LineChart>();
                 chart.Init();
             }
+
             chart.GetChartComponent<Title>().text = "LineChart - 折线图";
             chart.GetChartComponent<Title>().subText = "普通折线图";
 
@@ -55,15 +57,16 @@ namespace XCharts.Example
             chart.RemoveData();
             serie = chart.AddSerie<Line>("Line");
 
-            for (int i = 0; i < m_DataNum; i++)
+            for (var i = 0; i < m_DataNum; i++)
             {
                 chart.AddXAxisData("x" + (i + 1));
-                chart.AddData(0, UnityEngine.Random.Range(30, 90));
+                chart.AddData(0, Random.Range(30, 90));
             }
+
             yield return new WaitForSeconds(1);
         }
 
-        IEnumerator ChangeLineType()
+        private IEnumerator ChangeLineType()
         {
             chart.GetChartComponent<Title>().subText = "LineTyle - 曲线图";
             serie.lineType = LineType.Smooth;
@@ -106,7 +109,7 @@ namespace XCharts.Example
             chart.RefreshChart();
         }
 
-        IEnumerator LineAreaStyleSettings()
+        private IEnumerator LineAreaStyleSettings()
         {
             chart.GetChartComponent<Title>().subText = "AreaStyle 面积图";
 
@@ -128,6 +131,7 @@ namespace XCharts.Example
                 chart.RefreshChart();
                 yield return null;
             }
+
             yield return new WaitForSeconds(1);
 
             chart.GetChartComponent<Title>().subText = "AreaStyle 面积图 - 渐变";
@@ -136,7 +140,7 @@ namespace XCharts.Example
             yield return new WaitForSeconds(1);
         }
 
-        IEnumerator LineArrowSettings()
+        private IEnumerator LineArrowSettings()
         {
             chart.GetChartComponent<Title>().subText = "LineArrow 头部箭头";
             chart.GetSerie(0).EnsureComponent<LineArrow>();
@@ -153,10 +157,10 @@ namespace XCharts.Example
         }
 
         /// <summary>
-        /// SerieSymbol 相关设置
+        ///     SerieSymbol 相关设置
         /// </summary>
         /// <returns></returns>
-        IEnumerator LineSymbolSettings()
+        private IEnumerator LineSymbolSettings()
         {
             chart.GetChartComponent<Title>().subText = "SerieSymbol 图形标记";
             while (serie.symbol.size < 5)
@@ -165,6 +169,7 @@ namespace XCharts.Example
                 chart.RefreshChart();
                 yield return null;
             }
+
             chart.GetChartComponent<Title>().subText = "SerieSymbol 图形标记 - 空心圆";
             yield return new WaitForSeconds(1);
 
@@ -195,10 +200,10 @@ namespace XCharts.Example
         }
 
         /// <summary>
-        /// SerieLabel相关配置
+        ///     SerieLabel相关配置
         /// </summary>
         /// <returns></returns>
-        IEnumerator LineLabelSettings()
+        private IEnumerator LineLabelSettings()
         {
             chart.GetChartComponent<Title>().subText = "SerieLabel 文本标签";
             serie.EnsureComponent<LabelStyle>();
@@ -209,6 +214,7 @@ namespace XCharts.Example
                 chart.RefreshChart();
                 yield return null;
             }
+
             yield return new WaitForSeconds(1);
 
             chart.RefreshChart();
@@ -225,26 +231,20 @@ namespace XCharts.Example
         }
 
         /// <summary>
-        /// 添加多条线图
+        ///     添加多条线图
         /// </summary>
         /// <returns></returns>
-        IEnumerator LineMutilSerie()
+        private IEnumerator LineMutilSerie()
         {
             chart.GetChartComponent<Title>().subText = "多系列";
             var serie2 = chart.AddSerie<Line>("Line2");
             serie2.lineType = LineType.Normal;
-            for (int i = 0; i < m_DataNum; i++)
-            {
-                chart.AddData(1, UnityEngine.Random.Range(30, 90));
-            }
+            for (var i = 0; i < m_DataNum; i++) chart.AddData(1, Random.Range(30, 90));
             yield return new WaitForSeconds(1);
 
             var serie3 = chart.AddSerie<Line>("Line3");
             serie3.lineType = LineType.Normal;
-            for (int i = 0; i < m_DataNum; i++)
-            {
-                chart.AddData(2, UnityEngine.Random.Range(30, 90));
-            }
+            for (var i = 0; i < m_DataNum; i++) chart.AddData(2, Random.Range(30, 90));
             yield return new WaitForSeconds(1);
 
             var yAxis = chart.GetChartComponent<YAxis>();

@@ -7,9 +7,9 @@ namespace XCharts.Example
     [ExecuteInEditMode]
     public class Example03_ChartAnimation : MonoBehaviour
     {
-        BaseChart chart;
+        private BaseChart chart;
 
-        void Awake()
+        private void Awake()
         {
             chart = gameObject.GetComponent<BaseChart>();
             if (chart == null)
@@ -17,6 +17,7 @@ namespace XCharts.Example
                 chart = gameObject.AddComponent<BarChart>();
                 chart.Init();
             }
+
             var serie = chart.GetSerie(0);
             serie.animation.enable = true;
             //自定义每个数据项的渐入延时
@@ -25,12 +26,12 @@ namespace XCharts.Example
             serie.animation.fadeIn.durationFunction = CustomFadeInDuration;
         }
 
-        float CustomFadeInDelay(int dataIndex)
+        private float CustomFadeInDelay(int dataIndex)
         {
             return dataIndex * 1000;
         }
 
-        float CustomFadeInDuration(int dataIndex)
+        private float CustomFadeInDuration(int dataIndex)
         {
             return dataIndex * 1000 + 1000;
         }

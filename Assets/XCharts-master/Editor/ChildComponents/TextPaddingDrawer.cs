@@ -7,7 +7,8 @@ namespace XCharts.Editor
     [CustomPropertyDrawer(typeof(Padding), true)]
     public class PaddingDrawer : BasePropertyDrawer
     {
-        public override string ClassName { get { return "Padding"; } }
+        public override string ClassName => "Padding";
+
         public override void OnGUI(Rect pos, SerializedProperty prop, GUIContent label)
         {
             base.OnGUI(pos, prop, label);

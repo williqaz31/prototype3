@@ -1,11 +1,10 @@
-using System;
-using UnityEngine;
+using UnityEngine.Scripting;
 using UnityEngine.UI;
 using XUGL;
 
 namespace XCharts.Runtime
 {
-    [UnityEngine.Scripting.Preserve]
+    [Preserve]
     internal sealed class PolarCoordHandler : MainComponentHandler<PolarCoord>
     {
         public override void Update()
@@ -30,19 +29,15 @@ namespace XCharts.Runtime
             if (polar.show && !ChartHelper.IsClearColor(polar.backgroundColor))
             {
                 if (polar.context.insideRadius > 0)
-                {
                     UGL.DrawDoughnut(vh, polar.context.center,
                         polar.context.insideRadius,
                         polar.context.outsideRadius,
                         polar.backgroundColor,
                         ColorUtil.clearColor32);
-                }
                 else
-                {
                     UGL.DrawCricle(vh, polar.context.center,
                         polar.context.outsideRadius,
                         polar.backgroundColor);
-                }
             }
         }
     }

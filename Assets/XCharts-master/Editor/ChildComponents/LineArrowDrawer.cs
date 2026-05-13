@@ -7,7 +7,8 @@ namespace XCharts.Editor
     [CustomPropertyDrawer(typeof(ArrowStyle), true)]
     public class ArrowDrawer : BasePropertyDrawer
     {
-        public override string ClassName { get { return "Arrow"; } }
+        public override string ClassName => "Arrow";
+
         public override void OnGUI(Rect pos, SerializedProperty prop, GUIContent label)
         {
             base.OnGUI(pos, prop, label);
@@ -27,7 +28,8 @@ namespace XCharts.Editor
     [CustomPropertyDrawer(typeof(LineArrow), true)]
     public class LineArrowStyleDrawer : BasePropertyDrawer
     {
-        public override string ClassName { get { return "LineArrow"; } }
+        public override string ClassName => "LineArrow";
+
         public override void OnGUI(Rect pos, SerializedProperty prop, GUIContent label)
         {
             base.OnGUI(pos, prop, label);

@@ -1,12 +1,13 @@
 using UnityEngine;
+using UnityEngine.Scripting;
 using UnityEngine.UI;
 
 namespace XCharts.Runtime
 {
-    [UnityEngine.Scripting.Preserve]
+    [Preserve]
     internal sealed class YAxisHander : AxisHandler<YAxis>
     {
-        protected override Orient orient { get { return Orient.Vertical; } }
+        protected override Orient orient => Orient.Vertical;
 
         public override void InitComponent()
         {
@@ -50,7 +51,7 @@ namespace XCharts.Runtime
             var theme = chart.theme;
             var yAxisIndex = yAxis.index;
             yAxis.painter = chart.painter;
-            yAxis.refreshComponent = delegate()
+            yAxis.refreshComponent = delegate
             {
                 var grid = chart.GetChartComponent<GridCoord>(yAxis.gridIndex);
                 if (grid != null)
@@ -71,8 +72,7 @@ namespace XCharts.Runtime
         {
             base.UpdateAxisLabelText(axis);
             if (axis.IsTime() || axis.IsValue())
-            {
-                for (int i = 0; i < axis.context.labelObjectList.Count; i++)
+                for (var i = 0; i < axis.context.labelObjectList.Count; i++)
                 {
                     var label = axis.context.labelObjectList[i];
                     if (label != null)
@@ -82,7 +82,6 @@ namespace XCharts.Runtime
                         CheckValueLabelActive(axis, i, label, pos);
                     }
                 }
-            }
         }
 
         protected override Vector3 GetLabelPosition(float scaleWid, int i)

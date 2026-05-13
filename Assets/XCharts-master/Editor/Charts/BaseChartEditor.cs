@@ -10,43 +10,32 @@ namespace XCharts.Editor
     [CustomEditor(typeof(BaseChart), true)]
     public class BaseChartEditor : UnityEditor.Editor
     {
-        class Styles
-        {
-            public static readonly GUIContent btnAddSerie = new GUIContent("Add Serie", "");
-            public static readonly GUIContent btnAddComponent = new GUIContent("Add Main Component", "");
-            public static readonly GUIContent btnConvertXYAxis = new GUIContent("Convert XY Axis", "");
-            public static readonly GUIContent btnRebuildChartObject = new GUIContent("Rebuild Chart Object", "");
-            public static readonly GUIContent btnSaveAsImage = new GUIContent("Save As Image", "");
-            public static readonly GUIContent btnCheckWarning = new GUIContent("Check Warning", "");
-            public static readonly GUIContent btnHideWarning = new GUIContent("Hide Warning", "");
-        }
+        private bool m_BaseFoldout;
         protected BaseChart m_Chart;
-        protected SerializedProperty m_Script;
+        protected SerializedProperty m_ChartName;
+
+        private bool m_CheckWarning;
+        private MainComponentListEditor m_ComponentList;
+
+        protected List<SerializedProperty> m_Components = new();
+        protected SerializedProperty m_DebugInfo;
         protected SerializedProperty m_EnableTextMeshPro;
+        private int m_LastComponentCount;
+        private int m_LastSerieCount;
+        protected SerializedProperty m_RaycastTarget;
+        protected SerializedProperty m_Script;
+        private SerieListEditor m_SerieList;
+        protected List<SerializedProperty> m_Series = new();
         protected SerializedProperty m_Settings;
         protected SerializedProperty m_Theme;
-        protected SerializedProperty m_ChartName;
         protected SerializedProperty m_UseUtc;
-        protected SerializedProperty m_DebugInfo;
-        protected SerializedProperty m_RaycastTarget;
-
-        protected List<SerializedProperty> m_Components = new List<SerializedProperty>();
-        protected List<SerializedProperty> m_Series = new List<SerializedProperty>();
-
-        private bool m_BaseFoldout;
-
-        private bool m_CheckWarning = false;
-        private int m_LastComponentCount = 0;
-        private int m_LastSerieCount = 0;
         private string m_VersionString = "";
-        private StringBuilder sb = new StringBuilder();
-        MainComponentListEditor m_ComponentList;
-        SerieListEditor m_SerieList;
+        private readonly StringBuilder sb = new();
 
         protected virtual void OnEnable()
         {
             if (target == null) return;
-            m_Chart = (BaseChart) target;
+            m_Chart = (BaseChart)target;
             m_Script = serializedObject.FindProperty("m_Script");
             m_EnableTextMeshPro = serializedObject.FindProperty("m_EnableTextMeshPro");
             m_ChartName = serializedObject.FindProperty("m_ChartName");
@@ -73,10 +62,7 @@ namespace XCharts.Editor
         {
             m_Components.Clear();
             serializedObject.UpdateIfRequiredOrScript();
-            foreach (var kv in m_Chart.typeListForComponent)
-            {
-                InitComponent(kv.Value.Name);
-            }
+            foreach (var kv in m_Chart.typeListForComponent) InitComponent(kv.Value.Name);
             return m_Components;
         }
 
@@ -84,10 +70,7 @@ namespace XCharts.Editor
         {
             m_Series.Clear();
             serializedObject.UpdateIfRequiredOrScript();
-            foreach (var kv in m_Chart.typeListForSerie)
-            {
-                InitSerie(kv.Value.Name);
-            }
+            foreach (var kv in m_Chart.typeListForSerie) InitSerie(kv.Value.Name);
             return m_Series;
         }
 
@@ -98,20 +81,22 @@ namespace XCharts.Editor
                 base.OnInspectorGUI();
                 return;
             }
+
             serializedObject.UpdateIfRequiredOrScript();
             if (m_LastComponentCount != m_Chart.components.Count)
             {
                 m_LastComponentCount = m_Chart.components.Count;
                 RefreshComponent();
                 m_ComponentList.UpdateComponentsProperty(m_Components);
-
             }
+
             if (m_LastSerieCount != m_Chart.series.Count)
             {
                 m_LastSerieCount = m_Chart.series.Count;
                 RefreshSeries();
                 m_SerieList.UpdateSeriesProperty(m_Series);
             }
+
             OnStartInspectorGUI();
             OnDebugInspectorGUI();
             EditorGUILayout.Space();
@@ -135,6 +120,7 @@ namespace XCharts.Editor
                     EditorGUILayout.EndHorizontal();
                 }
             }
+
             EditorGUILayout.PropertyField(m_Theme);
             EditorGUILayout.PropertyField(m_Settings);
             m_ComponentList.OnGUI();
@@ -152,29 +138,21 @@ namespace XCharts.Editor
 
         protected void PropertyComponnetList(SerializedProperty prop)
         {
-            for (int i = 0; i < prop.arraySize; i++)
-            {
+            for (var i = 0; i < prop.arraySize; i++)
                 EditorGUILayout.PropertyField(prop.GetArrayElementAtIndex(i), true);
-            }
         }
 
         private void InitComponent(string propName)
         {
             var prop = serializedObject.FindProperty(propName);
-            for (int i = 0; i < prop.arraySize; i++)
-            {
-                m_Components.Add(prop.GetArrayElementAtIndex(i));
-            }
+            for (var i = 0; i < prop.arraySize; i++) m_Components.Add(prop.GetArrayElementAtIndex(i));
             m_Components.Sort((a, b) => { return a.propertyPath.CompareTo(b.propertyPath); });
         }
 
         private void InitSerie(string propName)
         {
             var prop = serializedObject.FindProperty(propName);
-            for (int i = 0; i < prop.arraySize; i++)
-            {
-                m_Series.Add(prop.GetArrayElementAtIndex(i));
-            }
+            for (var i = 0; i < prop.arraySize; i++) m_Series.Add(prop.GetArrayElementAtIndex(i));
             m_Series.Sort(delegate(SerializedProperty a, SerializedProperty b)
             {
                 var index1 = a.FindPropertyRelative("m_Index").intValue;
@@ -196,21 +174,17 @@ namespace XCharts.Editor
                 foreach (var type in GetMainComponentTypeNames())
                 {
                     var title = ChartEditorHelper.GetContent(type.Name);
-                    bool exists = !m_Chart.CanAddChartComponent(type);
+                    var exists = !m_Chart.CanAddChartComponent(type);
                     if (!exists)
-                        menu.AddItem(title, false, () =>
-                        {
-                            m_ComponentList.AddChartComponent(type);
-                        });
+                        menu.AddItem(title, false, () => { m_ComponentList.AddChartComponent(type); });
                     else
-                    {
                         menu.AddDisabledItem(title);
-                    }
                 }
 
                 menu.ShowAsContext();
             }
         }
+
         private void AddSerie()
         {
             if (GUILayout.Button(Styles.btnAddSerie))
@@ -220,17 +194,11 @@ namespace XCharts.Editor
                 {
                     var title = ChartEditorHelper.GetContent(type.Name);
                     if (m_Chart.CanAddSerie(type))
-                    {
-                        menu.AddItem(title, false, () =>
-                        {
-                            m_SerieList.AddSerie(type);
-                        });
-                    }
+                        menu.AddItem(title, false, () => { m_SerieList.AddSerie(type); });
                     else
-                    {
                         menu.AddDisabledItem(title);
-                    }
                 }
+
                 menu.ShowAsContext();
             }
         }
@@ -255,9 +223,11 @@ namespace XCharts.Editor
                     list.Add(type);
                 }
             }
+
             list.Sort((a, b) => { return a.Name.CompareTo(b.Name); });
             return list;
         }
+
         private List<Type> GetSerieTypeNames()
         {
             var list = new List<Type>();
@@ -268,6 +238,7 @@ namespace XCharts.Editor
                 if (type.IsDefined(typeof(SerieHandlerAttribute), false))
                     list.Add(type);
             }
+
             list.Sort((a, b) => { return a.Name.CompareTo(b.Name); });
             return list;
         }
@@ -275,18 +246,10 @@ namespace XCharts.Editor
         private void CheckWarning()
         {
             if (m_Chart.HasChartComponent<XAxis>() && m_Chart.HasChartComponent<YAxis>())
-            {
                 if (GUILayout.Button(Styles.btnConvertXYAxis))
                     m_Chart.ConvertXYAxis(0);
-            }
-            if (GUILayout.Button(Styles.btnRebuildChartObject))
-            {
-                m_Chart.RebuildChartObject();
-            }
-            if (GUILayout.Button(Styles.btnSaveAsImage))
-            {
-                m_Chart.SaveAsImage();
-            }
+            if (GUILayout.Button(Styles.btnRebuildChartObject)) m_Chart.RebuildChartObject();
+            if (GUILayout.Button(Styles.btnSaveAsImage)) m_Chart.SaveAsImage();
             if (m_CheckWarning)
             {
                 EditorGUILayout.BeginHorizontal();
@@ -295,10 +258,8 @@ namespace XCharts.Editor
                     m_CheckWarning = true;
                     m_Chart.CheckWarning();
                 }
-                if (GUILayout.Button(Styles.btnHideWarning))
-                {
-                    m_CheckWarning = false;
-                }
+
+                if (GUILayout.Button(Styles.btnHideWarning)) m_CheckWarning = false;
                 EditorGUILayout.EndHorizontal();
                 sb.Length = 0;
                 sb.AppendFormat("v{0}", XChartsMgr.fullVersion);
@@ -312,6 +273,7 @@ namespace XCharts.Editor
                     sb.AppendLine();
                     sb.Append("Perfect! No warning!");
                 }
+
                 EditorGUILayout.HelpBox(sb.ToString(), MessageType.Warning);
             }
             else
@@ -321,8 +283,18 @@ namespace XCharts.Editor
                     m_CheckWarning = true;
                     m_Chart.CheckWarning();
                 }
-
             }
+        }
+
+        private class Styles
+        {
+            public static readonly GUIContent btnAddSerie = new("Add Serie", "");
+            public static readonly GUIContent btnAddComponent = new("Add Main Component", "");
+            public static readonly GUIContent btnConvertXYAxis = new("Convert XY Axis", "");
+            public static readonly GUIContent btnRebuildChartObject = new("Rebuild Chart Object", "");
+            public static readonly GUIContent btnSaveAsImage = new("Save As Image", "");
+            public static readonly GUIContent btnCheckWarning = new("Check Warning", "");
+            public static readonly GUIContent btnHideWarning = new("Hide Warning", "");
         }
     }
 }

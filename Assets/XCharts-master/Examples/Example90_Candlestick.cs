@@ -1,19 +1,22 @@
+using System;
 using UnityEngine;
 using XCharts.Runtime;
+using Random = UnityEngine.Random;
 #if INPUT_SYSTEM_ENABLED
 using Input = XCharts.Runtime.InputHelper;
 #endif
+
 namespace XCharts.Example
 {
     [DisallowMultipleComponent]
     [ExecuteInEditMode]
     public class Example90_Candlestick : MonoBehaviour
     {
+        public int dataCount = 100;
         private CandlestickChart chart;
         private float updateTime;
-        public int dataCount = 100;
 
-        void Awake()
+        private void Awake()
         {
             chart = gameObject.GetComponent<CandlestickChart>();
             if (chart == null)
@@ -21,40 +24,32 @@ namespace XCharts.Example
                 chart = gameObject.AddComponent<CandlestickChart>();
                 chart.Init();
             }
+
             AddData();
         }
 
-        void Update()
+        private void Update()
         {
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                AddData();
-            }
+            if (Input.GetKeyDown(KeyCode.Space)) AddData();
         }
 
-        void AddData()
+        private void AddData()
         {
             chart.ClearData();
 
-            var xValue = System.DateTime.Now;
+            var xValue = DateTime.Now;
             var baseValue = Random.Range(0f, 1f) * 12000;
             var boxVals = new float[4];
             var dayRange = 12;
 
-            for (int i = 0; i < dataCount; i++)
+            for (var i = 0; i < dataCount; i++)
             {
                 baseValue = baseValue + Random.Range(0f, 1f) * 30 - 10;
-                for (int j = 0; j < 4; j++)
-                {
-                    boxVals[j] = (Random.Range(0f, 1f) - 0.5f) * dayRange + baseValue;
-                }
-                System.Array.Sort(boxVals);
+                for (var j = 0; j < 4; j++) boxVals[j] = (Random.Range(0f, 1f) - 0.5f) * dayRange + baseValue;
+                Array.Sort(boxVals);
                 var openIdx = Mathf.RoundToInt(Random.Range(0f, 1f) * 3);
                 var closeIdx = Mathf.RoundToInt(Random.Range(0f, 1f) * 2);
-                if (openIdx == closeIdx)
-                {
-                    closeIdx++;
-                }
+                if (openIdx == closeIdx) closeIdx++;
                 //var volumn = boxVals[3]*(1000+Random.Range(0f,1f) * 500);
                 var open = boxVals[openIdx];
                 var close = boxVals[closeIdx];

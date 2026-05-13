@@ -4,7 +4,8 @@ namespace XCharts.Runtime
 {
     internal static class PolarHelper
     {
-        public static void UpdatePolarCenter(PolarCoord polar, Vector3 chartPosition, float chartWidth, float chartHeight)
+        public static void UpdatePolarCenter(PolarCoord polar, Vector3 chartPosition, float chartWidth,
+            float chartHeight)
         {
             if (polar.center.Length < 2) return;
             var centerX = polar.center[0] <= 1 ? chartWidth * polar.center[0] : polar.center[0];
@@ -22,10 +23,12 @@ namespace XCharts.Runtime
             {
                 polar.context.outsideRadius = ChartHelper.GetActualValue(polar.radius[0], minWidth, 1);
             }
+
             polar.context.radius = polar.context.outsideRadius - polar.context.insideRadius;
         }
 
-        public static Vector3 UpdatePolarAngleAndPos(PolarCoord polar, AngleAxis angleAxis, RadiusAxis radiusAxis, SerieData serieData)
+        public static Vector3 UpdatePolarAngleAndPos(PolarCoord polar, AngleAxis angleAxis, RadiusAxis radiusAxis,
+            SerieData serieData)
         {
             var value = serieData.GetData(0);
             var angle = angleAxis.GetValueAngle(serieData.GetData(1));

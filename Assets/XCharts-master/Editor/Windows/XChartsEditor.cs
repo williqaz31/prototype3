@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEditor;
+using UnityEditor.Compilation;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -16,52 +17,46 @@ namespace XCharts.Editor
     {
         private static Transform GetParent()
         {
-            GameObject selectObj = Selection.activeGameObject;
+            var selectObj = Selection.activeGameObject;
             if (selectObj == null)
             {
 #if UNITY_2023_1_OR_NEWER
-                var canvas = UnityEngine.Object.FindFirstObjectByType<Canvas>();
+                var canvas = FindFirstObjectByType<Canvas>();
 #else
                 var canvas = GameObject.FindObjectOfType<Canvas>();
 #endif
                 if (canvas != null) return canvas.transform;
-                else
+                var canvasObject = new GameObject();
+                canvasObject.name = "Canvas";
+                canvas = canvasObject.AddComponent<Canvas>();
+                canvas.renderMode = RenderMode.ScreenSpaceCamera;
+                var mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
+                canvas.worldCamera = mainCamera == null ? null : mainCamera.GetComponent<Camera>();
+                canvasObject.AddComponent<CanvasScaler>();
+                canvasObject.AddComponent<GraphicRaycaster>();
+                if (GameObject.Find("EventSystem") == null)
                 {
-                    var canvasObject = new GameObject();
-                    canvasObject.name = "Canvas";
-                    canvas = canvasObject.AddComponent<Canvas>();
-                    canvas.renderMode = RenderMode.ScreenSpaceCamera;
-                    var mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
-                    canvas.worldCamera = mainCamera == null ? null : mainCamera.GetComponent<Camera>();
-                    canvasObject.AddComponent<CanvasScaler>();
-                    canvasObject.AddComponent<GraphicRaycaster>();
-                    if (GameObject.Find("EventSystem") == null)
-                    {
-                        var eventSystem = new GameObject();
-                        eventSystem.name = "EventSystem";
-                        eventSystem.AddComponent<EventSystem>();
-                        eventSystem.AddComponent<StandaloneInputModule>();
-                    }
-                    return canvas.transform;
+                    var eventSystem = new GameObject();
+                    eventSystem.name = "EventSystem";
+                    eventSystem.AddComponent<EventSystem>();
+                    eventSystem.AddComponent<StandaloneInputModule>();
                 }
+
+                return canvas.transform;
             }
-            else
-            {
-                return selectObj.transform;
-            }
+
+            return selectObj.transform;
         }
 
         private static string GetName(Transform parent, string name)
         {
             if (parent.Find(name) == null) return name;
-            for (int i = 1; i <= 10; i++)
+            for (var i = 1; i <= 10; i++)
             {
                 var newName = string.Format("{0} ({1})", name, i);
-                if (parent.Find(newName) == null)
-                {
-                    return newName;
-                }
+                if (parent.Find(newName) == null) return newName;
             }
+
             return name;
         }
 
@@ -74,6 +69,7 @@ namespace XCharts.Editor
                 var title = chart.GetChartComponent<Title>();
                 title.text = titleName;
             }
+
             return chart;
         }
 
@@ -208,9 +204,10 @@ namespace XCharts.Editor
         }
 
         #region Text mesh pro support
+
 #if UNITY_2017_1_OR_NEWER
-        const string SYMBOL_TMP = "dUI_TextMeshPro";
-        const string ASMDEF_TMP = "Unity.TextMeshPro";
+        private const string SYMBOL_TMP = "dUI_TextMeshPro";
+        private const string ASMDEF_TMP = "Unity.TextMeshPro";
 
 #if !dUI_TextMeshPro
         [MenuItem("XCharts/TextMeshPro Enable")]
@@ -222,7 +219,9 @@ namespace XCharts.Editor
                 Debug.LogError("TextMeshPro is not in the project, please import TextMeshPro package first.");
                 return;
             }
-            if (EditorUtility.DisplayDialog("TextMeshPro Enable", "TextMeshPro is disabled, do you want to enable it?", "Yes", "Cancel"))
+
+            if (EditorUtility.DisplayDialog("TextMeshPro Enable", "TextMeshPro is disabled, do you want to enable it?",
+                    "Yes", "Cancel"))
             {
                 DefineSymbolsUtil.AddGlobalDefine(SYMBOL_TMP);
                 XChartsMgr.RemoveAllChartObject();
@@ -235,7 +234,8 @@ namespace XCharts.Editor
 #endif
         public static void DisableTextMeshPro()
         {
-            if (EditorUtility.DisplayDialog("TextMeshPro Disable", "TextMeshPro is enabled, do you want to disable it?", "Yes", "Cancel"))
+            if (EditorUtility.DisplayDialog("TextMeshPro Disable", "TextMeshPro is enabled, do you want to disable it?",
+                    "Yes", "Cancel"))
             {
                 CheckAsmdefTmpReference(false);
                 DefineSymbolsUtil.RemoveGlobalDefine(SYMBOL_TMP);
@@ -257,13 +257,15 @@ namespace XCharts.Editor
             }
         }
 #endif
+
         #endregion
 
         #region InputSystem Support
+
 #if UNITY_2019_1_OR_NEWER
         //As InputSystem is released in 2019.1+ ,when unity version is 2019.1+ , enable InputSystem Support
-        const string SYMBOL_I_S = "INPUT_SYSTEM_ENABLED";
-        const string ASMDEF_I_S = "Unity.InputSystem";
+        private const string SYMBOL_I_S = "INPUT_SYSTEM_ENABLED";
+        private const string ASMDEF_I_S = "Unity.InputSystem";
 
 #if !INPUT_SYSTEM_ENABLED
         [MenuItem("XCharts/InputSystem Enable")]
@@ -275,7 +277,9 @@ namespace XCharts.Editor
                 Debug.LogError("InputSystem is not in the project, please import InputSystem package first.");
                 return;
             }
-            if (EditorUtility.DisplayDialog("InputSystem Enable", "InputSystem is disabled, do you want to enable it?", "Yes", "Cancel"))
+
+            if (EditorUtility.DisplayDialog("InputSystem Enable", "InputSystem is disabled, do you want to enable it?",
+                    "Yes", "Cancel"))
             {
                 CheckAsmdefInputSystemReference(true);
                 DefineSymbolsUtil.AddGlobalDefine(SYMBOL_I_S);
@@ -287,7 +291,8 @@ namespace XCharts.Editor
 #endif
         public static void DisableInputSystem()
         {
-            if (EditorUtility.DisplayDialog("InputSystem Disable", "InputSystem is enabled, do you want to disable it?", "Yes", "Cancel"))
+            if (EditorUtility.DisplayDialog("InputSystem Disable", "InputSystem is enabled, do you want to disable it?",
+                    "Yes", "Cancel"))
             {
                 CheckAsmdefInputSystemReference(false);
                 DefineSymbolsUtil.RemoveGlobalDefine(SYMBOL_I_S);
@@ -296,7 +301,7 @@ namespace XCharts.Editor
 
         public static void CheckAsmdefInputSystemReference(bool enable)
         {
-            if(enable)
+            if (enable)
             {
                 InsertSpecifyReferenceIntoAssembly(Platform.Editor, ASMDEF_I_S);
                 InsertSpecifyReferenceIntoAssembly(Platform.Runtime, ASMDEF_I_S);
@@ -308,9 +313,11 @@ namespace XCharts.Editor
             }
         }
 #endif
+
         #endregion
 
         #region Assistant members
+
 #if UNITY_2017_1_OR_NEWER
         // as text mesh pro is released in 2017.1, so we may use these function and types in 2017.1 or later
         private static void InsertSpecifyReferenceIntoAssembly(Platform platform, string reference)
@@ -343,32 +350,37 @@ namespace XCharts.Editor
             }
         }
 
-        public enum Platform { Editor, Runtime }
+        public enum Platform
+        {
+            Editor,
+            Runtime
+        }
+
         public static string GetPackageAssemblyDefinitionPath(Platform platform)
         {
             var p = platform == Platform.Editor ? "Editor" : "Runtime";
             var f = "XCharts." + p + ".asmdef";
             var sub = Path.Combine(p, f);
-            string packagePath = Path.GetFullPath("Packages/com.monitor1394.xcharts");
+            var packagePath = Path.GetFullPath("Packages/com.monitor1394.xcharts");
             if (!Directory.Exists(packagePath))
             {
                 packagePath = ADB.FindAssets("t:Script")
-                                                   .Where(v => Path.GetFileNameWithoutExtension(ADB.GUIDToAssetPath(v)) == "XChartsMgr")
-                                                   .Select(id => ADB.GUIDToAssetPath(id))
-                                                   .FirstOrDefault();
+                    .Where(v => Path.GetFileNameWithoutExtension(ADB.GUIDToAssetPath(v)) == "XChartsMgr")
+                    .Select(id => ADB.GUIDToAssetPath(id))
+                    .FirstOrDefault();
                 packagePath = Path.GetDirectoryName(packagePath);
                 packagePath = packagePath.Substring(0, packagePath.LastIndexOf("Runtime"));
             }
+
             return Path.Combine(packagePath, sub);
         }
 
         public static bool IsSpecifyAssemblyExist(string name)
         {
 #if UNITY_2018_1_OR_NEWER
-            foreach (var assembly in UnityEditor.Compilation.CompilationPipeline.GetAssemblies(UnityEditor.Compilation.AssembliesType.Player))
-            {
-                if (assembly.name.Equals(name)) return true;
-            }
+            foreach (var assembly in CompilationPipeline.GetAssemblies(AssembliesType.Player))
+                if (assembly.name.Equals(name))
+                    return true;
 #elif UNITY_2017_3_OR_NEWER
             foreach (var assembly in UnityEditor.Compilation.CompilationPipeline.GetAssemblies())
             {
@@ -379,7 +391,7 @@ namespace XCharts.Editor
         }
 
         [Serializable]
-        class AssemblyDefinitionData
+        private class AssemblyDefinitionData
         {
 #pragma warning disable 649
             public string name;
@@ -396,8 +408,7 @@ namespace XCharts.Editor
 #pragma warning restore 649
         }
 #endif
+
         #endregion
-
-
     }
 }

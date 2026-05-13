@@ -1,42 +1,42 @@
 using System.Collections.Generic;
-using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
-using XUGL;
 
 namespace XCharts.Runtime
 {
     public class TooltipViewItem
     {
+        public List<ChartLabel> columns = new();
         public GameObject gameObject;
-        public List<ChartLabel> columns = new List<ChartLabel>();
     }
+
     public class TooltipView
     {
-        private static Vector2 anchorMax = new Vector2(0, 1);
-        private static Vector2 anchorMin = new Vector2(0, 1);
-        private static Vector2 pivot = new Vector2(0, 1);
-        private static Vector2 v2_0_05 = new Vector2(0, 0.5f);
-
-        public Tooltip tooltip;
-        public ComponentTheme theme;
-        public GameObject gameObject;
-        public Transform transform;
+        private static readonly Vector2 anchorMax = new(0, 1);
+        private static readonly Vector2 anchorMin = new(0, 1);
+        private static readonly Vector2 pivot = new(0, 1);
+        private static readonly Vector2 v2_0_05 = new(0, 0.5f);
         public Image background;
         public Outline border;
+        public GameObject gameObject;
         public VerticalLayoutGroup layout;
-        public ChartLabel title;
-        private List<TooltipViewItem> m_Items = new List<TooltipViewItem>();
-        private List<float> m_ColumnMaxWidth = new List<float>();
-        private bool m_Active = false;
-        private Vector3 m_TargetPos;
+        private bool m_Active;
+        private readonly List<float> m_ColumnMaxWidth = new();
         private Vector3 m_CurrentVelocity;
+        private readonly List<TooltipViewItem> m_Items = new();
+        private Vector3 m_TargetPos;
+        public ComponentTheme theme;
+        public ChartLabel title;
+
+        public Tooltip tooltip;
+        public Transform transform;
 
         public void Update()
         {
             if (!m_Active)
                 return;
-            transform.localPosition = Vector3.SmoothDamp(transform.localPosition, m_TargetPos, ref m_CurrentVelocity, 0.08f);
+            transform.localPosition =
+                Vector3.SmoothDamp(transform.localPosition, m_TargetPos, ref m_CurrentVelocity, 0.08f);
         }
 
         public Vector3 GetCurrentPos()
@@ -76,7 +76,7 @@ namespace XCharts.Runtime
             ChartHelper.SetActive(title, titleActive);
             title.SetText(data.title);
 
-            for (int i = 0; i < data.param.Count; i++)
+            for (var i = 0; i < data.param.Count; i++)
             {
                 var item = GetItem(i);
                 var param = data.param[i];
@@ -85,8 +85,9 @@ namespace XCharts.Runtime
                     item.gameObject.SetActive(false);
                     continue;
                 }
+
                 item.gameObject.SetActive(true);
-                for (int j = 0; j < param.columns.Count; j++)
+                for (var j = 0; j < param.columns.Count; j++)
                 {
                     var column = GetItemColumn(item, j, j == 0 && IsSecondaryMark(param, param.columns[j]));
                     column.SetActive(true);
@@ -106,15 +107,11 @@ namespace XCharts.Runtime
                     if (m_ColumnMaxWidth[j] < columnWidth)
                         m_ColumnMaxWidth[j] = columnWidth;
                 }
-                for (int j = param.columns.Count; j < item.columns.Count; j++)
-                {
-                    item.columns[j].SetActive(false);
-                }
+
+                for (var j = param.columns.Count; j < item.columns.Count; j++) item.columns[j].SetActive(false);
             }
-            for (int i = data.param.Count; i < m_Items.Count; i++)
-            {
-                m_Items[i].gameObject.SetActive(false);
-            }
+
+            for (var i = data.param.Count; i < m_Items.Count; i++) m_Items[i].gameObject.SetActive(false);
             ResetSize();
             UpdatePosition(tooltip.context.pointer + tooltip.offset);
             tooltip.gameObject.transform.SetAsLastSibling();
@@ -124,10 +121,7 @@ namespace XCharts.Runtime
         {
             if (tooltip == null || tooltip.columnGapWidths.Count == 0) return 0;
             if (tooltip.columnGapWidths.Count == 1) return index == 1 ? tooltip.columnGapWidths[0] : 0;
-            if (index < tooltip.columnGapWidths.Count)
-            {
-                return tooltip.columnGapWidths[index];
-            }
+            if (index < tooltip.columnGapWidths.Count) return tooltip.columnGapWidths[index];
             return 0;
         }
 
@@ -170,12 +164,12 @@ namespace XCharts.Runtime
             if (tooltip.minHeight > 0 && maxHig < tooltip.minHeight)
                 maxHig = tooltip.minHeight;
 
-            for (int i = 0; i < m_Items.Count; i++)
+            for (var i = 0; i < m_Items.Count; i++)
             {
                 var item = m_Items[i];
                 item.gameObject.GetComponent<RectTransform>().sizeDelta = new Vector2(maxWid, tooltip.itemHeight);
                 var xPos = 0f;
-                for (int j = 0; j < m_ColumnMaxWidth.Count; j++)
+                for (var j = 0; j < m_ColumnMaxWidth.Count; j++)
                 {
                     if (j >= item.columns.Count) break;
                     var deltaX = j == m_ColumnMaxWidth.Count - 1 ? maxWid - xPos : m_ColumnMaxWidth[j];
@@ -185,9 +179,11 @@ namespace XCharts.Runtime
                     xPos += m_ColumnMaxWidth[j];
                 }
             }
+
             tooltip.context.width = maxWid + tooltip.paddingLeftRight * 2;
             tooltip.context.height = maxHig;
-            background.GetComponent<RectTransform>().sizeDelta = new Vector2(tooltip.context.width, tooltip.context.height);
+            background.GetComponent<RectTransform>().sizeDelta =
+                new Vector2(tooltip.context.width, tooltip.context.height);
         }
 
         private float TotalMaxWidth()
@@ -201,16 +197,11 @@ namespace XCharts.Runtime
         private TooltipViewItem GetItem(int i)
         {
             if (i < 0) i = 0;
-            if (i < m_Items.Count)
-            {
-                return m_Items[i];
-            }
-            else
-            {
-                var item = CreateViewItem(i, gameObject.transform, tooltip, theme);
-                m_Items.Add(item);
-                return item;
-            }
+            if (i < m_Items.Count) return m_Items[i];
+
+            var item = CreateViewItem(i, gameObject.transform, tooltip, theme);
+            m_Items.Add(item);
+            return item;
         }
 
         private ChartLabel GetItemColumn(TooltipViewItem item, int i, bool isSecondaryMark = false)
@@ -226,10 +217,9 @@ namespace XCharts.Runtime
                 column = CreateViewItemColumn(i, item.gameObject.transform, tooltip, theme);
                 item.columns.Add(column);
             }
+
             if (isSecondaryMark)
-            {
                 column.text.text.fontSize = (int)(tooltip.GetContentLabelStyle(i).textStyle.fontSize * 0.6f);
-            }
             return column;
         }
 
@@ -246,8 +236,9 @@ namespace XCharts.Runtime
             view.background = ChartHelper.EnsureComponent<Image>(view.gameObject);
             view.background.sprite = tooltip.backgroundImage;
             view.background.type = tooltip.backgroundType;
-            view.background.color = ChartHelper.IsClearColor(tooltip.backgroundColor) ?
-                Color.white : tooltip.backgroundColor;
+            view.background.color = ChartHelper.IsClearColor(tooltip.backgroundColor)
+                ? Color.white
+                : tooltip.backgroundColor;
 
             view.border = ChartHelper.EnsureComponent<Outline>(view.gameObject);
             view.border.enabled = tooltip.borderWidth > 0;
@@ -265,7 +256,8 @@ namespace XCharts.Runtime
                 tooltip.paddingTopBottom,
                 tooltip.paddingTopBottom);
 
-            view.title = ChartHelper.AddChartLabel("title", view.gameObject.transform, tooltip.titleLabelStyle, theme.tooltip,
+            view.title = ChartHelper.AddChartLabel("title", view.gameObject.transform, tooltip.titleLabelStyle,
+                theme.tooltip,
                 "", Color.clear, TextAnchor.MiddleLeft);
             view.title.gameObject.SetActive(true);
 
@@ -279,7 +271,7 @@ namespace XCharts.Runtime
 
         private static TooltipViewItem CreateViewItem(int i, Transform parent, Tooltip tooltip, ComponentTheme theme)
         {
-            GameObject item1 = ChartHelper.AddObject("item" + i, parent, anchorMin, anchorMax, v2_0_05, Vector3.zero);
+            var item1 = ChartHelper.AddObject("item" + i, parent, anchorMin, anchorMax, v2_0_05, Vector3.zero);
 
             var item = new TooltipViewItem();
             item.gameObject = item1;

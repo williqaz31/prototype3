@@ -9,7 +9,7 @@ namespace XCharts.Runtime
 
             double min = 0;
             double max = 0;
-            SerieHelper.GetMinMaxData(serie, out min, out max, null);
+            SerieHelper.GetMinMaxData(serie, out min, out max);
             dataZoom.context.startValue = min + (max - min) * dataZoom.start / 100;
             dataZoom.context.endValue = min + (max - min) * dataZoom.end / 100;
         }
@@ -17,15 +17,14 @@ namespace XCharts.Runtime
         public static void UpdateDataZoomRuntimeStartEndValue<T>(BaseChart chart) where T : Serie
         {
             foreach (var component in chart.components)
-            {
                 if (component is DataZoom)
                 {
                     var dataZoom = component as DataZoom;
                     if (!dataZoom.enable)
                         continue;
 
-                    double min = double.MaxValue;
-                    double max = double.MinValue;
+                    var min = double.MaxValue;
+                    var max = double.MinValue;
                     foreach (var serie in chart.series)
                     {
                         if (!serie.show || !(serie is T))
@@ -53,10 +52,10 @@ namespace XCharts.Runtime
                                 max = serieMaxValue;
                         }
                     }
+
                     dataZoom.context.startValue = min + (max - min) * dataZoom.start / 100;
                     dataZoom.context.endValue = min + (max - min) * dataZoom.end / 100;
                 }
-            }
         }
     }
 }

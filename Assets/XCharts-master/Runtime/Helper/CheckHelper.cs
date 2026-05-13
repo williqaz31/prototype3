@@ -13,8 +13,8 @@ namespace XCharts.Runtime
 
         public static string CheckChart(BaseGraph chart)
         {
-            if (chart is BaseChart) return CheckChart((BaseChart) chart);
-            else return string.Empty;
+            if (chart is BaseChart) return CheckChart((BaseChart)chart);
+            return string.Empty;
         }
 
         public static string CheckChart(BaseChart chart)
@@ -35,18 +35,12 @@ namespace XCharts.Runtime
         {
             if (string.IsNullOrEmpty(chart.chartName)) return;
             var list = XChartsMgr.GetCharts(chart.chartName);
-            if (list.Count > 1)
-            {
-                sb.AppendFormat("warning:chart name is repeated: {0}\n", chart.chartName);
-            }
+            if (list.Count > 1) sb.AppendFormat("warning:chart name is repeated: {0}\n", chart.chartName);
         }
 
         private static void CheckSize(BaseChart chart, StringBuilder sb)
         {
-            if (chart.chartWidth == 0 || chart.chartHeight == 0)
-            {
-                sb.Append("warning:chart width or height is 0\n");
-            }
+            if (chart.chartWidth == 0 || chart.chartHeight == 0) sb.Append("warning:chart width or height is 0\n");
         }
 
         private static void CheckTheme(BaseChart chart, StringBuilder sb)
@@ -68,9 +62,13 @@ namespace XCharts.Runtime
             // }
         }
 
-        private static void CheckLegend(BaseChart chart, StringBuilder sb) { }
+        private static void CheckLegend(BaseChart chart, StringBuilder sb)
+        {
+        }
 
-        private static void CheckGrid(BaseChart chart, StringBuilder sb) { }
+        private static void CheckGrid(BaseChart chart, StringBuilder sb)
+        {
+        }
 
         private static void CheckSerie(BaseChart chart, StringBuilder sb)
         {
@@ -86,40 +84,34 @@ namespace XCharts.Runtime
                     allDataIsEmpty = false;
                     var dataIndexError = 0;
                     set.Clear();
-                    for (int i = 0; i < serie.dataCount; i++)
+                    for (var i = 0; i < serie.dataCount; i++)
                     {
                         var serieData = serie.GetSerieData(i);
                         if (set.Contains(serieData.index))
-                        {
                             dataIndexError++;
-                        }
                         else
-                        {
                             set.Add(serieData.index);
-                        }
-                        for (int j = 1; j < serieData.data.Count; j++)
-                        {
+                        for (var j = 1; j < serieData.data.Count; j++)
                             if (serieData.GetData(j) != 0)
                             {
                                 allDataIsZero = false;
                                 break;
                             }
-                        }
                     }
+
                     var dataCount = serie.GetSerieData(0).data.Count;
                     if (serie.showDataDimension > 1 && serie.showDataDimension != dataCount)
-                    {
-                        sb.AppendFormat("warning:serie {0} serieData.data.count[{1}] not match showDataDimension[{2}]\n", serie.index, dataCount, serie.showDataDimension);
-                    }
+                        sb.AppendFormat(
+                            "warning:serie {0} serieData.data.count[{1}] not match showDataDimension[{2}]\n",
+                            serie.index, dataCount, serie.showDataDimension);
                     if (dataIndexError > 0)
-                    {
                         sb.AppendFormat("error: data index error, count={0}/{1}\n", dataIndexError, serie.dataCount);
-                    }
                 }
                 else
                 {
                     sb.AppendFormat("warning:serie {0} no data\n", serie.index);
                 }
+
                 if (IsColorAlphaZero(serie.itemStyle.color))
                     sb.AppendFormat("warning:serie {0} itemStyle->color alpha is 0\n", serie.index);
                 if (serie.itemStyle.opacity == 0)
@@ -144,6 +136,7 @@ namespace XCharts.Runtime
                         sb.AppendFormat("warning:serie {0} symbol type is None\n", serie.index);
                 }
             }
+
             if (allDataIsEmpty) sb.Append("warning:all serie data is empty\n");
             if (!allDataIsEmpty && allDataIsZero) sb.Append("warning:all serie data is 0\n");
             if (allSerieIsHide) sb.Append("warning:all serie is hide\n");

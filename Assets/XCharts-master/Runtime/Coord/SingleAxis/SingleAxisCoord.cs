@@ -5,5 +5,6 @@ namespace XCharts.Runtime
     [Serializable]
     [ComponentHandler(null)]
     public class SingleAxisCoord : CoordSystem
-    { }
+    {
+    }
 }

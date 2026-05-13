@@ -4,13 +4,13 @@ namespace XCharts.Runtime
 {
     public static class SerieEventDataPool
     {
-        private static readonly ObjectPool<SerieEventData> s_ListPool = new ObjectPool<SerieEventData>(null, OnClear);
+        private static readonly ObjectPool<SerieEventData> s_ListPool = new(null, OnClear);
 
-        static void OnGet(SerieEventData data)
+        private static void OnGet(SerieEventData data)
         {
         }
 
-        static void OnClear(SerieEventData data)
+        private static void OnClear(SerieEventData data)
         {
             data.Reset();
         }

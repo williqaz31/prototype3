@@ -1,7 +1,6 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections;
-using UnityEngine.SceneManagement;
 
 public class Loading : MonoBehaviour
 {
@@ -10,20 +9,18 @@ public class Loading : MonoBehaviour
     public Slider progressBar;
     public Button loadButton;
     public AudioSource audioSource;
-    
+
     public GameObject informationSup;
 
-   
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    private void Start()
     {
-        
     }
 
     // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        
     }
 
     public void StartLoading()
@@ -31,22 +28,23 @@ public class Loading : MonoBehaviour
         Debug.Log("StartLoading");
         loadButton.interactable = false;
         StartCoroutine(LoadRoutine());
-        
-       // tout.SetActive(false);
+
+        // tout.SetActive(false);
     }
 
-    IEnumerator LoadRoutine()
+    private IEnumerator LoadRoutine()
     {
         loadingScreen.SetActive(true);
-        float duration = 5f;
+        var duration = 5f;
         audioSource.Play();
-        float time = 0f;
+        var time = 0f;
         while (time < duration)
         {
-            time+= Time.deltaTime;
-            progressBar.value = time/duration;
+            time += Time.deltaTime;
+            progressBar.value = time / duration;
             yield return null;
         }
+
         Time.timeScale = 0;
         audioSource.Stop();
         loadingScreen.SetActive(false);

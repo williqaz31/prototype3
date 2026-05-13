@@ -3,33 +3,27 @@ using XCharts.Runtime;
 #if INPUT_SYSTEM_ENABLED
 using Input = XCharts.Runtime.InputHelper;
 #endif
+
 namespace XCharts.Example
 {
     [DisallowMultipleComponent]
     public class Example05_DynamicChart : MonoBehaviour
     {
-        BaseChart chart;
+        private BaseChart chart;
 
-        void Awake() { }
-
-        void Update()
+        private void Awake()
         {
-            if (Input.GetKeyDown(KeyCode.P))
-            {
-                AddPieChart("Dynamic PieChart");
-            }
-            if (Input.GetKeyDown(KeyCode.L))
-            {
-                AddLineChart("Dynamic LineChart");
-            }
         }
 
-        GameObject CreateChartObject(string chartName)
+        private void Update()
         {
-            for (int i = transform.childCount - 1; i >= 0; i--)
-            {
-                Destroy(transform.GetChild(i).gameObject);
-            }
+            if (Input.GetKeyDown(KeyCode.P)) AddPieChart("Dynamic PieChart");
+            if (Input.GetKeyDown(KeyCode.L)) AddLineChart("Dynamic LineChart");
+        }
+
+        private GameObject CreateChartObject(string chartName)
+        {
+            for (var i = transform.childCount - 1; i >= 0; i--) Destroy(transform.GetChild(i).gameObject);
             var chartObject = new GameObject();
             chartObject.name = chartName;
             chartObject.transform.SetParent(transform);
@@ -38,7 +32,7 @@ namespace XCharts.Example
             return chartObject;
         }
 
-        void AddPieChart(string chartName)
+        private void AddPieChart(string chartName)
         {
             var chartObject = CreateChartObject(chartName);
             var chart = chartObject.AddComponent<PieChart>();
@@ -53,13 +47,10 @@ namespace XCharts.Example
             chart.RemoveData();
             chart.AddSerie<Pie>();
 
-            for (int i = 0; i < 3; i++)
-            {
-                chart.AddData(0, Random.Range(10, 20), "pie" + (i + 1));
-            }
+            for (var i = 0; i < 3; i++) chart.AddData(0, Random.Range(10, 20), "pie" + (i + 1));
         }
 
-        void AddLineChart(string chartName)
+        private void AddLineChart(string chartName)
         {
             var chartObject = CreateChartObject(chartName);
             var chart = chartObject.AddComponent<PieChart>();
@@ -85,7 +76,7 @@ namespace XCharts.Example
             chart.RemoveData();
             chart.AddSerie<Line>();
 
-            for (int i = 0; i < 10; i++)
+            for (var i = 0; i < 10; i++)
             {
                 chart.AddXAxisData("x" + (i + 1));
                 chart.AddData(0, Random.Range(10, 100));

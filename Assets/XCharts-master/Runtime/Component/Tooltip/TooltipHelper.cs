@@ -17,20 +17,19 @@ namespace XCharts.Runtime
                 {
                     tooltip.context.data.title = tooltip.titleFormatter;
                     var numericFormatter = string.IsNullOrEmpty(tooltip.titleLabelStyle.numericFormatter)
-                        ? tooltip.numericFormatter : tooltip.titleLabelStyle.numericFormatter;
+                        ? tooltip.numericFormatter
+                        : tooltip.titleLabelStyle.numericFormatter;
                     FormatterHelper.ReplaceContent(ref tooltip.context.data.title, -1, numericFormatter, null, chart);
                 }
             }
-            for (int i = tooltip.context.data.param.Count - 1; i >= 0; i--)
+
+            for (var i = tooltip.context.data.param.Count - 1; i >= 0; i--)
             {
                 var param = tooltip.context.data.param[i];
-                if (IsIgnoreFormatter(param.itemFormatter))
-                {
-                    tooltip.context.data.param.RemoveAt(i);
-                }
+                if (IsIgnoreFormatter(param.itemFormatter)) tooltip.context.data.param.RemoveAt(i);
             }
+
             foreach (var param in tooltip.context.data.param)
-            {
                 if (!string.IsNullOrEmpty(param.itemFormatter))
                 {
                     param.columns.Clear();
@@ -47,12 +46,8 @@ namespace XCharts.Runtime
                         param.serieData,
                         chart,
                         param.serieIndex);
-                    foreach (var item in content.Split('|'))
-                    {
-                        param.columns.Add(item);
-                    }
+                    foreach (var item in content.Split('|')) param.columns.Add(item);
                 }
-            }
         }
 
         public static bool IsIgnoreFormatter(string itemFormatter)
@@ -67,17 +62,10 @@ namespace XCharts.Runtime
 
             var pos = tooltip.view.GetTargetPos();
             if (pos.x + tooltip.context.width > chartRect.x + chartRect.width)
-            {
                 pos.x = tooltip.context.pointer.x - tooltip.context.width - tooltip.offset.x;
-            }
             else if (pos.x < chartRect.x)
-            {
                 pos.x = tooltip.context.pointer.x - tooltip.context.width + Mathf.Abs(tooltip.offset.x);
-            }
-            if (pos.y - tooltip.context.height < chartRect.y)
-            {
-                pos.y = chartRect.y + tooltip.context.height;
-            }
+            if (pos.y - tooltip.context.height < chartRect.y) pos.y = chartRect.y + tooltip.context.height;
             if (pos.y > chartRect.y + chartRect.height)
                 pos.y = chartRect.y + chartRect.height;
             var screenGap = 10;
@@ -96,7 +84,7 @@ namespace XCharts.Runtime
         }
 
         /// <summary>
-        /// 更新文本框位置
+        ///     更新文本框位置
         /// </summary>
         /// <param name="pos"></param>
         private static void UpdateContentPos(Tooltip tooltip, Vector2 pos, Rect chartRect)
@@ -127,6 +115,7 @@ namespace XCharts.Runtime
                         pos.y += ChartHelper.GetActualValue(tooltip.fixedY, height);
                         break;
                 }
+
                 tooltip.view.UpdatePosition(pos);
             }
         }
@@ -135,22 +124,17 @@ namespace XCharts.Runtime
         {
             var itemStyle = SerieHelper.GetItemStyle(serie, serieData);
             if (!string.IsNullOrEmpty(itemStyle.numericFormatter)) return itemStyle.numericFormatter;
-            else return tooltip.numericFormatter;
+            return tooltip.numericFormatter;
         }
 
         public static Color32 GetLineColor(Tooltip tooltip, Color32 defaultColor)
         {
             var lineStyle = tooltip.lineStyle;
-            if (!ChartHelper.IsClearColor(lineStyle.color))
-            {
-                return lineStyle.GetColor();
-            }
-            else
-            {
-                var color = defaultColor;
-                ChartHelper.SetColorOpacity(ref color, lineStyle.opacity);
-                return color;
-            }
+            if (!ChartHelper.IsClearColor(lineStyle.color)) return lineStyle.GetColor();
+
+            var color = defaultColor;
+            ChartHelper.SetColorOpacity(ref color, lineStyle.opacity);
+            return color;
         }
     }
 }

@@ -5,21 +5,21 @@ using UnityEngine;
 namespace XCharts.Runtime
 {
     /// <summary>
-    /// Language.
-    /// ||国际化语言表。
+    ///     Language.
+    ///     ||国际化语言表。
     /// </summary>
     [Serializable]
     [CreateAssetMenu(menuName = "XCharts/Export Lang")]
     public class Lang : ScriptableObject
     {
         public string langName = "EN";
-        public LangTime time = new LangTime();
-        public LangCandlestick candlestick = new LangCandlestick();
+        public LangTime time = new();
+        public LangCandlestick candlestick = new();
 
         public string GetMonthAbbr(int month)
         {
             if (month < 1 && month > 12) return month.ToString();
-            else return time.monthAbbr[month - 1];
+            return time.monthAbbr[month - 1];
         }
 
         public string GetDay(int day)
@@ -27,23 +27,21 @@ namespace XCharts.Runtime
             day = day - 1;
             if (day >= 0 && day < time.dayOfMonth.Count - 1)
                 return time.dayOfMonth[day];
-            else
-                return day.ToString();
+            return day.ToString();
         }
 
         public string GetCandlestickDimensionName(int i)
         {
             if (i >= 0 && i < candlestick.dimensionNames.Count)
                 return candlestick.dimensionNames[i];
-            else
-                return string.Empty;
+            return string.Empty;
         }
     }
 
     [Serializable]
     public class LangTime
     {
-        public List<string> months = new List<string>()
+        public List<string> months = new()
         {
             "January",
             "February",
@@ -58,7 +56,8 @@ namespace XCharts.Runtime
             "November",
             "December"
         };
-        public List<string> monthAbbr = new List<string>()
+
+        public List<string> monthAbbr = new()
         {
             "Jan",
             "Feb",
@@ -73,7 +72,8 @@ namespace XCharts.Runtime
             "Nov",
             "Dec"
         };
-        public List<string> dayOfMonth = new List<string>()
+
+        public List<string> dayOfMonth = new()
         {
             "1",
             "2",
@@ -107,7 +107,8 @@ namespace XCharts.Runtime
             "30",
             "31"
         };
-        public List<string> dayOfWeek = new List<string>()
+
+        public List<string> dayOfWeek = new()
         {
             "Sunday",
             "Monday",
@@ -117,7 +118,8 @@ namespace XCharts.Runtime
             "Friday",
             "Saturday"
         };
-        public List<string> dayOfWeekAbbr = new List<string>()
+
+        public List<string> dayOfWeekAbbr = new()
         {
             "Sun",
             "Mon",
@@ -132,6 +134,6 @@ namespace XCharts.Runtime
     [Serializable]
     public class LangCandlestick
     {
-        public List<string> dimensionNames = new List<string>() { "open", "close", "lowest", "highest" };
+        public List<string> dimensionNames = new() { "open", "close", "lowest", "highest" };
     }
 }

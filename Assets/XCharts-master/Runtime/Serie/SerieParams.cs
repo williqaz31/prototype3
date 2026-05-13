@@ -6,21 +6,21 @@ namespace XCharts.Runtime
 {
     public class SerieParams
     {
-        public Type serieType;
+        public string category;
+        public Color32 color;
+        public List<string> columns = new();
+        public int dataCount;
+        public int dimension;
+        public bool ignore;
+        public bool isSecondaryMark;
+        public string itemFormatter;
+        public string marker = "●";
+        public string numericFormatter;
+        public SerieData serieData;
         public int serieIndex;
         public string serieName;
-        public string marker = "●";
-        public bool isSecondaryMark;
-        public string category;
-        public int dimension;
-        public SerieData serieData;
-        public int dataCount;
-        public double value;
+        public Type serieType;
         public double total;
-        public Color32 color;
-        public string itemFormatter;
-        public string numericFormatter;
-        public bool ignore;
-        public List<string> columns = new List<string>();   
+        public double value;
     }
 }

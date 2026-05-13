@@ -5,14 +5,14 @@ namespace XCharts.Runtime
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public sealed class ComponentHandlerAttribute : Attribute
     {
-        public readonly Type handler;
         public readonly bool allowMultiple = true;
+        public readonly Type handler;
         public readonly int order = 3;
 
         public ComponentHandlerAttribute(Type handler, int order = 3)
         {
             this.handler = handler;
-            this.allowMultiple = true;
+            allowMultiple = true;
             this.order = order;
         }
 

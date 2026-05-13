@@ -5,8 +5,8 @@ namespace XCharts.Runtime
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public sealed class DefaultTooltipAttribute : Attribute
     {
-        public readonly Tooltip.Type type;
         public readonly Tooltip.Trigger trigger;
+        public readonly Tooltip.Type type;
 
         public DefaultTooltipAttribute(Tooltip.Type type, Tooltip.Trigger trigger)
         {

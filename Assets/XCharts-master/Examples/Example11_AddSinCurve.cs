@@ -6,11 +6,11 @@ namespace XCharts.Example
     [DisallowMultipleComponent]
     public class Example11_AddSinCurve : MonoBehaviour
     {
-        private float time;
         public int angle;
         private LineChart chart;
+        private float time;
 
-        void Awake()
+        private void Awake()
         {
             chart = gameObject.GetComponent<LineChart>();
             if (chart == null)
@@ -18,6 +18,7 @@ namespace XCharts.Example
                 chart = gameObject.AddComponent<LineChart>();
                 chart.Init();
             }
+
             chart.EnsureChartComponent<Title>().show = true;
             chart.EnsureChartComponent<Title>().text = "Sin Curve";
 
@@ -44,18 +45,18 @@ namespace XCharts.Example
             serie.lineType = LineType.Normal;
             for (angle = 0; angle < 1080; angle++)
             {
-                float xvalue = Mathf.PI / 180 * angle;
-                float yvalue = Mathf.Sin(xvalue);
+                var xvalue = Mathf.PI / 180 * angle;
+                var yvalue = Mathf.Sin(xvalue);
                 chart.AddData(0, xvalue, yvalue);
             }
         }
 
-        void Update()
+        private void Update()
         {
             if (angle > 3000) return;
             angle++;
-            float xvalue = Mathf.PI / 180 * angle;
-            float yvalue = Mathf.Sin(xvalue);
+            var xvalue = Mathf.PI / 180 * angle;
+            var yvalue = Mathf.Sin(xvalue);
             chart.AddData(0, xvalue, yvalue);
         }
     }

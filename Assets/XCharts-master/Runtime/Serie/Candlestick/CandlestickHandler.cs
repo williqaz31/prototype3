@@ -1,14 +1,16 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Scripting;
 using UnityEngine.UI;
 using XUGL;
 
 namespace XCharts.Runtime
 {
-    [UnityEngine.Scripting.Preserve]
+    [Preserve]
     internal sealed class CandlestickHandler : SerieHandler<Candlestick>
     {
         private GridCoord m_SerieGrid;
+
         public override void DrawSerie(VertexHelper vh)
         {
             DrawCandlestickSerie(vh, serie);
@@ -58,7 +60,7 @@ namespace XCharts.Runtime
                 param.columns.Add(string.Empty);
 
                 paramList.Add(param);
-                for (int i = 1; i < 5; i++)
+                for (var i = 1; i < 5; i++)
                 {
                     param = new SerieParams();
                     param.serieName = serie.serieName;
@@ -112,7 +114,8 @@ namespace XCharts.Runtime
             if (m_SerieGrid == null)
                 return;
 
-            var needCheck = (chart.isPointerInChart && m_SerieGrid.IsPointerEnter() && !serie.placeHolder) || m_LegendEnter;
+            var needCheck = (chart.isPointerInChart && m_SerieGrid.IsPointerEnter() && !serie.placeHolder) ||
+                            m_LegendEnter;
             var needInteract = false;
             if (!needCheck)
             {
@@ -129,10 +132,13 @@ namespace XCharts.Runtime
                         SerieHelper.GetItemColor(out color1, out toColor1, serie, serieData, chart.theme, state);
                         serieData.interact.SetColor(ref needInteract, color1, toColor1);
                     }
+
                     chart.RefreshPainter(serie);
                 }
+
                 return;
             }
+
             m_LastCheckContextFlag = needCheck;
             Color32 color, toColor;
             if (m_LegendEnter)
@@ -161,15 +167,14 @@ namespace XCharts.Runtime
                     {
                         serieData.context.highlight = false;
                     }
+
                     var state = SerieHelper.GetSerieState(serie, serieData, true);
                     SerieHelper.GetItemColor(out color, out toColor, serie, serieData, chart.theme, state);
                     serieData.interact.SetColor(ref needInteract, color, toColor);
                 }
             }
-            if (needInteract)
-            {
-                chart.RefreshPainter(serie);
-            }
+
+            if (needInteract) chart.RefreshPainter(serie);
         }
 
         private void DrawCandlestickSerie(VertexHelper vh, Candlestick serie)
@@ -178,30 +183,30 @@ namespace XCharts.Runtime
             if (serie.animation.HasFadeOut()) return;
             XAxis xAxis;
             YAxis yAxis;
-            if (!chart.TryGetChartComponent<XAxis>(out xAxis, serie.xAxisIndex)) return;
-            if (!chart.TryGetChartComponent<YAxis>(out yAxis, serie.yAxisIndex)) return;
-            if (!chart.TryGetChartComponent<GridCoord>(out m_SerieGrid, xAxis.gridIndex)) return;
+            if (!chart.TryGetChartComponent(out xAxis, serie.xAxisIndex)) return;
+            if (!chart.TryGetChartComponent(out yAxis, serie.yAxisIndex)) return;
+            if (!chart.TryGetChartComponent(out m_SerieGrid, xAxis.gridIndex)) return;
             var theme = chart.theme;
             var dataZoom = chart.GetDataZoomOfAxis(xAxis);
             var showData = serie.GetDataList(dataZoom);
-            float categoryWidth = AxisHelper.GetDataWidth(xAxis, m_SerieGrid.context.width, showData.Count, dataZoom);
-            float barWidth = serie.GetBarWidth(categoryWidth);
-            float gap = (categoryWidth - barWidth) / 2;
-            int maxCount = serie.maxShow > 0 ?
-                (serie.maxShow > showData.Count ? showData.Count : serie.maxShow) :
-                showData.Count;
+            var categoryWidth = AxisHelper.GetDataWidth(xAxis, m_SerieGrid.context.width, showData.Count, dataZoom);
+            var barWidth = serie.GetBarWidth(categoryWidth);
+            var gap = (categoryWidth - barWidth) / 2;
+            var maxCount = serie.maxShow > 0
+                ? serie.maxShow > showData.Count ? showData.Count : serie.maxShow
+                : showData.Count;
 
-            bool dataChanging = false;
-            float dataChangeDuration = serie.animation.GetChangeDuration();
+            var dataChanging = false;
+            var dataChangeDuration = serie.animation.GetChangeDuration();
             var dataAddDuration = serie.animation.GetAdditionDuration();
             var unscaledTime = serie.animation.unscaledTime;
-            double yMinValue = yAxis.context.minValue;
-            double yMaxValue = yAxis.context.maxValue;
+            var yMinValue = yAxis.context.minValue;
+            var yMaxValue = yAxis.context.maxValue;
             var isYAxis = false;
             serie.containerIndex = m_SerieGrid.index;
             serie.containterInstanceId = m_SerieGrid.instanceId;
             var intensive = m_SerieGrid.context.width / (maxCount - serie.minShow) < 0.6f;
-            for (int i = serie.minShow; i < maxCount; i++)
+            for (var i = serie.minShow; i < maxCount; i++)
             {
                 var serieData = showData[i];
                 if (!serieData.show || serie.IsIgnoreValue(serieData))
@@ -210,32 +215,40 @@ namespace XCharts.Runtime
                     serie.context.dataIndexs.Add(serieData.index);
                     continue;
                 }
+
                 var state = SerieHelper.GetSerieState(serie, serieData);
                 var itemStyle = SerieHelper.GetItemStyle(serie, serieData, state);
                 var startDataIndex = serieData.data.Count > 4 ? 1 : 0;
-                var open = serieData.GetCurrData(startDataIndex, dataAddDuration, dataChangeDuration, yAxis.inverse, yMinValue, yMaxValue, unscaledTime);
-                var close = serieData.GetCurrData(startDataIndex + 1, dataAddDuration, dataChangeDuration, yAxis.inverse, yMinValue, yMaxValue, unscaledTime);
-                var lowest = serieData.GetCurrData(startDataIndex + 2, dataAddDuration, dataChangeDuration, yAxis.inverse, yMinValue, yMaxValue, unscaledTime);
-                var heighest = serieData.GetCurrData(startDataIndex + 3, dataAddDuration, dataChangeDuration, yAxis.inverse, yMinValue, yMaxValue, unscaledTime);
+                var open = serieData.GetCurrData(startDataIndex, dataAddDuration, dataChangeDuration, yAxis.inverse,
+                    yMinValue, yMaxValue, unscaledTime);
+                var close = serieData.GetCurrData(startDataIndex + 1, dataAddDuration, dataChangeDuration,
+                    yAxis.inverse, yMinValue, yMaxValue, unscaledTime);
+                var lowest = serieData.GetCurrData(startDataIndex + 2, dataAddDuration, dataChangeDuration,
+                    yAxis.inverse, yMinValue, yMaxValue, unscaledTime);
+                var heighest = serieData.GetCurrData(startDataIndex + 3, dataAddDuration, dataChangeDuration,
+                    yAxis.inverse, yMinValue, yMaxValue, unscaledTime);
                 var isRise = yAxis.inverse ? close < open : close > open;
                 var borderWidth = open == 0 ? 0f :
-                    (itemStyle.borderWidth == 0 ? theme.serie.candlestickBorderWidth :
-                        itemStyle.borderWidth);
+                    itemStyle.borderWidth == 0 ? theme.serie.candlestickBorderWidth :
+                    itemStyle.borderWidth;
                 if (serieData.IsDataChanged()) dataChanging = true;
-                float pX = xAxis.IsCategory() ? m_SerieGrid.context.x + i * categoryWidth : AxisHelper.GetAxisValuePosition(m_SerieGrid, xAxis, categoryWidth, serieData.GetData(0));
-                float zeroY = m_SerieGrid.context.y + yAxis.context.offset;
+                var pX = xAxis.IsCategory()
+                    ? m_SerieGrid.context.x + i * categoryWidth
+                    : AxisHelper.GetAxisValuePosition(m_SerieGrid, xAxis, categoryWidth, serieData.GetData(0));
+                var zeroY = m_SerieGrid.context.y + yAxis.context.offset;
                 if (!xAxis.boundaryGap) pX -= categoryWidth / 2;
-                float pY = zeroY;
+                var pY = zeroY;
                 var barHig = 0f;
-                double valueTotal = yMaxValue - yMinValue;
+                var valueTotal = yMaxValue - yMinValue;
                 var minCut = yMinValue > 0 ? yMinValue : 0;
                 if (valueTotal != 0)
                 {
                     barHig = (float)((close - open) / valueTotal * m_SerieGrid.context.height);
                     pY += (float)((open - minCut) / valueTotal * m_SerieGrid.context.height);
                 }
+
                 serieData.context.stackHeight = barHig;
-                float currHig = AnimationStyleHelper.CheckDataAnimation(chart, serie, i, barHig);
+                var currHig = AnimationStyleHelper.CheckDataAnimation(chart, serie, i, barHig);
                 Vector3 plb, plt, prt, prb, top;
 
                 var offset = 2 * borderWidth;
@@ -255,6 +268,7 @@ namespace XCharts.Runtime
                     prb = new Vector3(pX + gap + barWidth - offset, pY - offset);
                     top = new Vector3(pX + gap + barWidth / 2, pY + currHig + offset);
                 }
+
                 if (serie.clip)
                 {
                     plb = chart.ClampInGrid(m_SerieGrid, plb);
@@ -263,19 +277,22 @@ namespace XCharts.Runtime
                     prb = chart.ClampInGrid(m_SerieGrid, prb);
                     top = chart.ClampInGrid(m_SerieGrid, top);
                 }
+
                 serie.context.dataPoints.Add(top);
                 serie.context.dataIndexs.Add(serieData.index);
-                var areaColor = isRise ?
-                    itemStyle.GetColor(theme.serie.candlestickColor) :
-                    itemStyle.GetColor0(theme.serie.candlestickColor0);
-                var borderColor = isRise ?
-                    itemStyle.GetBorderColor(theme.serie.candlestickBorderColor) :
-                    itemStyle.GetBorderColor0(theme.serie.candlestickBorderColor0);
+                var areaColor = isRise
+                    ? itemStyle.GetColor(theme.serie.candlestickColor)
+                    : itemStyle.GetColor0(theme.serie.candlestickColor0);
+                var borderColor = isRise
+                    ? itemStyle.GetBorderColor(theme.serie.candlestickBorderColor)
+                    : itemStyle.GetBorderColor0(theme.serie.candlestickBorderColor0);
                 var itemWidth = Mathf.Abs(prt.x - plb.x);
                 var itemHeight = Mathf.Abs(plt.y - prb.y);
                 var center = new Vector3((plb.x + prt.x) / 2, (plt.y + prb.y) / 2);
-                var lowPos = new Vector3(center.x, zeroY + (float)((lowest - minCut) / valueTotal * m_SerieGrid.context.height));
-                var heighPos = new Vector3(center.x, zeroY + (float)((heighest - minCut) / valueTotal * m_SerieGrid.context.height));
+                var lowPos = new Vector3(center.x,
+                    zeroY + (float)((lowest - minCut) / valueTotal * m_SerieGrid.context.height));
+                var heighPos = new Vector3(center.x,
+                    zeroY + (float)((heighest - minCut) / valueTotal * m_SerieGrid.context.height));
                 var openCenterPos = new Vector3(center.x, prb.y);
                 var closeCenterPos = new Vector3(center.x, prt.y);
 
@@ -295,23 +312,21 @@ namespace XCharts.Runtime
                         if (itemWidth > 0 && itemHeight > 0)
                         {
                             if (itemStyle.IsNeedCorner())
-                            {
                                 UGL.DrawRoundRectangle(vh, center, itemWidth, itemHeight, areaColor, areaColor, 0,
                                     itemStyle.cornerRadius, isYAxis, 0.5f);
-                            }
                             else
-                            {
                                 chart.DrawClipPolygon(vh, ref prb, ref plb, ref plt, ref prt, areaColor, areaColor,
                                     serie.clip, m_SerieGrid);
-                            }
                             UGL.DrawBorder(vh, center, itemWidth, itemHeight, 2 * borderWidth, borderColor, 0,
                                 itemStyle.cornerRadius, isYAxis, 0.5f);
                         }
                     }
                     else
                     {
-                        UGL.DrawLine(vh, openCenterPos, closeCenterPos, Mathf.Max(borderWidth, barWidth / 2), borderColor);
+                        UGL.DrawLine(vh, openCenterPos, closeCenterPos, Mathf.Max(borderWidth, barWidth / 2),
+                            borderColor);
                     }
+
                     if (isRise)
                     {
                         UGL.DrawLine(vh, openCenterPos, lowPos, borderWidth, borderColor);
@@ -324,14 +339,9 @@ namespace XCharts.Runtime
                     }
                 }
             }
-            if (!serie.animation.IsFinish())
-            {
-                serie.animation.CheckProgress();
-            }
-            if (dataChanging)
-            {
-                chart.RefreshPainter(serie);
-            }
+
+            if (!serie.animation.IsFinish()) serie.animation.CheckProgress();
+            if (dataChanging) chart.RefreshPainter(serie);
         }
     }
 }

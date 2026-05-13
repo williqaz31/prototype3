@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 #if dUI_TextMeshPro
@@ -6,15 +7,15 @@ using TMPro;
 
 namespace XCharts.Runtime
 {
-    [System.Serializable]
+    [Serializable]
     public class ChartText
     {
         private Text m_Text;
         private TextAnchor m_TextAlignment;
         public Text text
         {
-            get { return m_Text; }
-            set { m_Text = value; }
+            get => m_Text;
+            set => m_Text = value;
         }
 #if dUI_TextMeshPro
         private TextMeshProUGUI m_TMPText;
@@ -35,18 +36,13 @@ namespace XCharts.Runtime
 
         public TextAnchor alignment
         {
-            get
-            {
-                return m_TextAlignment;
-            }
-            set
-            {
-                SetAlignment(alignment);
-            }
+            get => m_TextAlignment;
+            set => SetAlignment(alignment);
         }
 
         public ChartText()
-        { }
+        {
+        }
 
         public ChartText(GameObject textParent)
         {
@@ -58,10 +54,7 @@ namespace XCharts.Runtime
             }
 #else
             m_Text = textParent.GetComponentInChildren<Text>();
-            if (m_Text == null)
-            {
-                Debug.LogError("can't find Text component:" + textParent);
-            }
+            if (m_Text == null) Debug.LogError("can't find Text component:" + textParent);
 #endif
         }
 
@@ -69,9 +62,9 @@ namespace XCharts.Runtime
         {
 #if dUI_TextMeshPro
             if (m_TMPText != null) m_TMPText.fontSize = fontSize;
-#else               
+#else
             if (m_Text != null) m_Text.fontSize = (int)fontSize;
-#endif           
+#endif
         }
 
         public void SetText(string text)
@@ -89,7 +82,7 @@ namespace XCharts.Runtime
         {
 #if dUI_TextMeshPro
             if (m_TMPText != null) return m_TMPText.text;
-#else               
+#else
             if (m_Text != null) return m_Text.text;
 #endif
             return string.Empty;
@@ -99,7 +92,7 @@ namespace XCharts.Runtime
         {
 #if dUI_TextMeshPro
             if (m_TMPText != null) m_TMPText.color = color;
-#else              
+#else
             if (m_Text != null) m_Text.color = color;
 #endif
         }
@@ -118,7 +111,7 @@ namespace XCharts.Runtime
         {
 #if dUI_TextMeshPro
             if (m_TMPText != null) m_TMPText.lineSpacing = lineSpacing;
-#else              
+#else
             if (m_Text != null) m_Text.lineSpacing = lineSpacing;
 #endif
         }
@@ -210,7 +203,7 @@ namespace XCharts.Runtime
             }
 #else
             if (m_Text != null) m_Text.alignment = alignment;
-#endif              
+#endif
         }
 
         public void SetFont(Font font)
@@ -239,7 +232,7 @@ namespace XCharts.Runtime
             }
 #else
             if (m_Text != null) m_Text.fontStyle = fontStyle;
-#endif              
+#endif
         }
 
         public void SetFontAndSizeAndStyle(TextStyle textStyle, ComponentTheme theme)
@@ -286,6 +279,7 @@ namespace XCharts.Runtime
 #endif
             return 0;
         }
+
         public float GetPreferredHeight()
         {
 #if dUI_TextMeshPro
@@ -302,19 +296,16 @@ namespace XCharts.Runtime
             if (sourWid < maxWidth) return content;
             var suffixWid = GetPreferredWidth(suffix);
             var textWid = maxWidth - 1.3f * suffixWid;
-            for (int i = content.Length; i > 0; i--)
+            for (var i = content.Length; i > 0; i--)
             {
                 var temp = content.Substring(0, i);
-                if (GetPreferredWidth(temp) < textWid)
-                {
-                    return temp + suffix;
-                }
+                if (GetPreferredWidth(temp) < textWid) return temp + suffix;
             }
+
             return string.Empty;
         }
 
 #if dUI_TextMeshPro
-
         public void SetFont(TMP_FontAsset font)
         {
             if (m_TMPText != null) m_TMPText.font = font;

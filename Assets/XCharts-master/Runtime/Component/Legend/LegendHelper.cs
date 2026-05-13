@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -6,34 +5,34 @@ namespace XCharts.Runtime
 {
     public static class LegendHelper
     {
-        public static Color GetContentColor(BaseChart chart, int legendIndex, string legendName, Legend legend, ThemeStyle theme, bool active)
+        public static Color GetContentColor(BaseChart chart, int legendIndex, string legendName, Legend legend,
+            ThemeStyle theme, bool active)
         {
             var textStyle = legend.labelStyle.textStyle;
             if (active)
             {
                 if (legend.labelStyle.textStyle.autoColor)
                     return SeriesHelper.GetNameColor(chart, legendIndex, legendName);
-                else
-                    return !ChartHelper.IsClearColor(textStyle.color) ? textStyle.color : theme.legend.textColor;
+                return !ChartHelper.IsClearColor(textStyle.color) ? textStyle.color : theme.legend.textColor;
             }
-            else return theme.legend.inactiveColor;
+
+            return theme.legend.inactiveColor;
         }
 
         public static Color GetIconColor(BaseChart chart, Legend legend, int readIndex, string legendName, bool active)
         {
             if (active)
             {
-                if (legend.itemAutoColor)
-                {
-                    return SeriesHelper.GetNameColor(chart, readIndex, legendName);
-                }
-                else
-                    return legend.GetColor(readIndex);
+                if (legend.itemAutoColor) return SeriesHelper.GetNameColor(chart, readIndex, legendName);
+
+                return legend.GetColor(readIndex);
             }
-            else return chart.theme.legend.inactiveColor;
+
+            return chart.theme.legend.inactiveColor;
         }
 
-        public static LegendItem AddLegendItem(BaseChart chart, Legend legend, int i, string legendName, Transform parent,
+        public static LegendItem AddLegendItem(BaseChart chart, Legend legend, int i, string legendName,
+            Transform parent,
             ThemeStyle theme, string content, Color itemColor, bool active, int legendIndex)
         {
             var objName = i + "_" + legendName;
@@ -48,7 +47,8 @@ namespace XCharts.Runtime
             var objAnchorMin = new Vector2(0, 1);
             var objAnchorMax = new Vector2(0, 1);
             var objPivot = new Vector2(0, 1);
-            var btnObj = ChartHelper.AddObject(objName, parent, objAnchorMin, objAnchorMax, objPivot, sizeDelta, -1, chart.childrenNodeNames);
+            var btnObj = ChartHelper.AddObject(objName, parent, objAnchorMin, objAnchorMax, objPivot, sizeDelta, -1,
+                chart.childrenNodeNames);
             var iconObj = ChartHelper.AddObject("icon", btnObj.transform, anchorMin, anchorMax, pivot, iconSizeDelta);
             var img = ChartHelper.EnsureComponent<Image>(btnObj);
             img.color = Color.clear;
@@ -136,15 +136,13 @@ namespace XCharts.Runtime
                     startY = chartPos.y + legendRuntimeHeight + legend.location.runtimeBottom;
                     break;
             }
+
             if (!legend.padding.show)
-            {
-                legend.context.center = new Vector2(startX + legend.context.width / 2, startY - legend.context.height / 2);
-            }
+                legend.context.center =
+                    new Vector2(startX + legend.context.width / 2, startY - legend.context.height / 2);
             else
-            {
                 legend.context.center = new Vector2(startX + legend.context.width / 2 - legend.padding.left,
                     startY - legend.context.height / 2 + legend.padding.top);
-            }
 
             if (isVertical) SetVerticalItemPosition(legend, legendMaxHeight, startX, startY);
             else SetHorizonalItemPosition(legend, legendMaxWidth, startX, startY);
@@ -166,10 +164,12 @@ namespace XCharts.Runtime
                     offsetX += legend.context.eachWidthDict[row];
                     row++;
                 }
+
                 item.SetPosition(legend.GetPosition(index++, new Vector3(startX + offsetX, startY - currHeight)));
                 currHeight += item.height + legend.itemGap;
             }
         }
+
         private static void SetHorizonalItemPosition(Legend legend, float legendMaxWidth, float startX, float startY)
         {
             var currWidth = 0f;
@@ -183,6 +183,7 @@ namespace XCharts.Runtime
                     currWidth = 0;
                     offsetY += legend.context.eachHeight;
                 }
+
                 item.SetPosition(legend.GetPosition(index++, new Vector3(startX + currWidth, startY - offsetY)));
                 currWidth += item.width + legend.itemGap;
             }
@@ -205,16 +206,16 @@ namespace XCharts.Runtime
                         realWidth = width - legend.itemGap;
                         realHeight += height + legend.itemGap;
                         if (legend.context.eachHeight < height + legend.itemGap)
-                        {
                             legend.context.eachHeight = height + legend.itemGap;
-                        }
                         height = 0;
                         width = 0;
                     }
+
                     width += kv.Value.width + legend.itemGap;
                     if (kv.Value.height > height)
                         height = kv.Value.height;
                 }
+
                 width -= legend.itemGap;
                 legend.context.height = realHeight + height;
                 legend.context.width = realWidth > 0 ? realWidth : width;
@@ -233,14 +234,17 @@ namespace XCharts.Runtime
                         height = 0;
                         width = 0;
                     }
+
                     height += kv.Value.height + legend.itemGap;
                     if (kv.Value.width > width)
                         width = kv.Value.width;
                 }
+
                 height -= legend.itemGap;
                 legend.context.height = realHeight > 0 ? realHeight : height;
                 legend.context.width = realWidth + width;
             }
+
             if (legend.padding.show)
             {
                 legend.context.width += legend.padding.left + legend.padding.right;
@@ -257,12 +261,13 @@ namespace XCharts.Runtime
                 totalWidth += item.width + legend.itemGap;
                 if (totalWidth > maxWidth) return true;
             }
+
             return false;
         }
 
         public static bool CheckDataShow(Serie serie, string legendName, bool show)
         {
-            bool needShow = false;
+            var needShow = false;
             if (legendName.Equals(serie.serieName))
             {
                 serie.show = show;
@@ -272,15 +277,14 @@ namespace XCharts.Runtime
             else
             {
                 foreach (var data in serie.data)
-                {
                     if (legendName.Equals(data.name))
                     {
                         data.show = show;
                         data.context.highlight = false;
                         if (data.show) needShow = true;
                     }
-                }
             }
+
             return needShow;
         }
 
@@ -288,23 +292,15 @@ namespace XCharts.Runtime
         {
             var highlightedDataIndex = 0;
             if (legendName.Equals(serie.serieName))
-            {
                 serie.highlight = heighlight;
-            }
             else
-            {
                 foreach (var data in serie.data)
-                {
                     if (legendName.Equals(data.name))
                     {
                         data.context.highlight = heighlight;
-                        if (data.context.highlight)
-                        {
-                            highlightedDataIndex = data.index;
-                        }
+                        if (data.context.highlight) highlightedDataIndex = data.index;
                     }
-                }
-            }
+
             return highlightedDataIndex;
         }
     }

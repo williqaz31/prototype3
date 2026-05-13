@@ -7,7 +7,8 @@ namespace XCharts.Editor
     [CustomPropertyDrawer(typeof(IconStyle), true)]
     public class IconStyleDrawer : BasePropertyDrawer
     {
-        public override string ClassName { get { return "IconStyle"; } }
+        public override string ClassName => "IconStyle";
+
         public override void OnGUI(Rect pos, SerializedProperty prop, GUIContent label)
         {
             base.OnGUI(pos, prop, label);

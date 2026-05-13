@@ -1,28 +1,34 @@
-using UnityEngine;
 using SimulationFourmiliere;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class backgroundManager : MonoBehaviour
 {
-    
     public Image background;
+
     public Sprite springImage, summerImage, automnImage, winterImage;
 
-    void OnEnable() => SimulationState.OnSeasonChanged += UpdateBackground;
-    void OnDisable() => SimulationState.OnSeasonChanged -= UpdateBackground;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    private void Start()
     {
-        
     }
 
     // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        
     }
 
-    void UpdateBackground(Saison saison)
+    private void OnEnable()
+    {
+        SimulationState.OnSeasonChanged += UpdateBackground;
+    }
+
+    private void OnDisable()
+    {
+        SimulationState.OnSeasonChanged -= UpdateBackground;
+    }
+
+    private void UpdateBackground(Saison saison)
     {
         //Change l'image d'arrière plan en fonction de la saison
         switch (saison)
@@ -39,8 +45,6 @@ public class backgroundManager : MonoBehaviour
             case Saison.Printemps:
                 background.sprite = springImage;
                 break;
-            
         }
-        
     }
 }

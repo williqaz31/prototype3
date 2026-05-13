@@ -10,55 +10,73 @@ namespace XCharts.Runtime
     {
         [SerializeField] private float m_Width = 10;
         [SerializeField] private float m_Height = 15;
-        [SerializeField] private float m_Offset = 0;
+        [SerializeField] private float m_Offset;
         [SerializeField] private float m_Dent = 3;
         [SerializeField] private Color32 m_Color = Color.clear;
 
         /// <summary>
-        /// The widht of arrow.
-        /// ||箭头宽。
+        ///     The widht of arrow.
+        ///     ||箭头宽。
         /// </summary>
         public float width
         {
-            get { return m_Width; }
-            set { if (PropertyUtil.SetStruct(ref m_Width, value)) SetVerticesDirty(); }
-        }
-        /// <summary>
-        /// The height of arrow.
-        /// ||箭头高。
-        /// </summary>
-        public float height
-        {
-            get { return m_Height; }
-            set { if (PropertyUtil.SetStruct(ref m_Height, value)) SetVerticesDirty(); }
-        }
-        /// <summary>
-        /// The offset of arrow.
-        /// ||箭头偏移。
-        /// </summary>
-        public float offset
-        {
-            get { return m_Offset; }
-            set { if (PropertyUtil.SetStruct(ref m_Offset, value)) SetVerticesDirty(); }
-        }
-        /// <summary>
-        /// The dent of arrow.
-        /// ||箭头的凹度。
-        /// </summary>
-        public float dent
-        {
-            get { return m_Dent; }
-            set { if (PropertyUtil.SetStruct(ref m_Dent, value)) SetVerticesDirty(); }
+            get => m_Width;
+            set
+            {
+                if (PropertyUtil.SetStruct(ref m_Width, value)) SetVerticesDirty();
+            }
         }
 
         /// <summary>
-        /// the color of arrow.
-        /// ||箭头颜色。
+        ///     The height of arrow.
+        ///     ||箭头高。
+        /// </summary>
+        public float height
+        {
+            get => m_Height;
+            set
+            {
+                if (PropertyUtil.SetStruct(ref m_Height, value)) SetVerticesDirty();
+            }
+        }
+
+        /// <summary>
+        ///     The offset of arrow.
+        ///     ||箭头偏移。
+        /// </summary>
+        public float offset
+        {
+            get => m_Offset;
+            set
+            {
+                if (PropertyUtil.SetStruct(ref m_Offset, value)) SetVerticesDirty();
+            }
+        }
+
+        /// <summary>
+        ///     The dent of arrow.
+        ///     ||箭头的凹度。
+        /// </summary>
+        public float dent
+        {
+            get => m_Dent;
+            set
+            {
+                if (PropertyUtil.SetStruct(ref m_Dent, value)) SetVerticesDirty();
+            }
+        }
+
+        /// <summary>
+        ///     the color of arrow.
+        ///     ||箭头颜色。
         /// </summary>
         public Color32 color
         {
-            get { return m_Color; }
-            set { if (PropertyUtil.SetColor(ref m_Color, value)) SetVerticesDirty(); }
+            get => m_Color;
+            set
+            {
+                if (PropertyUtil.SetColor(ref m_Color, value)) SetVerticesDirty();
+            }
         }
 
         public ArrowStyle Clone()
@@ -85,8 +103,7 @@ namespace XCharts.Runtime
         {
             if (ChartHelper.IsClearColor(color))
                 return defaultColor;
-            else
-                return color;
+            return color;
         }
     }
 }

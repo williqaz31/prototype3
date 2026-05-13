@@ -2,11 +2,11 @@ using UnityEngine;
 
 public class GestionGraphiques : MonoBehaviour
 {
-    public RectTransform panneauTiroir; 
-    public Vector2 positionOuverte = new Vector2(0, 0); 
-    public Vector2 positionFermee = new Vector2(450, 0); 
+    public RectTransform panneauTiroir;
+    public Vector2 positionOuverte = new(0, 0);
+    public Vector2 positionFermee = new(450, 0);
 
-    private bool estCache = false;
+    private bool estCache;
 
     public void ToggleGlissement()
     {

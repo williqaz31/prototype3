@@ -6,25 +6,30 @@ namespace XCharts.Runtime
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public sealed class SerieDataExtraFieldAttribute : Attribute
     {
-        public readonly List<string> fields = new List<string>();
+        public readonly List<string> fields = new();
 
         public SerieDataExtraFieldAttribute()
-        { }
+        {
+        }
+
         public SerieDataExtraFieldAttribute(string field1)
         {
             AddFiled(field1);
         }
+
         public SerieDataExtraFieldAttribute(string field1, string field2)
         {
             AddFiled(field1);
             AddFiled(field2);
         }
+
         public SerieDataExtraFieldAttribute(string field1, string field2, string field3)
         {
             AddFiled(field1);
             AddFiled(field2);
             AddFiled(field3);
         }
+
         public SerieDataExtraFieldAttribute(string field1, string field2, string field3, string field4)
         {
             AddFiled(field1);
@@ -32,6 +37,7 @@ namespace XCharts.Runtime
             AddFiled(field3);
             AddFiled(field4);
         }
+
         public SerieDataExtraFieldAttribute(string field1, string field2, string field3, string field4, string field5)
         {
             AddFiled(field1);
@@ -40,7 +46,9 @@ namespace XCharts.Runtime
             AddFiled(field4);
             AddFiled(field5);
         }
-        public SerieDataExtraFieldAttribute(string field1, string field2, string field3, string field4, string field5, string field6)
+
+        public SerieDataExtraFieldAttribute(string field1, string field2, string field3, string field4, string field5,
+            string field6)
         {
             AddFiled(field1);
             AddFiled(field2);
@@ -49,7 +57,9 @@ namespace XCharts.Runtime
             AddFiled(field5);
             AddFiled(field6);
         }
-        public SerieDataExtraFieldAttribute(string field1, string field2, string field3, string field4, string field5, string field6, string field7)
+
+        public SerieDataExtraFieldAttribute(string field1, string field2, string field3, string field4, string field5,
+            string field6, string field7)
         {
             AddFiled(field1);
             AddFiled(field2);

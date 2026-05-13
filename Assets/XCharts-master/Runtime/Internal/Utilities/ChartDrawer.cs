@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using XUGL;
@@ -19,15 +18,18 @@ namespace XCharts.Runtime
                 case SymbolType.Circle:
                     if (gap > 0)
                     {
-                        UGL.DrawDoughnut(vh, pos, symbolSize, symbolSize + gap, backgroundColor, backgroundColor, color, smoothness);
+                        UGL.DrawDoughnut(vh, pos, symbolSize, symbolSize + gap, backgroundColor, backgroundColor, color,
+                            smoothness);
                     }
                     else
                     {
                         if (tickness > 0 && !ChartHelper.IsClearColor(borderColor))
-                            UGL.DrawDoughnut(vh, pos, symbolSize, symbolSize + tickness, borderColor, borderColor, color, smoothness);
+                            UGL.DrawDoughnut(vh, pos, symbolSize, symbolSize + tickness, borderColor, borderColor,
+                                color, smoothness);
                         else
                             UGL.DrawCricle(vh, pos, symbolSize, color, toColor, smoothness);
                     }
+
                     break;
                 case SymbolType.EmptyCircle:
                     if (tickness == 0) tickness = 4f;
@@ -40,6 +42,7 @@ namespace XCharts.Runtime
                     {
                         UGL.DrawEmptyCricle(vh, pos, symbolSize, tickness, color, color, emptyColor, smoothness);
                     }
+
                     break;
                 case SymbolType.Rect:
                     if (symbolSize2 > 0 && symbolSize2 != symbolSize)
@@ -57,13 +60,18 @@ namespace XCharts.Runtime
                         {
                             if (tickness > 0)
                             {
-                                UGL.DrawRoundRectangle(vh, pos, symbolSize * 2, symbolSize * 2, color, color, 0, cornerRadius, true);
+                                UGL.DrawRoundRectangle(vh, pos, symbolSize * 2, symbolSize * 2, color, color, 0,
+                                    cornerRadius, true);
                                 UGL.DrawBorder(vh, pos, symbolSize, symbolSize, tickness, borderColor, 0, cornerRadius);
                             }
                             else
-                                UGL.DrawRoundRectangle(vh, pos, symbolSize * 2, symbolSize * 2, color, color, 0, cornerRadius, true);
+                            {
+                                UGL.DrawRoundRectangle(vh, pos, symbolSize * 2, symbolSize * 2, color, color, 0,
+                                    cornerRadius, true);
+                            }
                         }
                     }
+
                     break;
                 case SymbolType.EmptyRect:
                     if (tickness == 0) tickness = 4f;
@@ -74,15 +82,14 @@ namespace XCharts.Runtime
                     }
                     else
                     {
-                        UGL.DrawBorder(vh, pos, symbolSize * 2 - tickness * 2, symbolSize * 2 - tickness * 2, tickness, color);
+                        UGL.DrawBorder(vh, pos, symbolSize * 2 - tickness * 2, symbolSize * 2 - tickness * 2, tickness,
+                            color);
                     }
+
                     break;
                 case SymbolType.Triangle:
                 case SymbolType.EmptyTriangle:
-                    if (gap > 0)
-                    {
-                        UGL.DrawEmptyTriangle(vh, pos, symbolSize * 1.4f + gap * 2, gap * 2, backgroundColor);
-                    }
+                    if (gap > 0) UGL.DrawEmptyTriangle(vh, pos, symbolSize * 1.4f + gap * 2, gap * 2, backgroundColor);
                     if (type == SymbolType.EmptyTriangle)
                     {
                         if (tickness == 0) tickness = 4f;
@@ -92,15 +99,13 @@ namespace XCharts.Runtime
                     {
                         UGL.DrawTriangle(vh, pos, symbolSize * 1.4f, color, toColor);
                     }
+
                     break;
                 case SymbolType.Diamond:
                 case SymbolType.EmptyDiamond:
                     var xRadius = symbolSize;
                     var yRadius = symbolSize * 1.5f;
-                    if (gap > 0)
-                    {
-                        UGL.DrawEmptyDiamond(vh, pos, xRadius + gap, yRadius + gap, gap, backgroundColor);
-                    }
+                    if (gap > 0) UGL.DrawEmptyDiamond(vh, pos, xRadius + gap, yRadius + gap, gap, backgroundColor);
                     if (type == SymbolType.EmptyDiamond)
                     {
                         if (tickness == 0) tickness = 4f;
@@ -110,6 +115,7 @@ namespace XCharts.Runtime
                     {
                         UGL.DrawDiamond(vh, pos, xRadius, yRadius, color, toColor);
                     }
+
                     break;
                 case SymbolType.Arrow:
                 case SymbolType.EmptyArrow:
@@ -128,6 +134,7 @@ namespace XCharts.Runtime
                         UGL.DrawArrow(vh, startPos, sharpPos, arrowWidth, arrowHeight,
                             arrowOffset, arrowDent, backgroundColor);
                     }
+
                     arrowWidth = symbolSize * 2;
                     arrowHeight = arrowWidth * 1.5f;
                     arrowOffset = 0;
@@ -146,19 +153,14 @@ namespace XCharts.Runtime
                         UGL.DrawArrow(vh, startPos, sharpPos, arrowWidth, arrowHeight,
                             arrowOffset, arrowDent, backgroundColor);
                     }
+
                     break;
                 case SymbolType.Plus:
-                    if (gap > 0)
-                    {
-                        UGL.DrawPlus(vh, pos, symbolSize + gap, tickness + gap, backgroundColor);
-                    }
+                    if (gap > 0) UGL.DrawPlus(vh, pos, symbolSize + gap, tickness + gap, backgroundColor);
                     UGL.DrawPlus(vh, pos, symbolSize, tickness, color);
                     break;
                 case SymbolType.Minus:
-                    if (gap > 0)
-                    {
-                        UGL.DrawMinus(vh, pos, symbolSize + gap, tickness + gap, backgroundColor);
-                    }
+                    if (gap > 0) UGL.DrawMinus(vh, pos, symbolSize + gap, tickness + gap, backgroundColor);
                     UGL.DrawMinus(vh, pos, symbolSize, tickness, color);
                     break;
             }

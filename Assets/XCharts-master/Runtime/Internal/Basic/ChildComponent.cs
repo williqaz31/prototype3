@@ -3,28 +3,36 @@ using UnityEngine;
 
 namespace XCharts.Runtime
 {
-    [System.Serializable]
+    [Serializable]
     public class ChildComponent
     {
-        public virtual int index { get; set; }
-
-        [NonSerialized] protected bool m_VertsDirty;
         [NonSerialized] protected bool m_ComponentDirty;
         [NonSerialized] protected Painter m_Painter;
 
+        [NonSerialized] protected bool m_VertsDirty;
+        public virtual int index { get; set; }
+
         /// <summary>
-        /// 图表重绘标记。
+        ///     图表重绘标记。
         /// </summary>
-        public virtual bool vertsDirty { get { return m_VertsDirty; } }
+        public virtual bool vertsDirty => m_VertsDirty;
+
         /// <summary>
-        /// 组件重新初始化标记。
+        ///     组件重新初始化标记。
         /// </summary>
-        public virtual bool componentDirty { get { return m_ComponentDirty; } }
+        public virtual bool componentDirty => m_ComponentDirty;
+
         /// <summary>
-        /// 需要重绘图表或重新初始化组件。
+        ///     需要重绘图表或重新初始化组件。
         /// </summary>
-        public bool anyDirty { get { return vertsDirty || componentDirty; } }
-        public Painter painter { get { return m_Painter; } set { m_Painter = value; } }
+        public bool anyDirty => vertsDirty || componentDirty;
+
+        public Painter painter
+        {
+            get => m_Painter;
+            set => m_Painter = value;
+        }
+
         public Action refreshComponent { get; set; }
         public GameObject gameObject { get; set; }
 
@@ -42,12 +50,12 @@ namespace XCharts.Runtime
 
         public static bool IsVertsDirty(ChildComponent component)
         {
-            return component == null?false : component.vertsDirty;
+            return component == null ? false : component.vertsDirty;
         }
 
         public static bool IsComponentDirty(ChildComponent component)
         {
-            return component == null?false : component.componentDirty;
+            return component == null ? false : component.componentDirty;
         }
 
         public virtual void SetVerticesDirty()

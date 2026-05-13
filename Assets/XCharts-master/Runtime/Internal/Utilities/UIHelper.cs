@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using XUGL;
@@ -7,7 +5,7 @@ using XUGL;
 namespace XCharts.Runtime
 {
     /// <summary>
-    /// UI帮助类。
+    ///     UI帮助类。
     /// </summary>
     public static class UIHelper
     {
@@ -22,12 +20,14 @@ namespace XCharts.Runtime
                     rect.width = background.imageWidth;
                     rect.x = component.graphX + (component.graphWidth - background.imageWidth) / 2;
                 }
+
                 if (background.imageHeight > 0)
                 {
                     rect.height = background.imageHeight;
                     rect.y = component.graphY + (component.graphHeight - background.imageHeight) / 2;
                 }
             }
+
             background.rect = rect;
             if (!background.show)
                 return;
@@ -52,15 +52,16 @@ namespace XCharts.Runtime
 
         internal static void InitBackground(UIComponent component)
         {
-            if (component.background.show == false ||
+            if (!component.background.show ||
                 (component.background.image == null && ChartHelper.IsClearColor(component.background.imageColor)))
             {
                 ChartHelper.DestoryGameObject(component.transform, "Background");
                 return;
             }
-            var sizeDelta = component.background.imageWidth > 0 && component.background.imageHeight > 0 ?
-                new Vector2(component.background.imageWidth, component.background.imageHeight) :
-                component.graphSizeDelta;
+
+            var sizeDelta = component.background.imageWidth > 0 && component.background.imageHeight > 0
+                ? new Vector2(component.background.imageWidth, component.background.imageHeight)
+                : component.graphSizeDelta;
             var backgroundObj = ChartHelper.AddObject("Background", component.transform, component.graphMinAnchor,
                 component.graphMaxAnchor, component.graphPivot, sizeDelta);
             backgroundObj.hideFlags = component.chartHideFlags;

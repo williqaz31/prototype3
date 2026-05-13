@@ -5,13 +5,15 @@ using UnityEngine;
 
 namespace XCharts.Runtime
 {
-    public static partial class SerieHelper
+    public static class SerieHelper
     {
+        private static readonly List<double> s_TempList = new();
+
         public static double GetMinData(Serie serie, int dimension = 1, DataZoom dataZoom = null)
         {
-            double min = double.MaxValue;
+            var min = double.MaxValue;
             var dataList = serie.GetDataList(dataZoom);
-            for (int i = 0; i < dataList.Count; i++)
+            for (var i = 0; i < dataList.Count; i++)
             {
                 var serieData = dataList[i];
                 if (serieData.show && serieData.data.Count > dimension)
@@ -20,14 +22,16 @@ namespace XCharts.Runtime
                     if (value < min && !serie.IsIgnoreValue(serieData, value)) min = value;
                 }
             }
+
             return min == double.MaxValue ? 0 : min;
         }
+
         public static SerieData GetMinSerieData(Serie serie, int dimension = 1, DataZoom dataZoom = null)
         {
-            double min = double.MaxValue;
+            var min = double.MaxValue;
             SerieData minData = null;
             var dataList = serie.GetDataList(dataZoom);
-            for (int i = 0; i < dataList.Count; i++)
+            for (var i = 0; i < dataList.Count; i++)
             {
                 var serieData = dataList[i];
                 if (serieData.show && serieData.data.Count > dimension)
@@ -40,13 +44,15 @@ namespace XCharts.Runtime
                     }
                 }
             }
+
             return minData;
         }
+
         public static double GetMaxData(Serie serie, int dimension = 1, DataZoom dataZoom = null)
         {
-            double max = double.MinValue;
+            var max = double.MinValue;
             var dataList = serie.GetDataList(dataZoom);
-            for (int i = 0; i < dataList.Count; i++)
+            for (var i = 0; i < dataList.Count; i++)
             {
                 var serieData = dataList[i];
                 if (serieData.show && serieData.data.Count > dimension)
@@ -55,14 +61,16 @@ namespace XCharts.Runtime
                     if (value > max && !serie.IsIgnoreValue(serieData, value)) max = value;
                 }
             }
+
             return max == double.MinValue ? 0 : max;
         }
+
         public static SerieData GetMaxSerieData(Serie serie, int dimension = 1, DataZoom dataZoom = null)
         {
-            double max = double.MinValue;
+            var max = double.MinValue;
             SerieData maxData = null;
             var dataList = serie.GetDataList(dataZoom);
-            for (int i = 0; i < dataList.Count; i++)
+            for (var i = 0; i < dataList.Count; i++)
             {
                 var serieData = dataList[i];
                 if (serieData.show && serieData.data.Count > dimension)
@@ -75,6 +83,7 @@ namespace XCharts.Runtime
                     }
                 }
             }
+
             return maxData;
         }
 
@@ -82,7 +91,7 @@ namespace XCharts.Runtime
         {
             double total = 0;
             var dataList = serie.GetDataList(dataZoom);
-            for (int i = 0; i < dataList.Count; i++)
+            for (var i = 0; i < dataList.Count; i++)
             {
                 var serieData = dataList[i];
                 if (serieData.show && serieData.data.Count > dimension)
@@ -92,15 +101,15 @@ namespace XCharts.Runtime
                         total += value;
                 }
             }
+
             return total != 0 ? total / dataList.Count : 0;
         }
 
-        private static List<double> s_TempList = new List<double>();
         public static double GetMedianData(Serie serie, int dimension = 1, DataZoom dataZoom = null)
         {
             s_TempList.Clear();
             var dataList = serie.GetDataList(dataZoom);
-            for (int i = 0; i < dataList.Count; i++)
+            for (var i = 0; i < dataList.Count; i++)
             {
                 var serieData = dataList[i];
                 if (serieData.show && serieData.data.Count > dimension)
@@ -110,15 +119,16 @@ namespace XCharts.Runtime
                         s_TempList.Add(value);
                 }
             }
+
             s_TempList.Sort();
             var n = s_TempList.Count;
             if (n % 2 == 0) return (s_TempList[n / 2] + s_TempList[n / 2 - 1]) / 2;
-            else return s_TempList[n / 2];
+            return s_TempList[n / 2];
         }
 
         /// <summary>
-        /// Gets the maximum and minimum values of the specified dimension of a serie.
-        /// ||获得系列指定维数的最大最小值。
+        ///     Gets the maximum and minimum values of the specified dimension of a serie.
+        ///     ||获得系列指定维数的最大最小值。
         /// </summary>
         /// <param name="serie">指定系列</param>
         /// <param name="dimension">指定维数</param>
@@ -131,7 +141,7 @@ namespace XCharts.Runtime
             max = double.MinValue;
             min = double.MaxValue;
             var dataList = serie.GetDataList(dataZoom);
-            for (int i = 0; i < dataList.Count; i++)
+            for (var i = 0; i < dataList.Count; i++)
             {
                 var serieData = dataList[i];
                 if (serieData.show && serieData.data.Count > dimension)
@@ -144,6 +154,7 @@ namespace XCharts.Runtime
                     }
                 }
             }
+
             if (min == double.MaxValue && max == double.MinValue)
             {
                 min = 0;
@@ -152,29 +163,31 @@ namespace XCharts.Runtime
         }
 
         /// <summary>
-        /// Gets the maximum and minimum values of all data in the serie.
-        /// ||获得系列所有数据的最大最小值。
+        ///     Gets the maximum and minimum values of all data in the serie.
+        ///     ||获得系列所有数据的最大最小值。
         /// </summary>
         /// <param name="serie"></param>
         /// <param name="min"></param>
         /// <param name="max"></param>
         /// <param name="dataZoom"></param>
-        public static void GetMinMaxData(Serie serie, out double min, out double max, DataZoom dataZoom = null, int dimension = 0)
+        public static void GetMinMaxData(Serie serie, out double min, out double max, DataZoom dataZoom = null,
+            int dimension = 0)
         {
             max = double.MinValue;
             min = double.MaxValue;
             var dataList = serie.GetDataList(dataZoom);
-            for (int i = 0; i < dataList.Count; i++)
+            for (var i = 0; i < dataList.Count; i++)
             {
                 var serieData = dataList[i];
                 if (serieData.show)
                 {
                     var count = 0;
                     if (dimension > 0) count = dimension;
-                    else count = serie.showDataDimension > serieData.data.Count ?
-                        serieData.data.Count :
-                        serie.showDataDimension;
-                    for (int j = 0; j < count; j++)
+                    else
+                        count = serie.showDataDimension > serieData.data.Count
+                            ? serieData.data.Count
+                            : serie.showDataDimension;
+                    for (var j = 0; j < count; j++)
                     {
                         var value = serieData.data[j];
                         if (!serie.IsIgnoreValue(serieData, value))
@@ -185,6 +198,7 @@ namespace XCharts.Runtime
                     }
                 }
             }
+
             if (min == double.MaxValue && max == double.MinValue)
             {
                 min = 0;
@@ -193,8 +207,8 @@ namespace XCharts.Runtime
         }
 
         /// <summary>
-        /// Whether the data for the specified dimension of serie are all 0.
-        /// ||系列指定维数的数据是否全部为0。
+        ///     Whether the data for the specified dimension of serie are all 0.
+        ///     ||系列指定维数的数据是否全部为0。
         /// </summary>
         /// <param name="serie">系列</param>
         /// <param name="dimension">指定维数</param>
@@ -203,14 +217,13 @@ namespace XCharts.Runtime
         {
             if (serie.dataCount == 0) return false;
             foreach (var serieData in serie.data)
-            {
-                if (serieData.GetData(dimension) != 0) return false;
-            }
+                if (serieData.GetData(dimension) != 0)
+                    return false;
             return true;
         }
 
         /// <summary>
-        /// 更新运行时中心点和半径
+        ///     更新运行时中心点和半径
         /// </summary>
         /// <param name="chartWidth"></param>
         /// <param name="chartHeight"></param>
@@ -222,12 +235,11 @@ namespace XCharts.Runtime
             var chartHeight = chart.chartHeight;
             if (serie.gridIndex >= 0)
             {
-                var layout = chart.GetChartComponent<GridLayout>(0);
+                var layout = chart.GetChartComponent<GridLayout>();
                 if (layout != null)
-                {
                     layout.UpdateGridContext(serie.gridIndex, ref chartPosition, ref chartWidth, ref chartHeight);
-                }
             }
+
             var centerX = serie.center[0] <= 1 ? chartWidth * serie.center[0] : serie.center[0];
             var centerY = serie.center[1] <= 1 ? chartHeight * serie.center[1] : serie.center[1];
             serie.context.center = chartPosition + new Vector3(centerX, centerY);
@@ -251,7 +263,8 @@ namespace XCharts.Runtime
                 serie.context.height = chartHeight - runtimeTop - runtimeBottom;
                 serie.context.center = new Vector3(serie.context.x + serie.context.width / 2,
                     serie.context.y + serie.context.height / 2);
-                serie.context.rect = new Rect(serie.context.x, serie.context.y, serie.context.width, serie.context.height);
+                serie.context.rect = new Rect(serie.context.x, serie.context.y, serie.context.width,
+                    serie.context.height);
             }
             else
             {
@@ -260,7 +273,8 @@ namespace XCharts.Runtime
                 serie.context.width = chartWidth;
                 serie.context.height = chartHeight;
                 serie.context.center = chartPosition + new Vector3(chartWidth / 2, chartHeight / 2);
-                serie.context.rect = new Rect(serie.context.x, serie.context.y, serie.context.width, serie.context.height);
+                serie.context.rect = new Rect(serie.context.x, serie.context.y, serie.context.width,
+                    serie.context.height);
             }
         }
 
@@ -298,6 +312,7 @@ namespace XCharts.Runtime
                 color = theme.GetColor(index);
                 color.a = 50;
             }
+
             return color;
         }
 
@@ -305,11 +320,12 @@ namespace XCharts.Runtime
             Serie serie, SerieData serieData, ThemeStyle theme, SerieState state = SerieState.Auto)
         {
             var colorIndex = serieData != null && serie.colorByData ? serieData.index : serie.context.colorIndex;
-            GetItemColor(out color, out toColor, serie, serieData, theme, colorIndex, state, true);
+            GetItemColor(out color, out toColor, serie, serieData, theme, colorIndex, state);
         }
 
         public static void GetItemColor(out Color32 color, out Color32 toColor,
-            Serie serie, SerieData serieData, ThemeStyle theme, int index, SerieState state = SerieState.Auto, bool opacity = true)
+            Serie serie, SerieData serieData, ThemeStyle theme, int index, SerieState state = SerieState.Auto,
+            bool opacity = true)
         {
             color = ColorUtil.clearColor32;
             toColor = ColorUtil.clearColor32;
@@ -335,19 +351,20 @@ namespace XCharts.Runtime
                         color = ChartHelper.GetSelectColor(color);
                         toColor = ChartHelper.GetSelectColor(toColor);
                         break;
-                    default:
-                        break;
                 }
             }
             else
             {
-                GetColor(ref color, stateStyle.itemStyle.color, stateStyle.itemStyle.color, stateStyle.itemStyle.opacity, theme, index, opacity);
-                GetColor(ref toColor, stateStyle.itemStyle.toColor, color, stateStyle.itemStyle.opacity, theme, index, opacity, true);
+                GetColor(ref color, stateStyle.itemStyle.color, stateStyle.itemStyle.color,
+                    stateStyle.itemStyle.opacity, theme, index, opacity);
+                GetColor(ref toColor, stateStyle.itemStyle.toColor, color, stateStyle.itemStyle.opacity, theme, index,
+                    opacity, true);
             }
         }
 
         public static void GetItemColor(out Color32 color, out Color32 toColor, out Color32 backgroundColor,
-            Serie serie, SerieData serieData, ThemeStyle theme, int index, SerieState state = SerieState.Auto, bool opacity = true)
+            Serie serie, SerieData serieData, ThemeStyle theme, int index, SerieState state = SerieState.Auto,
+            bool opacity = true)
         {
             color = ColorUtil.clearColor32;
             toColor = ColorUtil.clearColor32;
@@ -375,19 +392,20 @@ namespace XCharts.Runtime
                         color = ChartHelper.GetSelectColor(color);
                         toColor = ChartHelper.GetSelectColor(toColor);
                         break;
-                    default:
-                        break;
                 }
             }
             else
             {
                 backgroundColor = stateStyle.itemStyle.backgroundColor;
-                GetColor(ref color, stateStyle.itemStyle.color, stateStyle.itemStyle.color, stateStyle.itemStyle.opacity, theme, index, opacity);
-                GetColor(ref toColor, stateStyle.itemStyle.toColor, color, stateStyle.itemStyle.opacity, theme, index, opacity, true);
+                GetColor(ref color, stateStyle.itemStyle.color, stateStyle.itemStyle.color,
+                    stateStyle.itemStyle.opacity, theme, index, opacity);
+                GetColor(ref toColor, stateStyle.itemStyle.toColor, color, stateStyle.itemStyle.opacity, theme, index,
+                    opacity, true);
             }
         }
 
-        public static Color32 GetItemColor(Serie serie, SerieData serieData, ThemeStyle theme, int index, SerieState state = SerieState.Auto, bool opacity = true)
+        public static Color32 GetItemColor(Serie serie, SerieData serieData, ThemeStyle theme, int index,
+            SerieState state = SerieState.Auto, bool opacity = true)
         {
             var color = ColorUtil.clearColor32;
             if (serie == null) return color;
@@ -408,14 +426,14 @@ namespace XCharts.Runtime
                     case SerieState.Select:
                         color = ChartHelper.GetSelectColor(color);
                         break;
-                    default:
-                        break;
                 }
             }
             else
             {
-                GetColor(ref color, stateStyle.itemStyle.color, stateStyle.itemStyle.color, stateStyle.itemStyle.opacity, theme, index, opacity);
+                GetColor(ref color, stateStyle.itemStyle.color, stateStyle.itemStyle.color,
+                    stateStyle.itemStyle.opacity, theme, index, opacity);
             }
+
             return color;
         }
 
@@ -423,7 +441,7 @@ namespace XCharts.Runtime
         {
             var dataPoints = serie.context.dataPoints;
             if (dataPoints.Count < 2) return false;
-            else if (index > 0 && index < dataPoints.Count - 1)
+            if (index > 0 && index < dataPoints.Count - 1)
             {
                 var lp = dataPoints[index - 1];
                 var np = dataPoints[index + 1];
@@ -431,18 +449,12 @@ namespace XCharts.Runtime
                 var dot = Vector3.Cross(np - lp, cp - np);
                 return dot.z < 0;
             }
-            else if (index == 0)
-            {
-                return dataPoints[0].y < dataPoints[1].y;
-            }
-            else if (index == dataPoints.Count - 1)
-            {
-                return dataPoints[index].y < dataPoints[index - 1].y;
-            }
-            else
-            {
-                return false;
-            }
+
+            if (index == 0) return dataPoints[0].y < dataPoints[1].y;
+
+            if (index == dataPoints.Count - 1) return dataPoints[index].y < dataPoints[index - 1].y;
+
+            return false;
         }
 
         public static ItemStyle GetItemStyle(Serie serie, SerieData serieData, SerieState state = SerieState.Auto)
@@ -450,96 +462,81 @@ namespace XCharts.Runtime
             if (state == SerieState.Auto) state = GetSerieState(serie, serieData);
             var stateStyle = GetStateStyle(serie, serieData, state);
             if (stateStyle == null || !stateStyle.show)
-            {
                 return serieData != null && serieData.itemStyle != null ? serieData.itemStyle : serie.itemStyle;
-            }
-            else
-            {
-                return stateStyle.itemStyle;
-            }
+
+            return stateStyle.itemStyle;
         }
 
         public static LabelStyle GetSerieLabel(Serie serie, SerieData serieData, SerieState state = SerieState.Auto)
         {
             if (state == SerieState.Auto) state = GetSerieState(serie, serieData);
             if (state == SerieState.Normal)
-            {
                 return serieData != null && serieData.labelStyle != null ? serieData.labelStyle : serie.label;
-            }
-            else
-            {
-                var stateStyle = GetStateStyle(serie, serieData, state);
-                if (stateStyle != null && stateStyle.show) return stateStyle.label;
-                else if (serieData.labelStyle != null) return serieData.labelStyle;
-                else return serie.label;
-            }
+
+            var stateStyle = GetStateStyle(serie, serieData, state);
+            if (stateStyle != null && stateStyle.show) return stateStyle.label;
+            if (serieData.labelStyle != null) return serieData.labelStyle;
+            return serie.label;
         }
 
         public static LabelLine GetSerieLabelLine(Serie serie, SerieData serieData, SerieState state = SerieState.Auto)
         {
             if (state == SerieState.Auto) state = GetSerieState(serie, serieData);
             if (state == SerieState.Normal)
-            {
                 return serieData != null && serieData.labelLine != null ? serieData.labelLine : serie.labelLine;
-            }
-            else
-            {
-                var stateStyle = GetStateStyle(serie, serieData, state);
-                if (stateStyle != null && stateStyle.show) return stateStyle.labelLine;
-                else if (serieData.labelLine != null) return serieData.labelLine;
-                else return serie.labelLine;
-            }
+
+            var stateStyle = GetStateStyle(serie, serieData, state);
+            if (stateStyle != null && stateStyle.show) return stateStyle.labelLine;
+            if (serieData.labelLine != null) return serieData.labelLine;
+            return serie.labelLine;
         }
 
         public static SerieSymbol GetSerieSymbol(Serie serie, SerieData serieData, SerieState state = SerieState.Auto)
         {
             if (state == SerieState.Auto) state = GetSerieState(serie, serieData);
             if (state == SerieState.Normal)
-            {
                 return serieData != null && serieData.symbol != null ? serieData.symbol : serie.symbol;
-            }
-            else
-            {
-                var stateStyle = GetStateStyle(serie, serieData, state);
-                if (stateStyle != null && stateStyle.show) return stateStyle.symbol;
-                else if (serieData.symbol != null) return serieData.symbol;
-                else return serie.symbol;
-            }
+
+            var stateStyle = GetStateStyle(serie, serieData, state);
+            if (stateStyle != null && stateStyle.show) return stateStyle.symbol;
+            if (serieData.symbol != null) return serieData.symbol;
+            return serie.symbol;
         }
 
         public static LineStyle GetLineStyle(Serie serie, SerieData serieData)
         {
             if (serieData != null && serieData.lineStyle != null) return serieData.lineStyle;
-            else return serie.lineStyle;
+            return serie.lineStyle;
         }
 
         public static AreaStyle GetAreaStyle(Serie serie, SerieData serieData)
         {
             if (serieData != null && serieData.areaStyle != null) return serieData.areaStyle;
-            else return serie.areaStyle;
+            return serie.areaStyle;
         }
 
         public static TitleStyle GetTitleStyle(Serie serie, SerieData serieData)
         {
             if (serieData != null && serieData.titleStyle != null) return serieData.titleStyle;
-            else return serie.titleStyle;
+            return serie.titleStyle;
         }
 
         public static EmphasisStyle GetEmphasisStyle(Serie serie, SerieData serieData)
         {
             if (serieData != null && serieData.emphasisStyle != null) return serieData.emphasisStyle;
-            else return serie.emphasisStyle;
+            return serie.emphasisStyle;
         }
 
         public static BlurStyle GetBlurStyle(Serie serie, SerieData serieData)
         {
             if (serieData != null && serieData.blurStyle != null) return serieData.blurStyle;
-            else return serie.blurStyle;
+            return serie.blurStyle;
         }
+
         public static SelectStyle GetSelectStyle(Serie serie, SerieData serieData)
         {
             if (serieData != null && serieData.selectStyle != null) return serieData.selectStyle;
-            else return serie.selectStyle;
+            return serie.selectStyle;
         }
 
         public static StateStyle GetStateStyle(Serie serie, SerieData serieData, SerieState state)
@@ -580,7 +577,7 @@ namespace XCharts.Runtime
                 innerFill = areaStyle.innerFill;
                 toTop = areaStyle.toTop;
                 GetColor(ref color, areaStyle.color, serie.itemStyle.color, areaStyle.opacity, theme, index);
-                GetColor(ref toColor, areaStyle.toColor, color, areaStyle.opacity, theme, index, true);
+                GetColor(ref toColor, areaStyle.toColor, color, areaStyle.opacity, theme, index);
                 switch (state)
                 {
                     case SerieState.Emphasis:
@@ -595,8 +592,6 @@ namespace XCharts.Runtime
                         color = ChartHelper.GetSelectColor(color);
                         toColor = ChartHelper.GetSelectColor(toColor);
                         break;
-                    default:
-                        break;
                 }
             }
             else
@@ -605,20 +600,24 @@ namespace XCharts.Runtime
                 {
                     innerFill = stateStyle.areaStyle.innerFill;
                     toTop = stateStyle.areaStyle.toTop;
-                    GetColor(ref color, stateStyle.areaStyle.color, stateStyle.itemStyle.color, stateStyle.areaStyle.opacity, theme, index);
-                    GetColor(ref toColor, stateStyle.areaStyle.toColor, color, stateStyle.areaStyle.opacity, theme, index, true, true);
+                    GetColor(ref color, stateStyle.areaStyle.color, stateStyle.itemStyle.color,
+                        stateStyle.areaStyle.opacity, theme, index);
+                    GetColor(ref toColor, stateStyle.areaStyle.toColor, color, stateStyle.areaStyle.opacity, theme,
+                        index, true, true);
                 }
                 else
                 {
                     return false;
                 }
             }
+
             return true;
         }
 
-        public static Color32 GetLineColor(Serie serie, SerieData serieData, ThemeStyle theme, int index, SerieState state = SerieState.Auto)
+        public static Color32 GetLineColor(Serie serie, SerieData serieData, ThemeStyle theme, int index,
+            SerieState state = SerieState.Auto)
         {
-            Color32 color = ChartConst.clearColor32;
+            var color = ChartConst.clearColor32;
             if (state == SerieState.Auto)
                 state = GetSerieState(serie, serieData);
             var stateStyle = GetStateStyle(serie, serieData, state);
@@ -638,22 +637,25 @@ namespace XCharts.Runtime
                         return color;
                 }
             }
-            else
-            {
-                GetColor(ref color, stateStyle.lineStyle.color, stateStyle.itemStyle.color, stateStyle.lineStyle.opacity, theme, index);
-                return color;
-            }
+
+            GetColor(ref color, stateStyle.lineStyle.color, stateStyle.itemStyle.color, stateStyle.lineStyle.opacity,
+                theme, index);
+            return color;
         }
 
         public static void GetColor(ref Color32 color, Color32 checkColor, Color32 itemColor,
             float opacity, ThemeStyle theme, int colorIndex, bool setOpacity = true, bool resetOpacity = false)
         {
-            if (!ChartHelper.IsClearColor(checkColor)) color = checkColor;
+            if (!ChartHelper.IsClearColor(checkColor))
+            {
+                color = checkColor;
+            }
             else if (!ChartHelper.IsClearColor(itemColor))
             {
                 color = itemColor;
                 if (resetOpacity) opacity = 1;
             }
+
             if (ChartHelper.IsClearColor(color) && colorIndex >= 0) color = theme.GetColor(colorIndex);
             if (setOpacity) ChartHelper.SetColorOpacity(ref color, opacity);
         }
@@ -668,7 +670,9 @@ namespace XCharts.Runtime
             if (stateStyle == null)
             {
                 var itemStyle = GetItemStyle(serie, serieData, SerieState.Normal);
-                border = itemStyle.borderWidth != 0 ? itemStyle.borderWidth : serie.lineStyle.GetWidth(theme.serie.lineWidth) * 1.8f;
+                border = itemStyle.borderWidth != 0
+                    ? itemStyle.borderWidth
+                    : serie.lineStyle.GetWidth(theme.serie.lineWidth) * 1.8f;
                 cornerRadius = itemStyle.cornerRadius;
                 GetColor(ref borderColor, itemStyle.borderColor, itemStyle.borderColor, 1, theme, -1);
                 switch (state)
@@ -682,20 +686,21 @@ namespace XCharts.Runtime
                     case SerieState.Select:
                         borderColor = ChartHelper.GetSelectColor(borderColor);
                         break;
-                    default:
-                        break;
                 }
             }
             else
             {
                 var itemStyle = stateStyle.itemStyle;
-                border = itemStyle.borderWidth != 0 ? itemStyle.borderWidth : stateStyle.lineStyle.GetWidth(theme.serie.lineWidth) * 1.8f;
+                border = itemStyle.borderWidth != 0
+                    ? itemStyle.borderWidth
+                    : stateStyle.lineStyle.GetWidth(theme.serie.lineWidth) * 1.8f;
                 cornerRadius = itemStyle.cornerRadius;
                 GetColor(ref borderColor, stateStyle.itemStyle.borderColor, ColorUtil.clearColor32, 1, theme, -1);
             }
         }
 
-        public static float GetSysmbolSize(Serie serie, SerieData serieData, float defaultSize, SerieState state = SerieState.Auto, bool checkAnimation = false)
+        public static float GetSysmbolSize(Serie serie, SerieData serieData, float defaultSize,
+            SerieState state = SerieState.Auto, bool checkAnimation = false)
         {
             if (serie == null) return defaultSize;
             if (state == SerieState.Auto)
@@ -712,8 +717,6 @@ namespace XCharts.Runtime
                     case SerieState.Select:
                         size = serie.animation.interaction.GetRadius(size);
                         break;
-                    default:
-                        break;
                 }
             }
             else
@@ -721,36 +724,35 @@ namespace XCharts.Runtime
                 var symbol = stateStyle.symbol;
                 size = symbol.GetSize(serieData, defaultSize);
             }
+
             if (serieData != null && checkAnimation)
-            {
                 size = (float)serieData.GetAddAnimationData(0, size, serie.animation.GetAdditionDuration());
-            }
             return size;
         }
 
         public static string GetNumericFormatter(Serie serie, SerieData serieData, string defaultFormatter = null)
         {
-            var itemStyle = SerieHelper.GetItemStyle(serie, serieData);
+            var itemStyle = GetItemStyle(serie, serieData);
             if (!string.IsNullOrEmpty(itemStyle.numericFormatter)) return itemStyle.numericFormatter;
-            else return defaultFormatter;
+            return defaultFormatter;
         }
 
         public static string GetItemFormatter(Serie serie, SerieData serieData, string defaultFormatter = null)
         {
-            var itemStyle = SerieHelper.GetItemStyle(serie, serieData);
+            var itemStyle = GetItemStyle(serie, serieData);
             if (!string.IsNullOrEmpty(itemStyle.itemFormatter)) return itemStyle.itemFormatter;
-            else return defaultFormatter;
+            return defaultFormatter;
         }
 
         public static string GetItemMarker(Serie serie, SerieData serieData, string defaultMarker = null)
         {
-            var itemStyle = SerieHelper.GetItemStyle(serie, serieData);
+            var itemStyle = GetItemStyle(serie, serieData);
             if (!string.IsNullOrEmpty(itemStyle.itemMarker)) return itemStyle.itemMarker;
-            else return defaultMarker;
+            return defaultMarker;
         }
 
         /// <summary>
-        /// 获得指定维数的最大最小值
+        ///     获得指定维数的最大最小值
         /// </summary>
         /// <param name="dimension"></param>
         /// <param name="dataZoom"></param>
@@ -788,7 +790,7 @@ namespace XCharts.Runtime
         }
 
         /// <summary>
-        /// 根据dataZoom更新数据列表缓存
+        ///     根据dataZoom更新数据列表缓存
         /// </summary>
         /// <param name="dataZoom"></param>
         public static void UpdateFilterData(Serie serie, DataZoom dataZoom)
@@ -800,6 +802,7 @@ namespace XCharts.Runtime
                 serie.context.dataZoomStartIndexOffset = 0;
                 return;
             }
+
             if (dataZoom.IsContainsXAxis(serie.xAxisIndex))
             {
                 if (dataZoom.IsXAxisIndexValue(serie.xAxisIndex))
@@ -828,12 +831,13 @@ namespace XCharts.Runtime
             }
         }
 
-        private static void UpdateFilterData_XAxisValue(Serie serie, DataZoom dataZoom, int dimension, double min, double max)
+        private static void UpdateFilterData_XAxisValue(Serie serie, DataZoom dataZoom, int dimension, double min,
+            double max)
         {
             var data = serie.data;
             var startValue = min;
             var endValue = max;
-            var minZoomRatio = (int)((max-min) * dataZoom.minZoomRatio);
+            var minZoomRatio = (int)((max - min) * dataZoom.minZoomRatio);
             if (endValue < startValue) endValue = startValue;
             if (startValue != serie.m_FilterStartValue || endValue != serie.m_FilterEndValue ||
                 dataZoom.minZoomRatio != serie.m_FilterMinShow || serie.m_NeedUpdateFilterData)
@@ -843,18 +847,12 @@ namespace XCharts.Runtime
                 serie.m_FilterMinShow = minZoomRatio;
                 serie.m_NeedUpdateFilterData = false;
 
-                if (ReferenceEquals(serie.m_FilterData, data))
-                {
-                    serie.m_FilterData = new List<SerieData>();
-                }
+                if (ReferenceEquals(serie.m_FilterData, data)) serie.m_FilterData = new List<SerieData>();
                 serie.m_FilterData.Clear();
                 foreach (var serieData in data)
                 {
                     var value = serieData.GetData(dimension);
-                    if (value >= startValue && value <= endValue)
-                    {
-                        serie.m_FilterData.Add(serieData);
-                    }
+                    if (value >= startValue && value <= endValue) serie.m_FilterData.Add(serieData);
                 }
             }
             else if (endValue == 0)
@@ -884,6 +882,7 @@ namespace XCharts.Runtime
                 end = start + range;
                 if (end > data.Count) end = data.Count;
             }
+
             var minZoomRatio = (int)(data.Count * dataZoom.minZoomRatio);
             if (start != serie.m_FilterStart || end != serie.m_FilterEnd ||
                 minZoomRatio != serie.m_FilterMinShow || serie.m_NeedUpdateFilterData)
@@ -899,6 +898,7 @@ namespace XCharts.Runtime
                         if (minZoomRatio > data.Count) range = data.Count;
                         else range = minZoomRatio;
                     }
+
                     if (range > data.Count - start)
                         start = data.Count - range;
                     if (start >= 0)
@@ -910,24 +910,21 @@ namespace XCharts.Runtime
                         if (nowCount > 0)
                         {
                             if (serie.IsIgnoreValue(serie.m_FilterData[nowCount - 1]))
-                            {
-                                for (int i = start + range; i < data.Count; i++)
+                                for (var i = start + range; i < data.Count; i++)
                                 {
                                     serie.m_FilterData.Add(data[i]);
                                     if (!serie.IsIgnoreValue(data[i]))
                                         break;
                                 }
-                            }
+
                             if (serie.IsIgnoreValue(serie.m_FilterData[0]))
-                            {
-                                for (int i = start - 1; i >= 0; i--)
+                                for (var i = start - 1; i >= 0; i--)
                                 {
                                     serie.m_FilterData.Insert(0, data[i]);
                                     serie.context.dataZoomStartIndexOffset++;
                                     if (!serie.IsIgnoreValue(data[i]))
                                         break;
                                 }
-                            }
                         }
                     }
                     else
@@ -963,53 +960,49 @@ namespace XCharts.Runtime
             var unscaledTime = serie.animation.unscaledTime;
             serie.context.sortedData.Clear();
             foreach (var serieData in serie.data)
-            {
                 if (!filterInvisible || (filterInvisible && serieData.show))
                     serie.context.sortedData.Add(serieData);
-            }
             switch (serie.dataSortType)
             {
                 case SerieDataSortType.Ascending:
-                    serie.context.sortedData.Sort(delegate (SerieData data1, SerieData data2)
+                    serie.context.sortedData.Sort(delegate(SerieData data1, SerieData data2)
                     {
-                        var value1 = realtimeData ?
-                            data1.GetCurrData(1, dataAddDuration, dataChangeDuration, false, 0, 0, unscaledTime) :
-                            data1.GetData(1);
-                        var value2 = realtimeData ?
-                            data2.GetCurrData(1, dataAddDuration, dataChangeDuration, false, 0, 0, unscaledTime) :
-                            data2.GetData(1);
+                        var value1 = realtimeData
+                            ? data1.GetCurrData(1, dataAddDuration, dataChangeDuration, false, 0, 0, unscaledTime)
+                            : data1.GetData(1);
+                        var value2 = realtimeData
+                            ? data2.GetCurrData(1, dataAddDuration, dataChangeDuration, false, 0, 0, unscaledTime)
+                            : data2.GetData(1);
                         if (value1 == value2) return 0;
-                        else if (value1 > value2) return 1;
-                        else return -1;
+                        if (value1 > value2) return 1;
+                        return -1;
                     });
                     break;
                 case SerieDataSortType.Descending:
-                    serie.context.sortedData.Sort(delegate (SerieData data1, SerieData data2)
+                    serie.context.sortedData.Sort(delegate(SerieData data1, SerieData data2)
                     {
-                        var value1 = realtimeData ?
-                            data1.GetCurrData(1, dataAddDuration, dataChangeDuration, false, 0, 0, unscaledTime) :
-                            data1.GetData(1);
-                        var value2 = realtimeData ?
-                            data2.GetCurrData(1, dataAddDuration, dataChangeDuration, false, 0, 0, unscaledTime) :
-                            data2.GetData(1);
+                        var value1 = realtimeData
+                            ? data1.GetCurrData(1, dataAddDuration, dataChangeDuration, false, 0, 0, unscaledTime)
+                            : data1.GetData(1);
+                        var value2 = realtimeData
+                            ? data2.GetCurrData(1, dataAddDuration, dataChangeDuration, false, 0, 0, unscaledTime)
+                            : data2.GetData(1);
                         if (value1 == value2) return 0;
-                        else if (value1 > value2) return -1;
-                        else return 1;
+                        if (value1 > value2) return -1;
+                        return 1;
                     });
                     break;
                 case SerieDataSortType.None:
                     break;
             }
-            for (int i = 0; i < serie.context.sortedData.Count; i++)
-            {
-                serie.context.sortedData[i].sortIndex = i;
-            }
+
+            for (var i = 0; i < serie.context.sortedData.Count; i++) serie.context.sortedData[i].sortIndex = i;
         }
 
         public static T CloneSerie<T>(Serie serie) where T : Serie
         {
             var newSerie = Activator.CreateInstance<T>();
-            SerieHelper.CopySerie(serie, newSerie);
+            CopySerie(serie, newSerie);
             return newSerie;
         }
 
@@ -1017,7 +1010,6 @@ namespace XCharts.Runtime
         {
             var fields = typeof(Serie).GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
             foreach (var field in fields)
-            {
                 if (field.IsDefined(typeof(SerializeField), false))
                 {
                     var filedValue = field.GetValue(oldSerie);
@@ -1026,7 +1018,6 @@ namespace XCharts.Runtime
                     if (filedType.IsClass)
                         field.SetValue(newSerie, ReflectionUtil.DeepCloneSerializeField(filedValue));
                 }
-            }
         }
     }
 }

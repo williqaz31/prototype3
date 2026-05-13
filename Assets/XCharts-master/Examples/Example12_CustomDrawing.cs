@@ -9,15 +9,16 @@ namespace XCharts.Example
     [ExecuteInEditMode]
     public class Example12_CustomDrawing : MonoBehaviour
     {
-        LineChart chart;
-        void Awake()
+        private LineChart chart;
+
+        private void Awake()
         {
             chart = gameObject.GetComponent<LineChart>();
             if (chart == null) return;
 
-            chart.onDraw = delegate(VertexHelper vh) { };
+            chart.onDraw = delegate { };
             // or
-            chart.onDrawBeforeSerie = delegate(VertexHelper vh, Serie serie) { };
+            chart.onDrawBeforeSerie = delegate { };
             // or
             chart.onDrawAfterSerie = delegate(VertexHelper vh, Serie serie)
             {
@@ -35,7 +36,7 @@ namespace XCharts.Example
                 }
             };
             // or
-            chart.onDrawTop = delegate(VertexHelper vh) { };
+            chart.onDrawTop = delegate { };
         }
     }
 }

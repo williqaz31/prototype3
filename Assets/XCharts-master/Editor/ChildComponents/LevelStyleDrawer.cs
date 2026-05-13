@@ -7,7 +7,8 @@ namespace XCharts.Editor
     [CustomPropertyDrawer(typeof(LevelStyle), true)]
     public class LevelStyleDrawer : BasePropertyDrawer
     {
-        public override string ClassName { get { return "LevelStyle"; } }
+        public override string ClassName => "LevelStyle";
+
         public override void OnGUI(Rect pos, SerializedProperty prop, GUIContent label)
         {
             base.OnGUI(pos, prop, label);
@@ -23,7 +24,8 @@ namespace XCharts.Editor
     [CustomPropertyDrawer(typeof(Level), true)]
     public class LevelDrawer : BasePropertyDrawer
     {
-        public override string ClassName { get { return "Level"; } }
+        public override string ClassName => "Level";
+
         public override void OnGUI(Rect pos, SerializedProperty prop, GUIContent label)
         {
             base.OnGUI(pos, prop, label);

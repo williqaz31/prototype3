@@ -1,26 +1,24 @@
-﻿using UnityEngine;
-using Random = System.Random;
+﻿using Random = System.Random;
 
 namespace individu
 {
     public static class Utils
     {
-        private static Random random = new Random();
+        private static readonly Random random = new();
 
         public static int DureeDeVie()
         {
-            int low = 548;
-            int high = 730;
+            var low = 548;
+            var high = 730;
 
-            int lowOutside = 0;
-            int highOutside = 900;
+            var lowOutside = 0;
+            var highOutside = 900;
 
-            double outsideProp = 0.3;
+            var outsideProp = 0.3;
 
             if (random.NextDouble() < outsideProp)
-                return random.Next(lowOutside, highOutside );
-            else
-                return random.Next(low, high );
+                return random.Next(lowOutside, highOutside);
+            return random.Next(low, high);
         }
 
         public static int RandomRange(int min, int max)
@@ -31,14 +29,14 @@ namespace individu
 
     public class Fourmi
     {
-        public int dureeDeVie;
         public int age;
+        public int dureeDeVie;
         public int joursSansManger;
 
         public Fourmi()
         {
             dureeDeVie = Utils.DureeDeVie();
-          
+
             age = 0;
             joursSansManger = 0;
         }
@@ -50,7 +48,6 @@ namespace individu
 
         public Fourmi Affamer()
         {
-           
             joursSansManger++;
 
             if (joursSansManger >= 14)
@@ -65,20 +62,16 @@ namespace individu
 
             if (age >= dureeDeVie)
                 return this;
-            else
-                return null;
+            return null;
         }
-
-   
     }
 
     public class Reine : Fourmi
     {
-        public Reine() : base()
+        public Reine()
         {
             // Entre 10 et 20 ans (3650 à 7300 jours)
-           dureeDeVie = Utils.RandomRange(3650, 7300);
-          
+            dureeDeVie = Utils.RandomRange(3650, 7300);
         }
 
         public Reine(int Age, int DureeDeVie)
@@ -86,14 +79,12 @@ namespace individu
             dureeDeVie = DureeDeVie;
             age = Age;
         }
-
-     
     }
 
     public class Oeuf
     {
-        public int delai;
         public int age;
+        public int delai;
 
         public Oeuf()
         {
@@ -107,8 +98,7 @@ namespace individu
 
             if (age >= delai)
                 return this;
-            else
-                return null;
+            return null;
         }
     }
 }

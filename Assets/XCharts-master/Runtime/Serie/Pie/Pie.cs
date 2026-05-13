@@ -1,54 +1,65 @@
+using System;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace XCharts.Runtime
 {
-
     public enum PieType
     {
         /// <summary>
-        /// solid pie chart - default fill style.
-        /// ||实心饼图 - 默认填充样式
+        ///     solid pie chart - default fill style.
+        ///     ||实心饼图 - 默认填充样式
         /// </summary>
         Solid,
 
         /// <summary>
-        /// wireframe pie chart - only show the outline wireframe.
-        /// ||线框饼图 - 仅显示轮廓线框
+        ///     wireframe pie chart - only show the outline wireframe.
+        ///     ||线框饼图 - 仅显示轮廓线框
         /// </summary>
         Wireframe
     }
-    [System.Serializable]
+
+    [Serializable]
     [SerieConvert(typeof(Line), typeof(Bar))]
     [SerieHandler(typeof(PieHandler), true)]
     [DefaultAnimation(AnimationType.Clockwise)]
-    [SerieComponent(typeof(LabelStyle), typeof(LabelLine), typeof(TitleStyle), typeof(EmphasisStyle), typeof(BlurStyle), typeof(SelectStyle))]
-    [SerieDataComponent(typeof(ItemStyle), typeof(LabelStyle), typeof(LabelLine), typeof(EmphasisStyle), typeof(BlurStyle), typeof(SelectStyle))]
+    [SerieComponent(typeof(LabelStyle), typeof(LabelLine), typeof(TitleStyle), typeof(EmphasisStyle), typeof(BlurStyle),
+        typeof(SelectStyle))]
+    [SerieDataComponent(typeof(ItemStyle), typeof(LabelStyle), typeof(LabelLine), typeof(EmphasisStyle),
+        typeof(BlurStyle), typeof(SelectStyle))]
     [SerieDataExtraField("m_Ignore", "m_Selected", "m_Radius")]
     public class Pie : Serie
     {
-        [SerializeField][Since("v3.8.1")] private bool m_RadiusGradient = false;
-        [SerializeField][Since("v3.15.0")] private PieType m_PieType = PieType.Solid;
+        [SerializeField] [Since("v3.8.1")] private bool m_RadiusGradient;
+        [SerializeField] [Since("v3.15.0")] private PieType m_PieType = PieType.Solid;
 
-        public override SerieColorBy defaultColorBy { get { return SerieColorBy.Data; } }
-        public override bool titleJustForSerie { get { return true; } }
+        public override SerieColorBy defaultColorBy => SerieColorBy.Data;
+        public override bool titleJustForSerie => true;
 
         /// <summary>
-        /// Pie chart type.
-        /// || 饼图类型。
+        ///     Pie chart type.
+        ///     || 饼图类型。
         /// </summary>
         public PieType pieType
         {
-            get { return m_PieType; }
-            set { if (PropertyUtil.SetStruct(ref m_PieType, value)) { SetVerticesDirty(); } }
+            get => m_PieType;
+            set
+            {
+                if (PropertyUtil.SetStruct(ref m_PieType, value)) SetVerticesDirty();
+            }
         }
+
         /// <summary>
-        /// Whether to use gradient color in pie chart.
-        /// || 是否开启半径方向的渐变效果。
+        ///     Whether to use gradient color in pie chart.
+        ///     || 是否开启半径方向的渐变效果。
         /// </summary>
         public bool radiusGradient
         {
-            get { return m_RadiusGradient; }
-            set { if (PropertyUtil.SetStruct(ref m_RadiusGradient, value)) { SetVerticesDirty(); } }
+            get => m_RadiusGradient;
+            set
+            {
+                if (PropertyUtil.SetStruct(ref m_RadiusGradient, value)) SetVerticesDirty();
+            }
         }
 
         public static Serie AddDefaultSerie(BaseChart chart, string serieName)

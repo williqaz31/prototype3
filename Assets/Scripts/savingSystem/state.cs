@@ -1,12 +1,7 @@
+using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using JetBrains.Annotations;
-using SimulationFourmiliere;
-using UnityEngine;
-using UnityEngine.Rendering;
 
-[System.Serializable]
+[Serializable]
 public class State
 {
     public int appartParJour;
@@ -19,15 +14,8 @@ public class State
     public int cols;
     public int[] odds;
     public int gameTime;
-    
+
 
     public List<float> graphPop;
     public List<float> graphBouff;
-
-
 }
-
-
-
-
-

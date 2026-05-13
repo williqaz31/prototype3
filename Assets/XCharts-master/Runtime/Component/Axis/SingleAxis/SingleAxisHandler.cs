@@ -1,12 +1,13 @@
 using UnityEngine;
+using UnityEngine.Scripting;
 using UnityEngine.UI;
 
 namespace XCharts.Runtime
 {
-    [UnityEngine.Scripting.Preserve]
+    [Preserve]
     internal sealed class SingleAxisHander : AxisHandler<SingleAxis>
     {
-        protected override Orient orient { get { return component.orient; } }
+        protected override Orient orient => component.orient;
 
         public override void InitComponent()
         {
@@ -31,7 +32,7 @@ namespace XCharts.Runtime
             var theme = chart.theme;
             var xAxisIndex = axis.index;
             axis.painter = chart.painter;
-            axis.refreshComponent = delegate()
+            axis.refreshComponent = delegate
             {
                 axis.UpdateRuntimeData(chart);
 
@@ -49,8 +50,7 @@ namespace XCharts.Runtime
         {
             base.UpdateAxisLabelText(axis);
             if (axis.IsTime() || axis.IsValue())
-            {
-                for (int i = 0; i < axis.context.labelObjectList.Count; i++)
+                for (var i = 0; i < axis.context.labelObjectList.Count; i++)
                 {
                     var label = axis.context.labelObjectList[i];
                     if (label != null)
@@ -60,7 +60,6 @@ namespace XCharts.Runtime
                         CheckValueLabelActive(component, i, label, pos);
                     }
                 }
-            }
         }
 
         protected override Vector3 GetLabelPosition(float scaleWid, int i)
@@ -104,14 +103,12 @@ namespace XCharts.Runtime
         private void DrawSingleAxisLine(VertexHelper vh, SingleAxis axis)
         {
             if (axis.show && axis.axisLine.show)
-            {
                 DrawAxisLine(vh, axis,
                     chart.theme.axis,
                     axis.orient,
                     axis.context.x,
                     GetAxisLineXOrY(),
                     axis.context.width);
-            }
         }
 
         internal override float GetAxisLineXOrY()

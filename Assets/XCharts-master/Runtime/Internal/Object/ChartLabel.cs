@@ -6,31 +6,32 @@ namespace XCharts.Runtime
     public class ChartLabel : Image
     {
         [SerializeField] private ChartText m_LabelText;
-
-        private bool m_HideIconIfTextEmpty = false;
+        private bool m_Active = true;
+        private Align m_Align = Align.Left;
         private bool m_AutoSize = true;
-        private float m_PaddingLeft = 0;
-        private float m_PaddingRight = 0;
-        private float m_PaddingTop = 0;
-        private float m_PaddingBottom = 0;
-        private float m_Width = 0;
-        private float m_Height = 0;
-        private RectTransform m_TextRect;
+        private float m_Height;
+
+        private bool m_HideIconIfTextEmpty;
+        private Image m_IconImage;
+        private Vector3 m_IconOffest;
         private RectTransform m_IconRect;
         private RectTransform m_ObjectRect;
-        private Vector3 m_IconOffest;
-        private Align m_Align = Align.Left;
-        private Image m_IconImage;
-        private bool m_Active = true;
+        private float m_PaddingBottom;
+        private float m_PaddingLeft;
+        private float m_PaddingRight;
+        private float m_PaddingTop;
+        private RectTransform m_TextRect;
+        private float m_Width;
 
         public Image icon
         {
-            get { return m_IconImage; }
-            set { SetIcon(value); }
+            get => m_IconImage;
+            set => SetIcon(value);
         }
+
         public ChartText text
         {
-            get { return m_LabelText; }
+            get => m_LabelText;
             set
             {
                 m_LabelText = value;
@@ -38,7 +39,11 @@ namespace XCharts.Runtime
             }
         }
 
-        public bool hideIconIfTextEmpty { set { m_HideIconIfTextEmpty = value; } }
+        public bool hideIconIfTextEmpty
+        {
+            set => m_HideIconIfTextEmpty = value;
+        }
+
         public bool isIconActive { get; private set; }
         public bool isAnimationEnd { get; internal set; }
         public Rect rect { get; set; }
@@ -53,15 +58,15 @@ namespace XCharts.Runtime
             }
         }
 
-        public bool InRect(Vector2 local)
-        {
-            return rect.Contains(local);
-        }
-
         protected override void Awake()
         {
             raycastTarget = false;
             m_Active = ChartHelper.IsActiveByScale(gameObject);
+        }
+
+        public bool InRect(Vector2 local)
+        {
+            return rect.Contains(local);
         }
 
         public void SetTextPadding(TextPadding padding)
@@ -72,6 +77,7 @@ namespace XCharts.Runtime
             m_PaddingBottom = padding.bottom;
             UpdatePadding();
         }
+
         public void SetPadding(float[] padding)
         {
             if (padding.Length >= 4)
@@ -95,16 +101,14 @@ namespace XCharts.Runtime
                 m_PaddingTop = padding[0];
                 m_PaddingBottom = padding[0];
             }
+
             UpdatePadding();
         }
 
         public void SetIcon(Image image)
         {
             m_IconImage = image;
-            if (image != null)
-            {
-                m_IconRect = m_IconImage.GetComponent<RectTransform>();
-            }
+            if (image != null) m_IconRect = m_IconImage.GetComponent<RectTransform>();
         }
 
         public float GetWidth()
@@ -119,8 +123,8 @@ namespace XCharts.Runtime
 
         public void SetSize(float width, float height)
         {
-            this.m_Width = width;
-            this.m_Height = height;
+            m_Width = width;
+            m_Height = height;
             m_AutoSize = width == 0 && height == 0;
             objectRect.sizeDelta = new Vector2(width, height);
         }
@@ -135,7 +139,7 @@ namespace XCharts.Runtime
             if (m_IconRect != null) m_IconRect.sizeDelta = new Vector3(width, height);
         }
 
-        public void UpdateIcon(IconStyle iconStyle, Sprite sprite = null, Color color = default(Color))
+        public void UpdateIcon(IconStyle iconStyle, Sprite sprite = null, Color color = default)
         {
             if (m_IconImage == null || iconStyle == null)
                 return;
@@ -161,7 +165,7 @@ namespace XCharts.Runtime
         public float GetTextWidth()
         {
             if (m_TextRect) return m_TextRect.sizeDelta.x;
-            else return 0;
+            return 0;
         }
 
         public float GetTextHeight()
@@ -209,10 +213,7 @@ namespace XCharts.Runtime
         public void SetActive(bool flag, bool force = false)
         {
             if (m_Active == flag && !force) return;
-            if (ChartHelper.SetActive(gameObject, flag))
-            {
-                m_Active = flag;
-            }
+            if (ChartHelper.SetActive(gameObject, flag)) m_Active = flag;
         }
 
         public void SetTextActive(bool flag)
@@ -238,12 +239,13 @@ namespace XCharts.Runtime
                 m_LabelText.SetText(text);
                 if (m_AutoSize)
                 {
-                    var newSize = string.IsNullOrEmpty(text) ? Vector2.zero :
-                        new Vector2(m_LabelText.GetPreferredWidth(),
+                    var newSize = string.IsNullOrEmpty(text)
+                        ? Vector2.zero
+                        : new Vector2(m_LabelText.GetPreferredWidth(),
                             m_LabelText.GetPreferredHeight());
                     var sizeChange = newSize.x != m_TextRect.sizeDelta.x || newSize.y != m_TextRect.sizeDelta.y;
-                    this.m_Width = newSize.x;
-                    this.m_Height = newSize.y;
+                    m_Width = newSize.x;
+                    m_Height = newSize.y;
                     if (sizeChange)
                     {
                         m_TextRect.sizeDelta = newSize;
@@ -251,14 +253,14 @@ namespace XCharts.Runtime
                         UpdatePadding();
                         AdjustIconPos();
                     }
+
                     return sizeChange;
                 }
+
                 AdjustIconPos();
-                if (m_HideIconIfTextEmpty && isIconActive)
-                {
-                    SetIconActive(!string.IsNullOrEmpty(text));
-                }
+                if (m_HideIconIfTextEmpty && isIconActive) SetIconActive(!string.IsNullOrEmpty(text));
             }
+
             return false;
         }
 
@@ -286,28 +288,35 @@ namespace XCharts.Runtime
                     rect = new Rect(transform.localPosition.x, transform.localPosition.y - m_Height, m_Width, m_Height);
                     break;
                 case TextAnchor.MiddleLeft:
-                    rect = new Rect(transform.localPosition.x, transform.localPosition.y - m_Height / 2, m_Width, m_Height);
+                    rect = new Rect(transform.localPosition.x, transform.localPosition.y - m_Height / 2, m_Width,
+                        m_Height);
                     break;
                 case TextAnchor.LowerRight:
                     rect = new Rect(transform.localPosition.x - m_Width, transform.localPosition.y, m_Width, m_Height);
                     break;
                 case TextAnchor.UpperRight:
-                    rect = new Rect(transform.localPosition.x - m_Width, transform.localPosition.y - m_Height, m_Width, m_Height);
+                    rect = new Rect(transform.localPosition.x - m_Width, transform.localPosition.y - m_Height, m_Width,
+                        m_Height);
                     break;
                 case TextAnchor.MiddleRight:
-                    rect = new Rect(transform.localPosition.x - m_Width, transform.localPosition.y - m_Height / 2, m_Width, m_Height);
+                    rect = new Rect(transform.localPosition.x - m_Width, transform.localPosition.y - m_Height / 2,
+                        m_Width, m_Height);
                     break;
                 case TextAnchor.LowerCenter:
-                    rect = new Rect(transform.localPosition.x - m_Width / 2, transform.localPosition.y, m_Width, m_Height);
+                    rect = new Rect(transform.localPosition.x - m_Width / 2, transform.localPosition.y, m_Width,
+                        m_Height);
                     break;
                 case TextAnchor.UpperCenter:
-                    rect = new Rect(transform.localPosition.x - m_Width / 2, transform.localPosition.y - m_Height, m_Width, m_Height);
+                    rect = new Rect(transform.localPosition.x - m_Width / 2, transform.localPosition.y - m_Height,
+                        m_Width, m_Height);
                     break;
                 case TextAnchor.MiddleCenter:
-                    rect = new Rect(transform.localPosition.x - m_Width / 2, transform.localPosition.y - m_Height / 2, m_Width, m_Height);
+                    rect = new Rect(transform.localPosition.x - m_Width / 2, transform.localPosition.y - m_Height / 2,
+                        m_Width, m_Height);
                     break;
                 default:
-                    rect = new Rect(transform.localPosition.x - m_Width / 2, transform.localPosition.y - m_Height / 2, m_Width, m_Height);
+                    rect = new Rect(transform.localPosition.x - m_Width / 2, transform.localPosition.y - m_Height / 2,
+                        m_Width, m_Height);
                     break;
             }
         }
@@ -324,7 +333,8 @@ namespace XCharts.Runtime
                     m_TextRect.anchoredPosition = new Vector2(m_PaddingLeft, -m_PaddingTop);
                     break;
                 case TextAnchor.MiddleLeft:
-                    m_TextRect.anchoredPosition = new Vector2(m_PaddingLeft, m_Height / 2 - m_PaddingTop - m_TextRect.sizeDelta.y / 2);
+                    m_TextRect.anchoredPosition = new Vector2(m_PaddingLeft,
+                        m_Height / 2 - m_PaddingTop - m_TextRect.sizeDelta.y / 2);
                     break;
                 case TextAnchor.LowerRight:
                     m_TextRect.anchoredPosition = new Vector2(-m_PaddingRight, m_PaddingBottom);
@@ -333,18 +343,21 @@ namespace XCharts.Runtime
                     m_TextRect.anchoredPosition = new Vector2(-m_PaddingRight, -m_PaddingTop);
                     break;
                 case TextAnchor.MiddleRight:
-                    m_TextRect.anchoredPosition = new Vector2(-m_PaddingRight, m_Height / 2 - m_PaddingTop - m_TextRect.sizeDelta.y / 2);
+                    m_TextRect.anchoredPosition = new Vector2(-m_PaddingRight,
+                        m_Height / 2 - m_PaddingTop - m_TextRect.sizeDelta.y / 2);
                     break;
                 case TextAnchor.LowerCenter:
-                    m_TextRect.anchoredPosition = new Vector2(-(m_Width / 2 - m_PaddingLeft - m_TextRect.sizeDelta.x / 2), m_PaddingBottom);
+                    m_TextRect.anchoredPosition =
+                        new Vector2(-(m_Width / 2 - m_PaddingLeft - m_TextRect.sizeDelta.x / 2), m_PaddingBottom);
                     break;
                 case TextAnchor.UpperCenter:
-                    m_TextRect.anchoredPosition = new Vector2(-(m_Width / 2 - m_PaddingLeft - m_TextRect.sizeDelta.x / 2), -m_PaddingTop);
+                    m_TextRect.anchoredPosition =
+                        new Vector2(-(m_Width / 2 - m_PaddingLeft - m_TextRect.sizeDelta.x / 2), -m_PaddingTop);
                     break;
                 case TextAnchor.MiddleCenter:
-                    m_TextRect.anchoredPosition = new Vector2(-(m_Width / 2 - m_PaddingLeft - m_TextRect.sizeDelta.x / 2), m_Height / 2 - m_PaddingTop - m_TextRect.sizeDelta.y / 2);
-                    break;
-                default:
+                    m_TextRect.anchoredPosition =
+                        new Vector2(-(m_Width / 2 - m_PaddingLeft - m_TextRect.sizeDelta.x / 2),
+                            m_Height / 2 - m_PaddingTop - m_TextRect.sizeDelta.y / 2);
                     break;
             }
         }
@@ -367,7 +380,8 @@ namespace XCharts.Runtime
                             case TextAnchor.LowerRight:
                             case TextAnchor.UpperRight:
                             case TextAnchor.MiddleRight:
-                                iconX = m_TextRect.sizeDelta.x / 2 - m_LabelText.GetPreferredWidth() - m_IconRect.sizeDelta.x / 2;
+                                iconX = m_TextRect.sizeDelta.x / 2 - m_LabelText.GetPreferredWidth() -
+                                        m_IconRect.sizeDelta.x / 2;
                                 break;
                             case TextAnchor.LowerCenter:
                             case TextAnchor.UpperCenter:
@@ -375,6 +389,7 @@ namespace XCharts.Runtime
                                 iconX = -m_LabelText.GetPreferredWidth() / 2 - m_IconRect.sizeDelta.x / 2;
                                 break;
                         }
+
                         break;
                     case Align.Right:
                         switch (m_LabelText.alignment)
@@ -395,8 +410,10 @@ namespace XCharts.Runtime
                                 iconX = m_LabelText.GetPreferredWidth() / 2 + m_IconRect.sizeDelta.x / 2;
                                 break;
                         }
+
                         break;
                 }
+
                 m_IconRect.anchoredPosition = m_IconOffest + new Vector3(iconX, 0);
             }
         }

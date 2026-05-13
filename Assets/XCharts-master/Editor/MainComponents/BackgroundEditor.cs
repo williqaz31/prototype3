@@ -8,7 +8,6 @@ namespace XCharts.Editor
     {
         public override void OnInspectorGUI()
         {
-
             ++EditorGUI.indentLevel;
             PropertyField("m_Image");
             PropertyField("m_ImageType");

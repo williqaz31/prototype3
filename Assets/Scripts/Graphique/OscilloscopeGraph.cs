@@ -4,15 +4,14 @@ using UnityEngine;
 [RequireComponent(typeof(LineRenderer))]
 public class OscilloscopeGraph : MonoBehaviour
 {
-    private LineRenderer lineRenderer;
-
     public float xSpacing = 0.1f;
     public float yScale = 1f;
     public int maxPoints = 200;
+    private LineRenderer lineRenderer;
 
-    private List<float> values = new List<float>();
+    private readonly List<float> values = new();
 
-    void Start()
+    private void Start()
     {
         lineRenderer = GetComponent<LineRenderer>();
 
@@ -26,13 +25,13 @@ public class OscilloscopeGraph : MonoBehaviour
         transform.position = Vector3.zero;
     }
 
-    void Update()
+    private void Update()
     {
-        float newValue = Mathf.Sin(Time.time) * 2f;
+        var newValue = Mathf.Sin(Time.time) * 2f;
         AddPoint(newValue);
     }
 
-    void AddPoint(float value)
+    private void AddPoint(float value)
     {
         if (values.Count >= maxPoints)
             values.RemoveAt(0);
@@ -41,10 +40,10 @@ public class OscilloscopeGraph : MonoBehaviour
 
         lineRenderer.positionCount = values.Count;
 
-        for (int i = 0; i < values.Count; i++)
+        for (var i = 0; i < values.Count; i++)
         {
-            Vector3 pos = transform.position +
-                          new Vector3(i * xSpacing, values[i] * yScale, 0);
+            var pos = transform.position +
+                      new Vector3(i * xSpacing, values[i] * yScale, 0);
 
             lineRenderer.SetPosition(i, pos);
         }

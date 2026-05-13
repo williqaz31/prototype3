@@ -7,7 +7,7 @@ namespace XCharts.Runtime
 {
     public static class LineHelper
     {
-        private static List<Vector3> s_CurvesPosList = new List<Vector3>();
+        private static List<Vector3> s_CurvesPosList = new();
 
         public static int GetDataAverageRate(Serie serie, float axisLength, int maxCount, bool isYAxis)
         {
@@ -25,20 +25,19 @@ namespace XCharts.Runtime
         {
             Color32 areaColor, areaToColor;
             bool innerFill, toTop;
-            if (!SerieHelper.GetAreaColor(out areaColor, out areaToColor, out innerFill, out toTop, serie, null, theme, serie.context.colorIndex))
-            {
-                return;
-            }
+            if (!SerieHelper.GetAreaColor(out areaColor, out areaToColor, out innerFill, out toTop, serie, null, theme,
+                    serie.context.colorIndex)) return;
             if (innerFill)
             {
                 UGL.DrawPolygon(vh, serie.context.dataPoints, areaColor);
                 return;
             }
-            var gridXY = (isY ? grid.context.x : grid.context.y);
+
+            var gridXY = isY ? grid.context.x : grid.context.y;
             var min = gridXY;
             var max = gridXY + (isY ? grid.context.width : grid.context.height);
             var start = 0f;
-            switch(serie.areaStyle.origin)
+            switch (serie.areaStyle.origin)
             {
                 case AreaStyle.AreaOrigin.Start:
                     start = min;
@@ -50,8 +49,8 @@ namespace XCharts.Runtime
                     start = gridXY + relativedAxis.context.offset;
                     break;
             }
+
             if (lastStackSerie == null)
-            {
                 DrawSerieLineNormalArea(vh, serie, isY,
                     start,
                     min,
@@ -63,9 +62,7 @@ namespace XCharts.Runtime
                     relativedAxis,
                     grid,
                     toTop);
-            }
             else
-            {
                 DrawSerieLineStackArea(vh, serie, lastStackSerie, isY,
                     start,
                     min,
@@ -74,7 +71,6 @@ namespace XCharts.Runtime
                     areaToColor,
                     visualMap,
                     toTop);
-            }
         }
 
         private static void DrawSerieLineNormalArea(VertexHelper vh, Serie serie, bool isY,
@@ -90,22 +86,17 @@ namespace XCharts.Runtime
             var lp = Vector3.zero;
             var isVisualMapGradient = VisualMapHelper.IsNeedAreaGradient(visualMap);
             var areaLerp = !ChartHelper.IsValueEqualsColor(areaColor, areaToColor);
-            var zsp = isY ?
-                new Vector3(zero, points[0].position.y) :
-                new Vector3(points[0].position.x, zero);
-            var zep = isY ?
-                new Vector3(zero, points[count - 1].position.y) :
-                new Vector3(points[count - 1].position.x, zero);
+            var zsp = isY ? new Vector3(zero, points[0].position.y) : new Vector3(points[0].position.x, zero);
+            var zep = isY
+                ? new Vector3(zero, points[count - 1].position.y)
+                : new Vector3(points[count - 1].position.x, zero);
 
             var lastDataIsIgnore = false;
-            for (int i = 0; i < points.Count; i++)
+            for (var i = 0; i < points.Count; i++)
             {
                 var pdata = points[i];
                 var tp = pdata.position;
-                if (serie.clip)
-                {
-                    grid.Clamp(ref tp);
-                }
+                if (serie.clip) grid.Clamp(ref tp);
                 var isIgnore = pdata.isIgnoreBreak;
                 var color = areaColor;
                 var toColor = areaToColor;
@@ -123,48 +114,55 @@ namespace XCharts.Runtime
                     if (UGLHelper.GetIntersection(lp, tp, axisStartPos, axisEndPos, ref ip))
                         tp = ip;
                 }
+
                 var zp = isY ? new Vector3(zero, tp.y) : new Vector3(tp.x, zero);
                 if (isVisualMapGradient)
                 {
                     color = VisualMapHelper.GetLineGradientColor(visualMap, zp, grid, axis, relativedAxis, areaColor);
-                    toColor = VisualMapHelper.GetLineGradientColor(visualMap, tp, grid, axis, relativedAxis, areaToColor);
+                    toColor = VisualMapHelper.GetLineGradientColor(visualMap, tp, grid, axis, relativedAxis,
+                        areaToColor);
                     lerp = true;
                 }
+
                 if (i > 0)
-                {
                     if ((lp.y - zero > 0 && tp.y - zero < 0) || (lp.y - zero < 0 && tp.y - zero > 0))
                     {
                         var ip = Vector3.zero;
                         if (UGLHelper.GetIntersection(lp, tp, zsp, zep, ref ip))
                         {
                             if (lerp)
-                                AddVertToVertexHelperWithLerpColor(vh, ip, ip, color, toColor, isY, min, max, i > 0, toTop);
+                            {
+                                AddVertToVertexHelperWithLerpColor(vh, ip, ip, color, toColor, isY, min, max, i > 0,
+                                    toTop);
+                            }
                             else
                             {
                                 if (lastDataIsIgnore)
-                                    UGL.AddVertToVertexHelper(vh, ip, ip, ColorUtil.clearColor32, true);
+                                    UGL.AddVertToVertexHelper(vh, ip, ip, ColorUtil.clearColor32);
 
                                 UGL.AddVertToVertexHelper(vh, ip, ip, toColor, color, i > 0);
 
                                 if (isIgnore)
-                                    UGL.AddVertToVertexHelper(vh, ip, ip, ColorUtil.clearColor32, true);
+                                    UGL.AddVertToVertexHelper(vh, ip, ip, ColorUtil.clearColor32);
                             }
                         }
                     }
-                }
 
                 if (lerp)
+                {
                     AddVertToVertexHelperWithLerpColor(vh, tp, zp, color, toColor, isY, min, max, i > 0, toTop);
+                }
                 else
                 {
                     if (lastDataIsIgnore)
-                        UGL.AddVertToVertexHelper(vh, tp, zp, ColorUtil.clearColor32, true);
+                        UGL.AddVertToVertexHelper(vh, tp, zp, ColorUtil.clearColor32);
 
                     UGL.AddVertToVertexHelper(vh, tp, zp, toColor, color, i > 0);
 
                     if (isIgnore)
-                        UGL.AddVertToVertexHelper(vh, tp, zp, ColorUtil.clearColor32, true);
+                        UGL.AddVertToVertexHelper(vh, tp, zp, ColorUtil.clearColor32);
                 }
+
                 lp = tp;
                 lastDataIsIgnore = isIgnore;
                 if (isBreak)
@@ -199,13 +197,13 @@ namespace XCharts.Runtime
             var isBreakTop = false;
             var isBreakBottom = false;
 
-            while ((u < upCount || d < downCount))
+            while (u < upCount || d < downCount)
             {
                 var tp = u < upCount ? upPoints[u].position : upPoints[upCount - 1].position;
                 var bp = d < downCount ? downPoints[d].position : downPoints[downCount - 1].position;
 
-                var tnp = (u + 1) < upCount ? upPoints[u + 1].position : upPoints[upCount - 1].position;
-                var bnp = (d + 1) < downCount ? downPoints[d + 1].position : downPoints[downCount - 1].position;
+                var tnp = u + 1 < upCount ? upPoints[u + 1].position : upPoints[upCount - 1].position;
+                var bnp = d + 1 < downCount ? downPoints[d + 1].position : downPoints[downCount - 1].position;
 
                 if (serie.animation.CheckDetailBreak(tp, isY))
                 {
@@ -221,6 +219,7 @@ namespace XCharts.Runtime
                     else
                         tp = new Vector3(progress, tp.y);
                 }
+
                 if (serie.animation.CheckDetailBreak(bp, isY))
                 {
                     isBreakBottom = true;
@@ -239,7 +238,7 @@ namespace XCharts.Runtime
                 if (lerp)
                     AddVertToVertexHelperWithLerpColor(vh, tp, bp, color, toColor, isY, min, max, true, toTop);
                 else
-                    UGL.AddVertToVertexHelper(vh, tp, bp, color, true);
+                    UGL.AddVertToVertexHelper(vh, tp, bp, color);
                 u++;
                 d++;
                 if (bp.x < tp.x && bnp.x < tp.x)
@@ -304,7 +303,7 @@ namespace XCharts.Runtime
             var dashLength = serie.lineStyle.dashLength;
             var gapLength = serie.lineStyle.gapLength;
             var dotLength = serie.lineStyle.dotLength;
-            for (int i = 1; i < dataCount; i++)
+            for (var i = 1; i < dataCount; i++)
             {
                 var cdata = datas[i];
                 var isIgnore = cdata.isIgnoreBreak;
@@ -318,9 +317,11 @@ namespace XCharts.Runtime
                     var ip = Vector3.zero;
                     var progress = serie.animation.GetCurrDetail();
                     var rate = 0f;
-                    if (AnimationStyleHelper.GetAnimationPosition(serie.animation, isY, lp, cp, progress, ref ip, ref rate))
+                    if (AnimationStyleHelper.GetAnimationPosition(serie.animation, isY, lp, cp, progress, ref ip,
+                            ref rate))
                         cp = np = ip;
                 }
+
                 serie.context.lineEndPostion = cp;
                 serie.context.lineEndValueY = AxisHelper.GetAxisPositionValue(grid, relativedAxis, cp);
                 var handled = false;
@@ -333,11 +334,13 @@ namespace XCharts.Runtime
                         firstInGridPointIndex = i;
                     if (isClip) isIgnore = true;
                 }
+
                 if (serie.lineStyle.type == LineStyle.Type.None)
                 {
                     handled = true;
                     break;
                 }
+
                 {
                     segmentCount++;
                     var index = 0f;
@@ -364,7 +367,8 @@ namespace XCharts.Runtime
                             index = segmentCount % (dashLength + 2 * dotLength + 3 * gapLength);
                             if (index >= dashLength && index < dashLength + gapLength)
                                 isIgnore = true;
-                            else if (index >= dashLength + gapLength + dotLength && index < dashLength + dotLength + 2 * gapLength)
+                            else if (index >= dashLength + gapLength + dotLength &&
+                                     index < dashLength + dotLength + 2 * gapLength)
                                 isIgnore = true;
                             else if (index >= dashLength + 2 * gapLength + 2 * dotLength)
                                 isIgnore = true;
@@ -377,9 +381,9 @@ namespace XCharts.Runtime
                     lastDataIsIgnore = isIgnore;
                     if (isBreak)
                         break;
-                    else
-                        continue;
+                    continue;
                 }
+
                 bool bitp = true, bibp = true;
                 UGLHelper.GetLinePoints(lp, cp, np, lineWidth,
                     ref ltp, ref lbp,
@@ -406,8 +410,10 @@ namespace XCharts.Runtime
                 if (bitp == bibp)
                 {
                     if (bitp)
+                    {
                         AddLineVertToVertexHelper(vh, itp, ibp, lineColor, isVisualMapGradient, isLineStyleGradient,
                             visualMap, serie.lineStyle, grid, axis, relativedAxis, true, lastDataIsIgnore, isIgnore);
+                    }
                     else
                     {
                         AddLineVertToVertexHelper(vh, ltp, clp, lineColor, isVisualMapGradient, isLineStyleGradient,
@@ -433,6 +439,7 @@ namespace XCharts.Runtime
                             visualMap, serie.lineStyle, grid, axis, relativedAxis, true, lastDataIsIgnore, isIgnore);
                     }
                 }
+
                 lastDataIsIgnore = isIgnore;
                 if (isBreak)
                     break;
@@ -447,6 +454,7 @@ namespace XCharts.Runtime
                 lineWidth = serie.lineStyle.GetWidth(defaultWidth);
                 serie.interact.SetValue(ref interacting, lineWidth);
             }
+
             return lineWidth;
         }
 
@@ -456,7 +464,7 @@ namespace XCharts.Runtime
             bool lastIgnore, bool ignore)
         {
             if (lastIgnore && needTriangle)
-                UGL.AddVertToVertexHelper(vh, tp, bp, ColorUtil.clearColor32, true);
+                UGL.AddVertToVertexHelper(vh, tp, bp, ColorUtil.clearColor32);
 
             if (visualMapGradient)
             {
@@ -474,14 +482,9 @@ namespace XCharts.Runtime
             {
                 UGL.AddVertToVertexHelper(vh, tp, bp, lineColor, needTriangle);
             }
-            if (lastIgnore && !needTriangle)
-            {
-                UGL.AddVertToVertexHelper(vh, tp, bp, ColorUtil.clearColor32, false);
-            }
-            if (ignore && needTriangle)
-            {
-                UGL.AddVertToVertexHelper(vh, tp, bp, ColorUtil.clearColor32, false);
-            }
+
+            if (lastIgnore && !needTriangle) UGL.AddVertToVertexHelper(vh, tp, bp, ColorUtil.clearColor32, false);
+            if (ignore && needTriangle) UGL.AddVertToVertexHelper(vh, tp, bp, ColorUtil.clearColor32, false);
         }
 
         internal static void UpdateSerieDrawPoints(Serie serie, Settings setting, ThemeStyle theme, VisualMap visualMap,
@@ -505,17 +508,18 @@ namespace XCharts.Runtime
             }
         }
 
-        private static void UpdateNormalLineDrawPoints(Serie serie, Settings setting, VisualMap visualMap, GridCoord grid)
+        private static void UpdateNormalLineDrawPoints(Serie serie, Settings setting, VisualMap visualMap,
+            GridCoord grid)
         {
             var isVisualMapGradient = VisualMapHelper.IsNeedGradient(visualMap);
-            if (isVisualMapGradient || serie.clip || (serie.lineStyle.IsNotSolidLine()))
+            if (isVisualMapGradient || serie.clip || serie.lineStyle.IsNotSolidLine())
             {
                 var dataPoints = serie.context.dataPoints;
                 if (dataPoints.Count > 1)
                 {
                     var sp = dataPoints[0];
                     var ip = Vector3.zero;
-                    for (int i = 1; i < dataPoints.Count; i++)
+                    for (var i = 1; i < dataPoints.Count; i++)
                     {
                         var ep = dataPoints[i];
                         var ignore = serie.context.dataIgnores[i];
@@ -524,20 +528,19 @@ namespace XCharts.Runtime
                             sp = ep;
                             continue;
                         }
+
                         var dir = (ep - sp).normalized;
                         var dist = Vector3.Distance(sp, ep);
                         var segment = (int)(dist / setting.lineSegmentDistance);
                         serie.context.drawPoints.Add(new PointInfo(sp, ignore));
-                        for (int j = 1; j < segment; j++)
+                        for (var j = 1; j < segment; j++)
                         {
                             var np = sp + dir * dist * j / segment;
                             serie.context.drawPoints.Add(new PointInfo(np, ignore));
                         }
+
                         sp = ep;
-                        if (i == dataPoints.Count - 1)
-                        {
-                            serie.context.drawPoints.Add(new PointInfo(ep, ignore));
-                        }
+                        if (i == dataPoints.Count - 1) serie.context.drawPoints.Add(new PointInfo(ep, ignore));
                     }
                 }
                 else
@@ -547,18 +550,17 @@ namespace XCharts.Runtime
             }
             else
             {
-                for (int i = 0; i < serie.context.dataPoints.Count; i++)
-                {
-                    serie.context.drawPoints.Add(new PointInfo(serie.context.dataPoints[i], serie.context.dataIgnores[i]));
-                }
+                for (var i = 0; i < serie.context.dataPoints.Count; i++)
+                    serie.context.drawPoints.Add(new PointInfo(serie.context.dataPoints[i],
+                        serie.context.dataIgnores[i]));
             }
         }
 
         private static void UpdateSmoothLineDrawPoints(Serie serie, Settings setting, bool isY)
         {
             var points = serie.context.dataPoints;
-            float smoothness = setting.lineSmoothness;
-            for (int i = 0; i < points.Count - 1; i++)
+            var smoothness = setting.lineSmoothness;
+            for (var i = 0; i < points.Count - 1; i++)
             {
                 var sp = points[i];
                 var ep = points[i + 1];
@@ -568,21 +570,21 @@ namespace XCharts.Runtime
                 if (isY)
                     UGLHelper.GetBezierListVertical(ref s_CurvesPosList, sp, ep, smoothness, setting.lineSmoothStyle);
                 else
-                    UGLHelper.GetBezierList(ref s_CurvesPosList, sp, ep, lsp, nep, smoothness, setting.lineSmoothStyle, serie.smoothLimit);
-                for (int j = 1; j < s_CurvesPosList.Count; j++)
-                {
+                    UGLHelper.GetBezierList(ref s_CurvesPosList, sp, ep, lsp, nep, smoothness, setting.lineSmoothStyle,
+                        serie.smoothLimit);
+                for (var j = 1; j < s_CurvesPosList.Count; j++)
                     serie.context.drawPoints.Add(new PointInfo(s_CurvesPosList[j], ignore));
-                }
             }
         }
 
-        private static void UpdateStepLineDrawPoints(Serie serie, Settings setting, ThemeStyle theme, bool isY, float lineWidth)
+        private static void UpdateStepLineDrawPoints(Serie serie, Settings setting, ThemeStyle theme, bool isY,
+            float lineWidth)
         {
             var points = serie.context.dataPoints;
             var lp = points[0];
             serie.context.drawPoints.Clear();
             serie.context.drawPoints.Add(new PointInfo(lp, serie.context.dataIgnores[0]));
-            for (int i = 1; i < points.Count; i++)
+            for (var i = 1; i < points.Count; i++)
             {
                 var cp = points[i];
                 var ignore = serie.context.dataIgnores[i];
@@ -593,27 +595,25 @@ namespace XCharts.Runtime
                     lp = cp;
                     continue;
                 }
+
                 switch (serie.lineType)
                 {
                     case LineType.StepStart:
-                        serie.context.drawPoints.Add(new PointInfo(isY ?
-                            new Vector3(cp.x, lp.y) :
-                            new Vector3(lp.x, cp.y), ignore));
+                        serie.context.drawPoints.Add(
+                            new PointInfo(isY ? new Vector3(cp.x, lp.y) : new Vector3(lp.x, cp.y), ignore));
                         break;
                     case LineType.StepMiddle:
-                        serie.context.drawPoints.Add(new PointInfo(isY ?
-                            new Vector3(lp.x, (lp.y + cp.y) / 2) :
-                            new Vector3((lp.x + cp.x) / 2, lp.y), ignore));
-                        serie.context.drawPoints.Add(new PointInfo(isY ?
-                            new Vector3(cp.x, (lp.y + cp.y) / 2) :
-                            new Vector3((lp.x + cp.x) / 2, cp.y), ignore));
+                        serie.context.drawPoints.Add(new PointInfo(
+                            isY ? new Vector3(lp.x, (lp.y + cp.y) / 2) : new Vector3((lp.x + cp.x) / 2, lp.y), ignore));
+                        serie.context.drawPoints.Add(new PointInfo(
+                            isY ? new Vector3(cp.x, (lp.y + cp.y) / 2) : new Vector3((lp.x + cp.x) / 2, cp.y), ignore));
                         break;
                     case LineType.StepEnd:
-                        serie.context.drawPoints.Add(new PointInfo(isY ?
-                            new Vector3(lp.x, cp.y) :
-                            new Vector3(cp.x, lp.y), ignore));
+                        serie.context.drawPoints.Add(
+                            new PointInfo(isY ? new Vector3(lp.x, cp.y) : new Vector3(cp.x, lp.y), ignore));
                         break;
                 }
+
                 serie.context.drawPoints.Add(new PointInfo(cp, ignore));
                 lp = cp;
             }

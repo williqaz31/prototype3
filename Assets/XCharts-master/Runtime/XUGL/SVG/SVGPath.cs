@@ -7,11 +7,11 @@ namespace XUGL
 {
     public class SVGPath
     {
-        private static Regex s_PathRegex = new Regex(@"(([a-z]|[A-Z])(\d|\.|,|-)*)");
-        private static Regex s_PathValueRegex = new Regex(@"(^[a-z]|[A-Z])\s*(-?\d+\.*\d*)*[\s|,|-]*(\d+\.*\d*)*");
-        private static Regex s_PathValueRegex2 = new Regex(@"(-?\d+\.?\d*)");
+        private static readonly Regex s_PathRegex = new(@"(([a-z]|[A-Z])(\d|\.|,|-)*)");
+        private static readonly Regex s_PathValueRegex = new(@"(^[a-z]|[A-Z])\s*(-?\d+\.*\d*)*[\s|,|-]*(\d+\.*\d*)*");
+        private static readonly Regex s_PathValueRegex2 = new(@"(-?\d+\.?\d*)");
         public bool mirrorY = true;
-        public List<SVGPathSeg> segs = new List<SVGPathSeg>();
+        public List<SVGPathSeg> segs = new();
 
         public void AddSegment(SVGPathSeg seg)
         {
@@ -22,10 +22,7 @@ namespace XUGL
         {
             if (string.IsNullOrEmpty(path))
                 return new SVGPath();
-            if (path.StartsWith("path://"))
-            {
-                path = path.Substring(7);
-            }
+            if (path.StartsWith("path://")) path = path.Substring(7);
             path = path.Replace(' ', ',');
             var mc = s_PathRegex.Matches(path);
             var svgPath = new SVGPath();
@@ -42,7 +39,7 @@ namespace XUGL
                 }
                 else
                 {
-                    var type = s_PathValueRegex.Match(key).Groups[1].ToString().ToCharArray() [0];
+                    var type = s_PathValueRegex.Match(key).Groups[1].ToString().ToCharArray()[0];
                     var mc3 = s_PathValueRegex2.Matches(key);
                     SVGPathSeg seg = null;
                     switch (type)
@@ -93,6 +90,7 @@ namespace XUGL
                             seg.relative = type == 'a';
                             break;
                     }
+
                     if (seg != null)
                     {
                         seg.raw = key;
@@ -104,10 +102,12 @@ namespace XUGL
                             if (float.TryParse(m3.ToString(), out p))
                                 seg.parameters.Add(p);
                         }
+
                         svgPath.AddSegment(seg);
                     }
                 }
             }
+
             // Debug.LogError(path);
             // foreach (var cmd in svgPath.commands)
             // {
@@ -124,15 +124,11 @@ namespace XUGL
             var bezierList = new List<Vector3>();
             var cp2 = Vector2.zero;
             foreach (var seg in segs)
-            {
                 switch (seg.type)
                 {
                     case SVGPathSegType.M:
                         sp = np = seg.relative ? np + seg.p1 : seg.p1;
-                        if (posList.Count > 0)
-                        {
-                            DrawPosList(vh, posList);
-                        }
+                        if (posList.Count > 0) DrawPosList(vh, posList);
                         posList.Add(np);
                         break;
                     case SVGPathSegType.L:
@@ -151,10 +147,10 @@ namespace XUGL
                         var cp1 = seg.relative ? np + seg.p1 : seg.p1;
                         cp2 = seg.relative ? np + seg.p2 : seg.p2;
                         var ep = seg.relative ? np + seg.p3 : seg.p3;
-                        var dist = (int) Vector2.Distance(np, ep) * 2;
+                        var dist = (int)Vector2.Distance(np, ep) * 2;
                         if (dist < 2) dist = 2;
                         UGLHelper.GetBezierList2(ref bezierList, np, ep, dist, cp1, cp2);
-                        for (int n = 1; n < bezierList.Count; n++)
+                        for (var n = 1; n < bezierList.Count; n++)
                             posList.Add(bezierList[n]);
                         np = ep;
                         break;
@@ -162,10 +158,10 @@ namespace XUGL
                         cp1 = np + (np - cp2).normalized * Vector2.Distance(np, cp2);
                         var scp2 = seg.relative ? np + seg.p1 : seg.p1;
                         ep = seg.relative ? np + seg.p2 : seg.p2;
-                        dist = (int) Vector2.Distance(np, ep) * 2;
+                        dist = (int)Vector2.Distance(np, ep) * 2;
                         if (dist < 2) dist = 2;
                         UGLHelper.GetBezierList2(ref bezierList, np, ep, dist, cp1, scp2);
-                        for (int n = 1; n < bezierList.Count; n++)
+                        for (var n = 1; n < bezierList.Count; n++)
                             posList.Add(bezierList[n]);
                         break;
                     case SVGPathSegType.Z:
@@ -179,7 +175,7 @@ namespace XUGL
                         Debug.LogError("unknow seg:" + seg.type);
                         break;
                 }
-            }
+
             if (posList.Count > 0)
                 DrawPosList(vh, posList);
             //UGL.DrawCricle(vh, sp, 1, Color.black);
@@ -188,13 +184,12 @@ namespace XUGL
         private void DrawPosList(VertexHelper vh, List<Vector3> posList)
         {
             if (mirrorY)
-            {
-                for (int i = posList.Count - 1; i >= 0; i--)
+                for (var i = posList.Count - 1; i >= 0; i--)
                 {
                     var pos = posList[i];
                     posList[i] = new Vector3(pos.x, -pos.y);
                 }
-            }
+
             UGL.DrawLine(vh, posList, 1f, Color.red, false);
             posList.Clear();
         }

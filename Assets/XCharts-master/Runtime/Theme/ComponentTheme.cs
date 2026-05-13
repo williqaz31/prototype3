@@ -18,40 +18,56 @@ namespace XCharts.Runtime
 #endif
 
         /// <summary>
-        /// the font of text.
-        /// ||字体。
+        ///     the font of text.
+        ///     ||字体。
         /// </summary>
         public Font font
         {
-            get { return m_Font; }
-            set { m_Font = value; SetComponentDirty(); }
+            get => m_Font;
+            set
+            {
+                m_Font = value;
+                SetComponentDirty();
+            }
         }
+
         /// <summary>
-        /// the color of text.
-        /// ||文本颜色。
+        ///     the color of text.
+        ///     ||文本颜色。
         /// </summary>
         public Color textColor
         {
-            get { return m_TextColor; }
-            set { if (PropertyUtil.SetColor(ref m_TextColor, value)) SetComponentDirty(); }
+            get => m_TextColor;
+            set
+            {
+                if (PropertyUtil.SetColor(ref m_TextColor, value)) SetComponentDirty();
+            }
         }
+
         /// <summary>
-        /// the color of text.
-        /// ||文本颜色。
+        ///     the color of text.
+        ///     ||文本颜色。
         /// </summary>
         public Color textBackgroundColor
         {
-            get { return m_TextBackgroundColor; }
-            set { if (PropertyUtil.SetColor(ref m_TextBackgroundColor, value)) SetComponentDirty(); }
+            get => m_TextBackgroundColor;
+            set
+            {
+                if (PropertyUtil.SetColor(ref m_TextBackgroundColor, value)) SetComponentDirty();
+            }
         }
+
         /// <summary>
-        /// the font size of text.
-        /// ||文本字体大小。
+        ///     the font size of text.
+        ///     ||文本字体大小。
         /// </summary>
         public int fontSize
         {
-            get { return m_FontSize; }
-            set { if (PropertyUtil.SetStruct(ref m_FontSize, value)) SetComponentDirty(); }
+            get => m_FontSize;
+            set
+            {
+                if (PropertyUtil.SetStruct(ref m_FontSize, value)) SetComponentDirty();
+            }
         }
 
 #if dUI_TextMeshPro

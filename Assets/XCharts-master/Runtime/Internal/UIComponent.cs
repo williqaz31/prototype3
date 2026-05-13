@@ -1,33 +1,64 @@
-using System;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace XCharts.Runtime
 {
     /// <summary>
-    /// UI组件基类。
+    ///     UI组件基类。
     /// </summary>
     [ExecuteInEditMode]
     [RequireComponent(typeof(RectTransform))]
     [DisallowMultipleComponent]
     public class UIComponent : BaseGraph
     {
-        [SerializeField] private bool m_DebugModel = false;
-        [SerializeField] protected UIComponentTheme m_Theme = new UIComponentTheme();
-        [SerializeField] protected Background m_Background = new Background() { show = true };
-
-        protected bool m_DataDirty;
+        [SerializeField] private bool m_DebugModel;
+        [SerializeField] protected UIComponentTheme m_Theme = new();
+        [SerializeField] protected Background m_Background = new() { show = true };
         private ThemeType m_CheckTheme = 0;
 
-        public override HideFlags chartHideFlags { get { return m_DebugModel ? HideFlags.None : HideFlags.HideInHierarchy; } }
-        public UIComponentTheme theme { get { return m_Theme; } set { m_Theme = value; } }
+        protected bool m_DataDirty;
+
+        public override HideFlags chartHideFlags => m_DebugModel ? HideFlags.None : HideFlags.HideInHierarchy;
+
+        public UIComponentTheme theme
+        {
+            get => m_Theme;
+            set => m_Theme = value;
+        }
+
         /// <summary>
-        /// 背景样式。
+        ///     背景样式。
         /// </summary>
-        public Background background { get { return m_Background; } set { m_Background = value; color = Color.white; } }
+        public Background background
+        {
+            get => m_Background;
+            set
+            {
+                m_Background = value;
+                color = Color.white;
+            }
+        }
+
+        protected override void Awake()
+        {
+            CheckTheme(true);
+            base.Awake();
+        }
+
+        protected override void Update()
+        {
+            base.Update();
+            if (m_DataDirty)
+            {
+                m_DataDirty = false;
+                DataDirty();
+            }
+        }
+
         /// <summary>
-        /// Update chart theme.
-        /// ||切换内置主题。
+        ///     Update chart theme.
+        ///     ||切换内置主题。
         /// </summary>
         /// <param name="theme">theme</param>
         public bool UpdateTheme(ThemeType theme)
@@ -37,6 +68,7 @@ namespace XCharts.Runtime
                 Debug.LogError("UpdateTheme: not support switch to Custom theme.");
                 return false;
             }
+
             if (m_Theme.sharedTheme == null)
                 m_Theme.sharedTheme = XCThemeMgr.GetTheme(ThemeType.Default);
             m_Theme.sharedTheme.CopyTheme(theme);
@@ -76,10 +108,7 @@ namespace XCharts.Runtime
             base.CheckComponent();
             if (m_Theme.anyDirty)
             {
-                if (m_Theme.componentDirty)
-                {
-                    SetAllComponentDirty();
-                }
+                if (m_Theme.componentDirty) SetAllComponentDirty();
                 if (m_Theme.vertsDirty) RefreshGraph();
                 m_Theme.ClearDirty();
             }
@@ -97,20 +126,29 @@ namespace XCharts.Runtime
             UIHelper.DrawBackground(vh, this);
         }
 
-        protected override void Awake()
+        protected virtual void DataDirty()
         {
-            CheckTheme(true);
-            base.Awake();
         }
 
-        protected override void Update()
+        protected virtual void CheckTheme(bool firstInit = false)
         {
-            base.Update();
-            if (m_DataDirty)
+            if (m_Theme.sharedTheme == null) m_Theme.sharedTheme = XCThemeMgr.GetTheme(ThemeType.Default);
+            if (firstInit) m_CheckTheme = m_Theme.themeType;
+            if (m_Theme.sharedTheme != null && m_CheckTheme != m_Theme.themeType)
             {
-                m_DataDirty = false;
-                DataDirty();
+                m_CheckTheme = m_Theme.themeType;
+                m_Theme.sharedTheme.CopyTheme(m_CheckTheme);
+#if UNITY_EDITOR
+                EditorUtility.SetDirty(this);
+#endif
+                SetAllDirty();
+                SetAllComponentDirty();
+                OnThemeChanged();
             }
+        }
+
+        protected virtual void OnThemeChanged()
+        {
         }
 
 #if UNITY_EDITOR
@@ -125,34 +163,5 @@ namespace XCharts.Runtime
             base.OnValidate();
         }
 #endif
-
-        protected virtual void DataDirty()
-        {
-        }
-
-        protected virtual void CheckTheme(bool firstInit = false)
-        {
-            if (m_Theme.sharedTheme == null)
-            {
-                m_Theme.sharedTheme = XCThemeMgr.GetTheme(ThemeType.Default);
-            }
-            if (firstInit)
-            {
-                m_CheckTheme = m_Theme.themeType;
-            }
-            if (m_Theme.sharedTheme != null && m_CheckTheme != m_Theme.themeType)
-            {
-                m_CheckTheme = m_Theme.themeType;
-                m_Theme.sharedTheme.CopyTheme(m_CheckTheme);
-#if UNITY_EDITOR
-                UnityEditor.EditorUtility.SetDirty(this);
-#endif
-                SetAllDirty();
-                SetAllComponentDirty();
-                OnThemeChanged();
-            }
-        }
-
-        protected virtual void OnThemeChanged() { }
     }
 }

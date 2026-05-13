@@ -1,13 +1,14 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace XCharts.Runtime
 {
     /// <summary>
-    /// The x axis in cartesian(rectangular) coordinate.
-    /// ||直角坐标系 grid 中的 y 轴。
+    ///     The x axis in cartesian(rectangular) coordinate.
+    ///     ||直角坐标系 grid 中的 y 轴。
     /// </summary>
-    [System.Serializable]
+    [Serializable]
     [RequireChartComponent(typeof(GridCoord), typeof(XAxis))]
     [ComponentHandler(typeof(YAxisHander), true)]
     public class YAxis : Axis

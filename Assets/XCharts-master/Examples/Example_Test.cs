@@ -1,8 +1,8 @@
 using UnityEngine;
+using XCharts.Runtime;
 #if INPUT_SYSTEM_ENABLED
 using Input = XCharts.Runtime.InputHelper;
 #endif
-using XCharts.Runtime;
 
 namespace XCharts.Example
 {
@@ -10,14 +10,14 @@ namespace XCharts.Example
     [ExecuteInEditMode]
     public class Example_Test : MonoBehaviour
     {
-        BaseChart chart;
+        private BaseChart chart;
 
-        void Awake()
+        private void Awake()
         {
             chart = gameObject.GetComponent<BaseChart>();
         }
 
-        void Update()
+        private void Update()
         {
             if (Input.GetKeyDown(KeyCode.Space))
             {
@@ -38,7 +38,7 @@ namespace XCharts.Example
             }
         }
 
-        void AddData()
+        private void AddData()
         {
             chart.AnimationReset();
             chart.AnimationFadeOut();

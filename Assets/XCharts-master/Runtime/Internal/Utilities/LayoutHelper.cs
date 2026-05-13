@@ -4,15 +4,15 @@ namespace XCharts.Runtime
 {
     public static class LayerHelper
     {
-        private static Vector2 s_Vector0And0 = new Vector2(0, 0);
-        private static Vector2 s_Vector0And0Dot5 = new Vector2(0, 0.5f);
-        private static Vector2 s_Vector0And1 = new Vector2(0, 1f);
-        private static Vector2 s_Vector0Dot5And1 = new Vector2(0.5f, 1f);
-        private static Vector2 s_Vector0Dot5And0Dot5 = new Vector2(0.5f, 0.5f);
-        private static Vector2 s_Vector0Dot5And0 = new Vector2(0.5f, 0f);
-        private static Vector2 s_Vector1And1 = new Vector2(1f, 1f);
-        private static Vector2 s_Vector1And0Dot5 = new Vector2(1f, 0.5f);
-        private static Vector2 s_Vector1And0 = new Vector2(1f, 0);
+        private static readonly Vector2 s_Vector0And0 = new(0, 0);
+        private static readonly Vector2 s_Vector0And0Dot5 = new(0, 0.5f);
+        private static readonly Vector2 s_Vector0And1 = new(0, 1f);
+        private static readonly Vector2 s_Vector0Dot5And1 = new(0.5f, 1f);
+        private static readonly Vector2 s_Vector0Dot5And0Dot5 = new(0.5f, 0.5f);
+        private static readonly Vector2 s_Vector0Dot5And0 = new(0.5f, 0f);
+        private static readonly Vector2 s_Vector1And1 = new(1f, 1f);
+        private static readonly Vector2 s_Vector1And0Dot5 = new(1f, 0.5f);
+        private static readonly Vector2 s_Vector1And0 = new(1f, 0);
 
         internal static Vector2 ResetChartPositionAndPivot(Vector2 minAnchor, Vector2 maxAnchor, float width,
             float height, ref float chartX, ref float chartY)
@@ -23,96 +23,112 @@ namespace XCharts.Runtime
                 chartY = -height;
                 return s_Vector0And1;
             }
-            else if (IsLeftCenter(minAnchor, maxAnchor))
+
+            if (IsLeftCenter(minAnchor, maxAnchor))
             {
                 chartX = 0;
                 chartY = -height / 2;
                 return s_Vector0And0Dot5;
             }
-            else if (IsLeftBottom(minAnchor, maxAnchor))
+
+            if (IsLeftBottom(minAnchor, maxAnchor))
             {
                 chartX = 0;
                 chartY = 0;
                 return s_Vector0And0;
             }
-            else if (IsCenterTop(minAnchor, maxAnchor))
+
+            if (IsCenterTop(minAnchor, maxAnchor))
             {
                 chartX = -width / 2;
                 chartY = -height;
                 return s_Vector0Dot5And1;
             }
-            else if (IsCenterCenter(minAnchor, maxAnchor))
+
+            if (IsCenterCenter(minAnchor, maxAnchor))
             {
                 chartX = -width / 2;
                 chartY = -height / 2;
                 return s_Vector0Dot5And0Dot5;
             }
-            else if (IsCenterBottom(minAnchor, maxAnchor))
+
+            if (IsCenterBottom(minAnchor, maxAnchor))
             {
                 chartX = -width / 2;
                 chartY = 0;
                 return s_Vector0Dot5And0;
             }
-            else if (IsRightTop(minAnchor, maxAnchor))
+
+            if (IsRightTop(minAnchor, maxAnchor))
             {
                 chartX = -width;
                 chartY = -height;
                 return s_Vector1And1;
             }
-            else if (IsRightCenter(minAnchor, maxAnchor))
+
+            if (IsRightCenter(minAnchor, maxAnchor))
             {
                 chartX = -width;
                 chartY = -height / 2;
                 return s_Vector1And0Dot5;
             }
-            else if (IsRightBottom(minAnchor, maxAnchor))
+
+            if (IsRightBottom(minAnchor, maxAnchor))
             {
                 chartX = -width;
                 chartY = 0;
                 return s_Vector1And0;
             }
-            else if (IsStretchTop(minAnchor, maxAnchor))
+
+            if (IsStretchTop(minAnchor, maxAnchor))
             {
                 chartX = -width / 2;
                 chartY = -height;
                 return s_Vector0Dot5And1;
             }
-            else if (IsStretchMiddle(minAnchor, maxAnchor))
+
+            if (IsStretchMiddle(minAnchor, maxAnchor))
             {
                 chartX = -width / 2;
                 chartY = -height / 2;
                 return s_Vector0Dot5And0Dot5;
             }
-            else if (IsStretchBottom(minAnchor, maxAnchor))
+
+            if (IsStretchBottom(minAnchor, maxAnchor))
             {
                 chartX = -width / 2;
                 chartY = 0;
                 return s_Vector0Dot5And0;
             }
-            else if (IsStretchLeft(minAnchor, maxAnchor))
+
+            if (IsStretchLeft(minAnchor, maxAnchor))
             {
                 chartX = 0;
                 chartY = -height / 2;
                 return s_Vector0And0Dot5;
             }
-            else if (IsStretchCenter(minAnchor, maxAnchor))
+
+            if (IsStretchCenter(minAnchor, maxAnchor))
             {
                 chartX = -width / 2;
                 chartY = -height / 2;
                 return s_Vector0Dot5And0Dot5;
             }
-            else if (IsStretchRight(minAnchor, maxAnchor))
+
+            if (IsStretchRight(minAnchor, maxAnchor))
             {
                 chartX = -width;
                 chartY = -height / 2;
                 return s_Vector1And0Dot5;
             }
-            else if (IsStretchStrech(minAnchor, maxAnchor))
+
+            if (IsStretchStrech(minAnchor, maxAnchor))
             {
                 chartX = -width / 2;
                 chartY = -height / 2;
                 return s_Vector0Dot5And0Dot5;
             }
+
             chartX = 0;
             chartY = 0;
             return Vector2.zero;
@@ -201,26 +217,25 @@ namespace XCharts.Runtime
         public static bool IsStretchPivot(RectTransform rt)
         {
             return IsStretchTop(rt.anchorMin, rt.anchorMax) ||
-                IsStretchMiddle(rt.anchorMin, rt.anchorMax) ||
-                IsStretchBottom(rt.anchorMin, rt.anchorMax) ||
-                IsStretchLeft(rt.anchorMin, rt.anchorMax) ||
-                IsStretchCenter(rt.anchorMin, rt.anchorMax) ||
-                IsStretchRight(rt.anchorMin, rt.anchorMax) ||
-                IsStretchStrech(rt.anchorMin, rt.anchorMax);
+                   IsStretchMiddle(rt.anchorMin, rt.anchorMax) ||
+                   IsStretchBottom(rt.anchorMin, rt.anchorMax) ||
+                   IsStretchLeft(rt.anchorMin, rt.anchorMax) ||
+                   IsStretchCenter(rt.anchorMin, rt.anchorMax) ||
+                   IsStretchRight(rt.anchorMin, rt.anchorMax) ||
+                   IsStretchStrech(rt.anchorMin, rt.anchorMax);
         }
 
         public static bool IsFixedWidthHeight(RectTransform rt)
         {
             return IsLeftTop(rt.anchorMin, rt.anchorMax) ||
-                IsLeftCenter(rt.anchorMin, rt.anchorMax) ||
-                IsLeftBottom(rt.anchorMin, rt.anchorMax) ||
-                IsCenterTop(rt.anchorMin, rt.anchorMax) ||
-                IsCenterCenter(rt.anchorMin, rt.anchorMax) ||
-                IsCenterBottom(rt.anchorMin, rt.anchorMax) ||
-                IsRightTop(rt.anchorMin, rt.anchorMax) ||
-                IsRightCenter(rt.anchorMin, rt.anchorMax) ||
-                IsRightBottom(rt.anchorMin, rt.anchorMax);
+                   IsLeftCenter(rt.anchorMin, rt.anchorMax) ||
+                   IsLeftBottom(rt.anchorMin, rt.anchorMax) ||
+                   IsCenterTop(rt.anchorMin, rt.anchorMax) ||
+                   IsCenterCenter(rt.anchorMin, rt.anchorMax) ||
+                   IsCenterBottom(rt.anchorMin, rt.anchorMax) ||
+                   IsRightTop(rt.anchorMin, rt.anchorMax) ||
+                   IsRightCenter(rt.anchorMin, rt.anchorMax) ||
+                   IsRightBottom(rt.anchorMin, rt.anchorMax);
         }
-
     }
 }

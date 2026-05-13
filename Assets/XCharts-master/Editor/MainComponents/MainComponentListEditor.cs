@@ -10,21 +10,22 @@ namespace XCharts.Editor
 {
     public sealed class MainComponentListEditor
     {
-        public BaseChart chart { get; private set; }
-        BaseChartEditor m_BaseEditor;
+        private readonly BaseChartEditor m_BaseEditor;
 
         //SerializedObject m_SerializedObject;
-        List<SerializedProperty> m_ComponentsProperty;
-        SerializedProperty m_EnableProperty;
+        private List<SerializedProperty> m_ComponentsProperty;
+        private List<MainComponentBaseEditor> m_Editors;
 
-        Dictionary<Type, Type> m_EditorTypes;
-        List<MainComponentBaseEditor> m_Editors;
+        private Dictionary<Type, Type> m_EditorTypes;
+        private SerializedProperty m_EnableProperty;
 
         public MainComponentListEditor(BaseChartEditor editor)
         {
             Assert.IsNotNull(editor);
             m_BaseEditor = editor;
         }
+
+        public BaseChart chart { get; private set; }
 
         public void Init(BaseChart chart, SerializedObject serializedObject, List<SerializedProperty> componentProps)
         {
@@ -72,51 +73,52 @@ namespace XCharts.Editor
             if (chart == null)
                 return;
 
-            for (int i = 0; i < m_Editors.Count; i++)
+            for (var i = 0; i < m_Editors.Count; i++)
             {
                 var editor = m_Editors[i];
-                string title = editor.GetDisplayTitle();
-                int id = i;
+                var title = editor.GetDisplayTitle();
+                var id = i;
 
-                bool displayContent = ChartEditorHelper.DrawHeader(
+                var displayContent = ChartEditorHelper.DrawHeader(
                     title,
                     editor.baseProperty,
                     editor.showProperty,
-                    () => { if (EditorUtility.DisplayDialog("", "Sure reset " + editor.component.GetType().Name + "?", "Yes", "Cancel")) ResetComponentEditor(id); },
-                    () => { if (EditorUtility.DisplayDialog("", "Sure remove " + editor.component.GetType().Name + "?", "Yes", "Cancel")) RemoveComponentEditor(id); },
-                    () => { Application.OpenURL("https://xcharts-team.github.io/docs/configuration/#" + editor.component.GetType().Name.ToLower()); }
+                    () =>
+                    {
+                        if (EditorUtility.DisplayDialog("", "Sure reset " + editor.component.GetType().Name + "?",
+                                "Yes", "Cancel")) ResetComponentEditor(id);
+                    },
+                    () =>
+                    {
+                        if (EditorUtility.DisplayDialog("", "Sure remove " + editor.component.GetType().Name + "?",
+                                "Yes", "Cancel")) RemoveComponentEditor(id);
+                    },
+                    () =>
+                    {
+                        Application.OpenURL("https://xcharts-team.github.io/docs/configuration/#" +
+                                            editor.component.GetType().Name.ToLower());
+                    }
                 );
-                if (displayContent)
-                {
-                    editor.OnInternalInspectorGUI();
-                }
+                if (displayContent) editor.OnInternalInspectorGUI();
             }
 
-            if (m_Editors.Count == 0)
-            {
-                EditorGUILayout.HelpBox("No componnet.", MessageType.Info);
-            }
+            if (m_Editors.Count == 0) EditorGUILayout.HelpBox("No componnet.", MessageType.Info);
         }
 
-        void RefreshEditors()
+        private void RefreshEditors()
         {
             foreach (var editor in m_Editors)
                 editor.OnDisable();
 
             m_Editors.Clear();
             var count = Mathf.Min(chart.components.Count, m_ComponentsProperty.Count);
-            for (int i = 0; i < count; i++)
-            {
+            for (var i = 0; i < count; i++)
                 if (chart.components[i] != null)
-                {
                     CreateEditor(chart.components[i], m_ComponentsProperty[i]);
-                }
-            }
         }
 
-        void CreateEditor(MainComponent component, SerializedProperty property, int index = -1)
+        private void CreateEditor(MainComponent component, SerializedProperty property, int index = -1)
         {
-
             var settingsType = component.GetType();
             Type editorType;
 
@@ -139,20 +141,15 @@ namespace XCharts.Editor
                 if (component is YAxis)
                 {
                     var yAxis = component as YAxis;
-                    if (yAxis.index == 1)
-                    {
-                        yAxis.position = Axis.AxisPosition.Right;
-                    }
+                    if (yAxis.index == 1) yAxis.position = Axis.AxisPosition.Right;
                 }
                 else if (component is XAxis)
                 {
                     var xAxis = component as XAxis;
-                    if (xAxis.index == 1)
-                    {
-                        xAxis.position = Axis.AxisPosition.Top;
-                    }
+                    if (xAxis.index == 1) xAxis.position = Axis.AxisPosition.Top;
                 }
             }
+
             m_ComponentsProperty = m_BaseEditor.RefreshComponent();
             RefreshEditors();
             EditorUtility.SetDirty(chart);

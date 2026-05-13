@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using XCharts.Runtime;
@@ -9,18 +10,22 @@ namespace XCharts.Editor
     {
         internal class Styles
         {
-            public static readonly GUIContent defaultFontAssetLabel = new GUIContent("Default Font Asset", "The Font Asset that will be assigned by default to newly created text objects when no Font Asset is specified.");
-            public static readonly GUIContent defaultFontAssetPathLabel = new GUIContent("Path:        Resources/", "The relative path to a Resources folder where the Font Assets and Material Presets are located.\nExample \"Fonts & Materials/\"");
+            public static readonly GUIContent defaultFontAssetLabel = new("Default Font Asset",
+                "The Font Asset that will be assigned by default to newly created text objects when no Font Asset is specified.");
+
+            public static readonly GUIContent defaultFontAssetPathLabel = new("Path:        Resources/",
+                "The relative path to a Resources folder where the Font Assets and Material Presets are located.\nExample \"Fonts & Materials/\"");
         }
     }
 
 #if UNITY_2018_3_OR_NEWER
-    class XCResourceImporterProvider : SettingsProvider
+    internal class XCResourceImporterProvider : SettingsProvider
     {
-        XCResourcesImporter m_ResourceImporter;
+        private XCResourcesImporter m_ResourceImporter;
 
         public XCResourceImporterProvider() : base("Project/XCharts", SettingsScope.Project)
-        { }
+        {
+        }
 
         public override void OnGUI(string searchContext)
         {
@@ -36,15 +41,15 @@ namespace XCharts.Editor
                 m_ResourceImporter.OnDestroy();
         }
 
-        static UnityEngine.Object GetSettings()
+        private static Object GetSettings()
         {
             return Resources.Load<XCSettings>("XCSettings");
         }
 
         [SettingsProviderGroup]
-        static SettingsProvider[] CreateXCSettingsProvider()
+        private static SettingsProvider[] CreateXCSettingsProvider()
         {
-            var providers = new System.Collections.Generic.List<SettingsProvider> { new XCResourceImporterProvider() };
+            var providers = new List<SettingsProvider> { new XCResourceImporterProvider() };
             if (GetSettings() != null)
             {
                 var provider = new AssetSettingsProvider("Project/XCharts/Settings", GetSettings);

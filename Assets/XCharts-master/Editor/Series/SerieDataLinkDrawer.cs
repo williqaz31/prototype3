@@ -7,7 +7,8 @@ namespace XCharts.Editor
     [CustomPropertyDrawer(typeof(SerieDataLink), true)]
     public class SerieDataLinkDrawer : BasePropertyDrawer
     {
-        public override string ClassName { get { return "Link"; } }
+        public override string ClassName => "Link";
+
         public override void OnGUI(Rect pos, SerializedProperty prop, GUIContent label)
         {
             base.OnGUI(pos, prop, label);

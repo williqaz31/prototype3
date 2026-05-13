@@ -10,7 +10,8 @@ namespace XCharts.Example
     {
         private RadarChart chart;
         private Serie serie, serie1;
-        void Awake()
+
+        private void Awake()
         {
             LoopDemo();
         }
@@ -20,13 +21,13 @@ namespace XCharts.Example
             LoopDemo();
         }
 
-        void LoopDemo()
+        private void LoopDemo()
         {
             StopAllCoroutines();
             StartCoroutine(RadarDemo());
         }
 
-        IEnumerator RadarDemo()
+        private IEnumerator RadarDemo()
         {
             StartCoroutine(RadarAdd());
             yield return new WaitForSeconds(2);
@@ -37,7 +38,7 @@ namespace XCharts.Example
             LoopDemo();
         }
 
-        IEnumerator RadarAdd()
+        private IEnumerator RadarAdd()
         {
             chart = gameObject.GetComponent<RadarChart>();
             if (chart == null)
@@ -80,7 +81,7 @@ namespace XCharts.Example
             yield return new WaitForSeconds(1);
         }
 
-        IEnumerator RadarUpdate()
+        private IEnumerator RadarUpdate()
         {
             var radarCoord = chart.GetChartComponent<RadarCoord>();
             radarCoord.UpdateIndicator(0, "new1", 0, 100);
@@ -89,7 +90,7 @@ namespace XCharts.Example
             yield return new WaitForSeconds(1);
         }
 
-        IEnumerator RadarAddMultiple()
+        private IEnumerator RadarAddMultiple()
         {
             chart.RemoveChartComponents<RadarCoord>();
             chart.RemoveData();
@@ -111,20 +112,14 @@ namespace XCharts.Example
             radarCoord.center[0] = 0.25f;
             radarCoord.center[1] = 0.4f;
             radarCoord.radius = 0.25f;
-            for (int i = 1; i <= 5; i++)
-            {
-                radarCoord.AddIndicator("radar1" + i, 0, 100);
-            }
+            for (var i = 1; i <= 5; i++) radarCoord.AddIndicator("radar1" + i, 0, 100);
 
             var radarCoord2 = chart.AddChartComponent<RadarCoord>();
             radarCoord2.shape = RadarCoord.Shape.Polygon;
             radarCoord2.center[0] = 0.75f;
             radarCoord2.center[1] = 0.4f;
             radarCoord2.radius = 0.25f;
-            for (int i = 1; i <= 5; i++)
-            {
-                radarCoord2.AddIndicator("radar2" + i, 0, 100);
-            }
+            for (var i = 1; i <= 5; i++) radarCoord2.AddIndicator("radar2" + i, 0, 100);
 
             serie = chart.AddSerie<Radar>("test1");
             serie.radarIndex = 0;

@@ -7,14 +7,14 @@ using UnityEngine;
 
 namespace XCharts.Runtime
 {
-    [System.Serializable]
+    [Serializable]
     public class XCResourcesImporter
     {
-        bool m_EssentialResourcesImported;
+        private bool m_EssentialResourcesImported;
 
-        public XCResourcesImporter() { }
-
-        public void OnDestroy() { }
+        public void OnDestroy()
+        {
+        }
 
         public void OnGUI()
         {
@@ -25,14 +25,16 @@ namespace XCharts.Runtime
                 GUILayout.BeginVertical(EditorStyles.helpBox);
                 {
                     GUILayout.Label("XCharts Essentials", EditorStyles.boldLabel);
-                    GUILayout.Label("This appears to be the first time you access XCharts, as such we need to add resources to your project that are essential for using XCharts. These new resources will be placed at the root of your project in the \"XCharts\" folder.", new GUIStyle(EditorStyles.label) { wordWrap = true });
+                    GUILayout.Label(
+                        "This appears to be the first time you access XCharts, as such we need to add resources to your project that are essential for using XCharts. These new resources will be placed at the root of your project in the \"XCharts\" folder.",
+                        new GUIStyle(EditorStyles.label) { wordWrap = true });
                     GUILayout.Space(5f);
 
                     GUI.enabled = !m_EssentialResourcesImported;
                     GUI.enabled = true;
                     if (GUILayout.Button("Import XCharts Essentials"))
                     {
-                        string packageFullPath = XChartsMgr.GetPackageFullPath();
+                        var packageFullPath = XChartsMgr.GetPackageFullPath();
                         if (packageFullPath != null)
                         {
                             var sourPath = Path.Combine(packageFullPath, "Resources");
@@ -44,6 +46,7 @@ namespace XCharts.Runtime
                             }
                         }
                     }
+
                     GUILayout.Space(5f);
                     GUI.enabled = true;
                 }
@@ -57,10 +60,7 @@ namespace XCharts.Runtime
         {
             try
             {
-                if (!Directory.Exists(destPath))
-                {
-                    Directory.CreateDirectory(destPath);
-                }
+                if (!Directory.Exists(destPath)) Directory.CreateDirectory(destPath);
                 var files = Directory.GetFiles(sourPath);
                 foreach (var file in files)
                 {
@@ -68,6 +68,7 @@ namespace XCharts.Runtime
                     var path = Path.Combine(destPath, name);
                     File.Copy(file, path);
                 }
+
                 var folders = Directory.GetDirectories(sourPath);
                 foreach (var folder in folders)
                 {
@@ -75,6 +76,7 @@ namespace XCharts.Runtime
                     var path = Path.Combine(destPath, name);
                     CopyFolder(folder, path);
                 }
+
                 return true;
             }
             catch (Exception e)
@@ -90,10 +92,9 @@ namespace XCharts.Runtime
         }
 
         /// <summary>
-        ///
         /// </summary>
         /// <param name="packageName"></param>
-        void ImportCallback(string packageName)
+        private void ImportCallback(string packageName)
         {
             if (packageName == "XCharts Essential Resources")
             {
@@ -102,17 +103,40 @@ namespace XCharts.Runtime
                 SettingsService.NotifySettingsProviderChanged();
 #endif
             }
+
             Debug.Log("[" + packageName + "] have been imported.");
 
             AssetDatabase.importPackageCompleted -= ImportCallback;
         }
     }
 
-    public class XCResourceImporterWindow : UnityEditor.EditorWindow
+    public class XCResourceImporterWindow : EditorWindow
     {
-        [SerializeField] XCResourcesImporter m_ResourceImporter;
+        private static XCResourceImporterWindow m_ImporterWindow;
+        [SerializeField] private XCResourcesImporter m_ResourceImporter;
 
-        static XCResourceImporterWindow m_ImporterWindow;
+        private void OnEnable()
+        {
+            SetEditorWindowSize();
+
+            if (m_ResourceImporter == null)
+                m_ResourceImporter = new XCResourcesImporter();
+        }
+
+        private void OnDestroy()
+        {
+            m_ResourceImporter.OnDestroy();
+        }
+
+        private void OnGUI()
+        {
+            m_ResourceImporter.OnGUI();
+        }
+
+        private void OnInspectorUpdate()
+        {
+            Repaint();
+        }
 
         public static void ShowPackageImporterWindow()
         {
@@ -124,41 +148,20 @@ namespace XCharts.Runtime
                     m_ImporterWindow = GetWindow<XCResourceImporterWindow>();
                     m_ImporterWindow.titleContent = new GUIContent("XCharts Importer");
                 }
+
                 m_ImporterWindow.Focus();
             }
         }
 
-        void OnEnable()
-        {
-            SetEditorWindowSize();
-
-            if (m_ResourceImporter == null)
-                m_ResourceImporter = new XCResourcesImporter();
-        }
-
-        void OnDestroy()
-        {
-            m_ResourceImporter.OnDestroy();
-        }
-
-        void OnGUI()
-        {
-            m_ResourceImporter.OnGUI();
-        }
-
-        void OnInspectorUpdate()
-        {
-            Repaint();
-        }
-
         /// <summary>
-        /// Limits the minimum size of the editor window.
-        /// ||</summary>
-        void SetEditorWindowSize()
+        ///     Limits the minimum size of the editor window.
+        ///     ||
+        /// </summary>
+        private void SetEditorWindowSize()
         {
             EditorWindow editorWindow = this;
 
-            Vector2 windowSize = new Vector2(640, 210);
+            var windowSize = new Vector2(640, 210);
             editorWindow.minSize = windowSize;
             editorWindow.maxSize = windowSize;
         }

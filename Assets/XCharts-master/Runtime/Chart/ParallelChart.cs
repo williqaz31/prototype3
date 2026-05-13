@@ -4,8 +4,8 @@ using UnityEngine;
 namespace XCharts.Runtime
 {
     /// <summary>
-    /// Parallel Coordinates is a common way of visualizing high-dimensional geometry and analyzing multivariate data.
-    /// || 平行坐标系，通过绘制垂直于坐标轴的平行线来显示数据的一种可视化图表。
+    ///     Parallel Coordinates is a common way of visualizing high-dimensional geometry and analyzing multivariate data.
+    ///     || 平行坐标系，通过绘制垂直于坐标轴的平行线来显示数据的一种可视化图表。
     /// </summary>
     [AddComponentMenu("XCharts/ParallelChart", 25)]
     [ExecuteInEditMode]
@@ -19,15 +19,16 @@ namespace XCharts.Runtime
             RemoveData();
             AddChartComponent<ParallelCoord>();
 
-            for (int i = 0; i < 3; i++)
+            for (var i = 0; i < 3; i++)
             {
                 var valueAxis = AddChartComponent<ParallelAxis>();
                 valueAxis.type = Axis.AxisType.Value;
             }
+
             var categoryAxis = AddChartComponent<ParallelAxis>();
             categoryAxis.type = Axis.AxisType.Category;
             categoryAxis.position = Axis.AxisPosition.Right;
-            categoryAxis.data = new List<string>() { "x1", "x2", "x3", "x4", "x5" };
+            categoryAxis.data = new List<string> { "x1", "x2", "x3", "x4", "x5" };
 
             Parallel.AddDefaultSerie(this, GenerateDefaultSerieName());
         }

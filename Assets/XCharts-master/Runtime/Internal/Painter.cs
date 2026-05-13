@@ -13,14 +13,34 @@ namespace XCharts.Runtime
             Serie,
             Top
         }
-        protected int m_Index = -1;
-        protected Type m_Type = Type.Base;
-        protected bool m_Refresh;
-        protected Action<VertexHelper, Painter> m_OnPopulateMesh;
 
-        public Action<VertexHelper, Painter> onPopulateMesh { set { m_OnPopulateMesh = value; } }
-        public int index { get { return m_Index; } set { m_Index = value; } }
-        public Type type { get { return m_Type; } set { m_Type = value; } }
+        protected int m_Index = -1;
+        protected Action<VertexHelper, Painter> m_OnPopulateMesh;
+        protected bool m_Refresh;
+        protected Type m_Type = Type.Base;
+
+        public Action<VertexHelper, Painter> onPopulateMesh
+        {
+            set => m_OnPopulateMesh = value;
+        }
+
+        public int index
+        {
+            get => m_Index;
+            set => m_Index = value;
+        }
+
+        public Type type
+        {
+            get => m_Type;
+            set => m_Type = value;
+        }
+
+        protected override void Awake()
+        {
+            Init();
+        }
+
         public void Refresh()
         {
             if (null == this || gameObject == null) return;
@@ -35,20 +55,9 @@ namespace XCharts.Runtime
 
         public void SetActive(bool flag, bool isDebugMode = false)
         {
-            if (gameObject.activeInHierarchy != flag)
-            {
-                gameObject.SetActive(flag);
-            }
+            if (gameObject.activeInHierarchy != flag) gameObject.SetActive(flag);
             var hideFlags = flag && isDebugMode ? HideFlags.None : HideFlags.HideInHierarchy;
-            if (gameObject.hideFlags != hideFlags)
-            {
-                gameObject.hideFlags = hideFlags;
-            }
-        }
-
-        protected override void Awake()
-        {
-            Init();
+            if (gameObject.hideFlags != hideFlags) gameObject.hideFlags = hideFlags;
         }
 
         public void CheckRefresh()
@@ -63,10 +72,7 @@ namespace XCharts.Runtime
         protected override void OnPopulateMesh(VertexHelper vh)
         {
             vh.Clear();
-            if (m_OnPopulateMesh != null)
-            {
-                m_OnPopulateMesh(vh, this);
-            }
+            if (m_OnPopulateMesh != null) m_OnPopulateMesh(vh, this);
         }
     }
 }

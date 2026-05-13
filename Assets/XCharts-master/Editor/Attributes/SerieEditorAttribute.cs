@@ -2,7 +2,7 @@ using System;
 
 namespace XCharts.Editor
 {
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Class)]
     public sealed class SerieEditorAttribute : Attribute
     {
         public readonly Type serieType;

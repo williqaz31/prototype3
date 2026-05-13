@@ -2,40 +2,31 @@ using System.Collections;
 using System.Collections.Generic;
 using SimulationFourmiliere;
 using UnityEngine;
-using UnityEngine.Tilemaps;
 
 public class ForagerManager : MonoBehaviour
 {
     public AntManager antManager;
     public MapLoader mapLoader;
-    public SimulationState simulation { get; private set; }
 
-    [Header("Forager Settings")]
-    public float forageReturnDelay = 3f;
+    [Header("Forager Settings")] public float forageReturnDelay = 3f;
+
     public int minFood = 2;
     public int maxFood = 6;
-    public float distributeRange = 1.5f;   // world units to check for hungry ants
+    public float distributeRange = 1.5f; // world units to check for hungry ants
     public float moveInterval = 0.2f;
 
     // How many ants should be foragers based on food stock
     public int targetForagerCount = 2;
+    private readonly Dictionary<int, int> foodCarried = new();
+    private readonly Dictionary<int, float> moveTimers = new();
+    private readonly Dictionary<int, Queue<Vector2Int>> paths = new();
+    private readonly Dictionary<int, float> returnTimers = new();
 
     // Per-forager state
-    private Dictionary<int, ForagerState> states = new();
-    private Dictionary<int, int> foodCarried = new();
-    private Dictionary<int, float> returnTimers = new();
-    private Dictionary<int, Queue<Vector2Int>> paths = new();
-    private Dictionary<int, float> moveTimers = new();
+    private readonly Dictionary<int, ForagerState> states = new();
+    public SimulationState simulation { get; private set; }
 
-    private enum ForagerState
-    {
-        WalkingToExit,
-        Outside,
-        ReturningToColony,
-        Distributing
-    }
-
-    IEnumerator Start()
+    private IEnumerator Start()
     {
         Debug.Log("ForagerManager Start");
 
@@ -50,27 +41,22 @@ public class ForagerManager : MonoBehaviour
         Debug.Log("ForagerManager linked simulation OK");
     }
 
-    void Update()
+    private void Update()
     {
         if (simulation == null)
             simulation = antManager.simulation;
 
         if (antManager == null || antManager.simulation == null)
-        {
             //Debug.Log("Waiting for AntManager simulation...");
             return;
-        }
 
         SyncForagerCount();
         UpdateForagers();
 
-        if (Time.frameCount % 60 == 0)
-        {
-            LogForagerStatus();
-        }
+        if (Time.frameCount % 60 == 0) LogForagerStatus();
     }
 
-    void SyncForagerCount()
+    private void SyncForagerCount()
     {
         if (antManager == null || simulation == null)
         {
@@ -79,8 +65,8 @@ public class ForagerManager : MonoBehaviour
         }
 
         // Decide how many foragers needed based on food stock vs colony size
-        int pop = simulation.Colonie.Pop();
-        int stock = simulation.StockNourriture;
+        var pop = simulation.Colonie.Pop();
+        var stock = simulation.StockNourriture;
 
         // If food is low relative to colony, push more foragers
         if (stock < pop)
@@ -91,20 +77,19 @@ public class ForagerManager : MonoBehaviour
             targetForagerCount = Mathf.Max(1, pop / 5);
 
         // Count current foragers
-        int currentForagers = 0;
-        foreach (int id in antManager.antIds)
+        var currentForagers = 0;
+        foreach (var id in antManager.antIds)
             if (antManager.roles.TryGetValue(id, out var r) && r == AntManager.AntRole.Forager)
                 currentForagers++;
 
         // Promote idle miners to foragers if needed
         if (currentForagers < targetForagerCount)
-        {
-            foreach (int id in antManager.antIds)
+            foreach (var id in antManager.antIds)
             {
                 if (currentForagers >= targetForagerCount) break;
 
-                bool isForager = antManager.roles.TryGetValue(id, out var r)
-                                 && r == AntManager.AntRole.Forager;
+                var isForager = antManager.roles.TryGetValue(id, out var r)
+                                && r == AntManager.AntRole.Forager;
                 if (isForager) continue;
 
                 // Only pull idle ants
@@ -115,12 +100,10 @@ public class ForagerManager : MonoBehaviour
                 PromoteToForager(id);
                 currentForagers++;
             }
-        }
 
         // Demote excess foragers that are idle back to miners
         if (currentForagers > targetForagerCount)
-        {
-            foreach (int id in antManager.antIds)
+            foreach (var id in antManager.antIds)
             {
                 if (currentForagers <= targetForagerCount) break;
 
@@ -129,17 +112,16 @@ public class ForagerManager : MonoBehaviour
 
                 // Only demote if currently outside or just returned with no food
                 if (states.TryGetValue(id, out var fs) && fs == ForagerState.Outside) continue;
-                if (foodCarried.TryGetValue(id, out int f) && f > 0) continue;
+                if (foodCarried.TryGetValue(id, out var f) && f > 0) continue;
 
                 DemoteToMiner(id);
                 currentForagers--;
             }
-        }
 
         //Debug.Log($"Population={pop}, Food={stock}, TargetForagers={targetForagerCount}");
     }
 
-    void PromoteToForager(int id)
+    private void PromoteToForager(int id)
     {
         antManager.roles[id] = AntManager.AntRole.Forager;
 
@@ -157,7 +139,7 @@ public class ForagerManager : MonoBehaviour
         //Debug.Log($"Ant {id} promoted to Forager");
     }
 
-    void DemoteToMiner(int id)
+    private void DemoteToMiner(int id)
     {
         antManager.roles[id] = AntManager.AntRole.Miner;
         states.Remove(id);
@@ -167,11 +149,11 @@ public class ForagerManager : MonoBehaviour
         moveTimers.Remove(id);
     }
 
-    void UpdateForagers()
+    private void UpdateForagers()
     {
         var toRemove = new List<int>();
 
-        foreach (int id in antManager.antIds)
+        foreach (var id in antManager.antIds)
         {
             if (!antManager.roles.TryGetValue(id, out var role)
                 || role != AntManager.AntRole.Forager) continue;
@@ -194,7 +176,7 @@ public class ForagerManager : MonoBehaviour
 
                     if (returnTimers[id] <= 0f)
                     {
-                        int food = Random.Range(minFood, maxFood + 1);
+                        var food = Random.Range(minFood, maxFood + 1);
                         foodCarried[id] = food;
 
                         antManager.SetCarrying(id, true, food);
@@ -205,6 +187,7 @@ public class ForagerManager : MonoBehaviour
                         states[id] = ForagerState.ReturningToColony;
                         SendToQueen(id);
                     }
+
                     break;
 
                 case ForagerState.ReturningToColony:
@@ -213,6 +196,7 @@ public class ForagerManager : MonoBehaviour
                         SendToQueen(id);
                         return;
                     }
+
                     MoveAlongPath(id);
                     CheckReachedQueen(id);
                     break;
@@ -224,7 +208,7 @@ public class ForagerManager : MonoBehaviour
         }
     }
 
-    void MoveAlongPath(int id)
+    private void MoveAlongPath(int id)
     {
         if (!paths.ContainsKey(id)) return;
 
@@ -235,12 +219,12 @@ public class ForagerManager : MonoBehaviour
         var path = paths[id];
         if (path.Count == 0) return;
 
-        Vector2Int next = path.Dequeue();
+        var next = path.Dequeue();
         antManager.ants[id] = next;
         antManager.DrawAnts();
     }
 
-    void CheckReachedExit(int id)
+    private void CheckReachedExit(int id)
     {
         if (!paths.ContainsKey(id) || paths[id].Count > 0) return;
 
@@ -256,20 +240,20 @@ public class ForagerManager : MonoBehaviour
         //Debug.Log($"Forager {id} left colony (hidden)");
     }
 
-    void CheckReachedQueen(int id)
+    private void CheckReachedQueen(int id)
     {
         if (!paths.ContainsKey(id) || paths[id].Count > 0) return;
 
         states[id] = ForagerState.Distributing;
     }
 
-    void DistributeFood(int id)
+    private void DistributeFood(int id)
     {
         if (!foodCarried.ContainsKey(id) || foodCarried[id] <= 0)
         {
             antManager.SetCarrying(id, false, 0);
             foodCarried[id] = 0;
-            // Out of food — go forage again
+            // Out of food ï¿½ go forage again
             states[id] = ForagerState.WalkingToExit;
             SendToExit(id);
             antManager.DrawAnts();
@@ -277,17 +261,17 @@ public class ForagerManager : MonoBehaviour
         }
 
         // Find nearest hungry ant within range
-        Vector2Int myPos = antManager.ants[id];
-        int bestTarget = -1;
-        float bestDist = float.MaxValue;
+        var myPos = antManager.ants[id];
+        var bestTarget = -1;
+        var bestDist = float.MaxValue;
 
-        foreach (int otherId in antManager.antIds)
+        foreach (var otherId in antManager.antIds)
         {
             if (otherId == id) continue;
             if (!antManager.IsHungry(otherId)) continue;
 
-            Vector2Int otherPos = antManager.ants[otherId];
-            float dist = Vector2Int.Distance(myPos, otherPos);
+            var otherPos = antManager.ants[otherId];
+            var dist = Vector2Int.Distance(myPos, otherPos);
 
             if (dist <= distributeRange && dist < bestDist)
             {
@@ -304,11 +288,11 @@ public class ForagerManager : MonoBehaviour
             return;
         }
 
-        // No hungry ant nearby — walk toward nearest hungry ant or queen
-        int hungryTarget = FindHungriestAnt();
+        // No hungry ant nearby ï¿½ walk toward nearest hungry ant or queen
+        var hungryTarget = FindHungriestAnt();
         if (hungryTarget == -1)
         {
-            // No hungry ants at all — dump food into stock and go forage
+            // No hungry ants at all ï¿½ dump food into stock and go forage
             simulation.StockNourriture += foodCarried[id];
             foodCarried[id] = 0;
             antManager.SetCarrying(id, false, 0);
@@ -320,7 +304,7 @@ public class ForagerManager : MonoBehaviour
         }
 
         // Walk one step toward hungriest ant
-        Vector2Int targetPos = antManager.ants[hungryTarget];
+        var targetPos = antManager.ants[hungryTarget];
         var path = antManager.FindPathPublic(myPos, targetPos);
         if (path != null && path.Count > 0)
         {
@@ -331,7 +315,7 @@ public class ForagerManager : MonoBehaviour
 
     public void ResetForagersToExit()
     {
-        foreach (int id in antManager.antIds)
+        foreach (var id in antManager.antIds)
         {
             if (!antManager.roles.TryGetValue(id, out var role))
                 continue;
@@ -359,38 +343,37 @@ public class ForagerManager : MonoBehaviour
             antManager.DrawAnts();
         }
     }
-    void LogForagerStatus()
-    {
-        int currentForagers = 0;
 
-        foreach (int id in antManager.antIds)
-        {
+    private void LogForagerStatus()
+    {
+        var currentForagers = 0;
+
+        foreach (var id in antManager.antIds)
             if (antManager.roles.TryGetValue(id, out var role) &&
                 role == AntManager.AntRole.Forager)
             {
                 currentForagers++;
 
-                int carried = 0;
+                var carried = 0;
                 if (foodCarried.ContainsKey(id))
                     carried = foodCarried[id];
-
                 //Debug.Log($"Forager {id} | Carrying Food: {carried} | State: {states[id]}");
             }
-        }
 
         //Debug.Log(
         //    $"FOOD STOCK: {simulation.StockNourriture} | " +
         //    $"Foragers: {currentForagers}/{targetForagerCount}"
         //);
     }
-    int FindHungriestAnt()
-    {
-        int best = -1;
-        int bestHunger = 0;
 
-        foreach (int id in antManager.antIds)
+    private int FindHungriestAnt()
+    {
+        var best = -1;
+        var bestHunger = 0;
+
+        foreach (var id in antManager.antIds)
         {
-            if (!antManager.hunger.TryGetValue(id, out int h)) continue;
+            if (!antManager.hunger.TryGetValue(id, out var h)) continue;
             if (h > bestHunger)
             {
                 bestHunger = h;
@@ -401,12 +384,12 @@ public class ForagerManager : MonoBehaviour
         return best;
     }
 
-    void SendToExit(int id)
+    private void SendToExit(int id)
     {
         // Make sure ant is visible and at a valid position first
         antManager.hiddenAnts.Remove(id);
 
-        Vector2Int currentPos = antManager.ants[id];
+        var currentPos = antManager.ants[id];
 
         // If position is invalid (was hidden off-map), snap to queen first
         if (currentPos.x < 0 || currentPos.y < 0 ||
@@ -425,9 +408,9 @@ public class ForagerManager : MonoBehaviour
         paths[id] = new Queue<Vector2Int>(path);
     }
 
-    void SendToQueen(int id)
+    private void SendToQueen(int id)
     {
-        Vector2Int currentPos = antManager.ants[id];
+        var currentPos = antManager.ants[id];
 
         var path = antManager.FindPathPublic(
             currentPos,
@@ -436,7 +419,7 @@ public class ForagerManager : MonoBehaviour
 
         if (path == null || path.Count == 0)
         {
-            Debug.LogWarning($"Forager {id} failed to path to queen — resetting");
+            Debug.LogWarning($"Forager {id} failed to path to queen ï¿½ resetting");
             ResetSingleForagerToExit(id);
             return;
         }
@@ -444,7 +427,7 @@ public class ForagerManager : MonoBehaviour
         paths[id] = new Queue<Vector2Int>(path);
     }
 
-    void ResetSingleForagerToExit(int id)
+    private void ResetSingleForagerToExit(int id)
     {
         var exit = FindExitTile();
         if (exit == null) return;
@@ -460,27 +443,27 @@ public class ForagerManager : MonoBehaviour
         antManager.hiddenAnts.Remove(id);
     }
 
-    Vector2Int? FindExitTile()
+    private Vector2Int? FindExitTile()
     {
         var mapData = mapLoader.GetMapData();
 
-        for (int y = 0; y < mapLoader.Rows; y++)
-            for (int x = 0; x < mapLoader.Cols; x++)
-                if (mapData[y, x] == '4')
-                    return new Vector2Int(x, y);
+        for (var y = 0; y < mapLoader.Rows; y++)
+        for (var x = 0; x < mapLoader.Cols; x++)
+            if (mapData[y, x] == '4')
+                return new Vector2Int(x, y);
 
         return null;
     }
 
     public void ResetBrokenForagersOnly()
     {
-        foreach (int id in antManager.antIds)
+        foreach (var id in antManager.antIds)
         {
             if (!antManager.roles.TryGetValue(id, out var role) ||
                 role != AntManager.AntRole.Forager)
                 continue;
 
-            Vector2Int pos = antManager.ants[id];
+            var pos = antManager.ants[id];
 
             // Only reset if OUTSIDE map or stuck in invalid tile
             if (pos.x < 0 || pos.y < 0 ||
@@ -491,11 +474,17 @@ public class ForagerManager : MonoBehaviour
             }
 
             // Optional: also reset if inside a wall
-            char tile = mapLoader.GetMapData()[pos.y, pos.x];
+            var tile = mapLoader.GetMapData()[pos.y, pos.x];
             if (tile == '1') // wall
-            {
                 ResetSingleForagerToExit(id);
-            }
         }
+    }
+
+    private enum ForagerState
+    {
+        WalkingToExit,
+        Outside,
+        ReturningToColony,
+        Distributing
     }
 }

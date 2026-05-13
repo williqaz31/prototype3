@@ -12,19 +12,19 @@ namespace XCharts.Runtime
         private const string NUMERIC_FORMATTER_X = "X";
         private const string NUMERIC_FORMATTER_x = "x";
         private static readonly string s_DefaultAxis = "axis_";
-        private static CultureInfo ci = GetDefaultCultureInfo(); // "en-us", "zh-cn", "ar-iq", "de-de"
-        private static Dictionary<Color, string> s_ColorToStr = new Dictionary<Color, string>(100);
-        private static Dictionary<int, string> s_SerieLabelName = new Dictionary<int, string>(1000);
-        private static Dictionary<Color, string> s_ColorDotStr = new Dictionary<Color, string>(100);
-        private static Dictionary<Type, Dictionary<int, string>> s_ComponentObjectName = new Dictionary<Type, Dictionary<int, string>>();
-        private static Dictionary<int, string> s_AxisLabelName = new Dictionary<int, string>();
-        private static Dictionary<Type, string> s_TypeName = new Dictionary<Type, string>();
+        private static readonly CultureInfo ci = GetDefaultCultureInfo(); // "en-us", "zh-cn", "ar-iq", "de-de"
+        private static readonly Dictionary<Color, string> s_ColorToStr = new(100);
+        private static readonly Dictionary<int, string> s_SerieLabelName = new(1000);
+        private static readonly Dictionary<Color, string> s_ColorDotStr = new(100);
+        private static readonly Dictionary<Type, Dictionary<int, string>> s_ComponentObjectName = new();
+        private static readonly Dictionary<int, string> s_AxisLabelName = new();
+        private static readonly Dictionary<Type, string> s_TypeName = new();
 
-        private static Dictionary<double, Dictionary<string, string>> s_NumberToStr = new Dictionary<double, Dictionary<string, string>>();
-        private static Dictionary<int, Dictionary<string, string>> s_PrecisionToStr = new Dictionary<int, Dictionary<string, string>>();
-        private static Dictionary<string, Dictionary<int, string>> s_StringIntDict = new Dictionary<string, Dictionary<int, string>>();
-        private static Dictionary<double, DateTime> s_TimestampToDateTimeDict = new Dictionary<double, DateTime>();
-        private static Dictionary<double, TimeSpan> s_NumberToTimeSpanDict = new Dictionary<double, TimeSpan>();
+        private static readonly Dictionary<double, Dictionary<string, string>> s_NumberToStr = new();
+        private static readonly Dictionary<int, Dictionary<string, string>> s_PrecisionToStr = new();
+        private static readonly Dictionary<string, Dictionary<int, string>> s_StringIntDict = new();
+        private static readonly Dictionary<double, DateTime> s_TimestampToDateTimeDict = new();
+        private static readonly Dictionary<double, TimeSpan> s_NumberToTimeSpanDict = new();
 
         private static CultureInfo GetDefaultCultureInfo()
         {
@@ -43,47 +43,38 @@ namespace XCharts.Runtime
             if (precision > 0 && numericFormatter.Length == 1)
             {
                 if (!s_PrecisionToStr.ContainsKey(precision))
-                {
                     s_PrecisionToStr[precision] = new Dictionary<string, string>();
-                }
                 if (!s_PrecisionToStr[precision].ContainsKey(numericFormatter))
-                {
                     s_PrecisionToStr[precision][numericFormatter] = numericFormatter + precision;
-                }
                 return NumberToStr(value, s_PrecisionToStr[precision][numericFormatter]);
             }
-            else
-            {
-                return NumberToStr(value, numericFormatter);
-            }
+
+            return NumberToStr(value, numericFormatter);
         }
 
         public static string NumberToStr(double value, string formatter)
         {
-            if (!s_NumberToStr.ContainsKey(value))
-            {
-                s_NumberToStr[value] = new Dictionary<string, string>();
-            }
+            if (!s_NumberToStr.ContainsKey(value)) s_NumberToStr[value] = new Dictionary<string, string>();
             if (!s_NumberToStr[value].ContainsKey(formatter))
             {
-                bool isDateFormatter = false;
+                var isDateFormatter = false;
                 string newFormatter = null;
                 if (string.IsNullOrEmpty(formatter))
                 {
                     s_NumberToStr[value][formatter] = value.ToString();
                 }
-                else if (DateTimeUtil.IsDateOrTimeRegex(formatter,ref isDateFormatter, ref newFormatter))
+                else if (DateTimeUtil.IsDateOrTimeRegex(formatter, ref isDateFormatter, ref newFormatter))
                 {
-                    if(isDateFormatter)
+                    if (isDateFormatter)
                         s_NumberToStr[value][formatter] = NumberToDateStr(value, newFormatter);
                     else
-                        s_NumberToStr[value][formatter] = NumberToTimeStr(value, newFormatter);                    
+                        s_NumberToStr[value][formatter] = NumberToTimeStr(value, newFormatter);
                 }
                 else if (formatter.StartsWith(NUMERIC_FORMATTER_D) ||
-                    formatter.StartsWith(NUMERIC_FORMATTER_d) ||
-                    formatter.StartsWith(NUMERIC_FORMATTER_X) ||
-                    formatter.StartsWith(NUMERIC_FORMATTER_x)
-                )
+                         formatter.StartsWith(NUMERIC_FORMATTER_d) ||
+                         formatter.StartsWith(NUMERIC_FORMATTER_X) ||
+                         formatter.StartsWith(NUMERIC_FORMATTER_x)
+                        )
                 {
                     s_NumberToStr[value][formatter] = ((int)value).ToString(formatter, ci);
                 }
@@ -92,6 +83,7 @@ namespace XCharts.Runtime
                     s_NumberToStr[value][formatter] = value.ToString(formatter, ci);
                 }
             }
+
             return s_NumberToStr[value][formatter];
         }
 
@@ -118,7 +110,7 @@ namespace XCharts.Runtime
         {
             try
             {
-            var ts = NumberToTimeSpan(timestamp);
+                var ts = NumberToTimeSpan(timestamp);
 #if UNITY_2018_3_OR_NEWER
                 return ts.ToString(formatter, ci);
 #else
@@ -129,74 +121,51 @@ namespace XCharts.Runtime
             {
                 XLog.LogError("Not support TimeSpan format: " + formatter);
                 return timestamp.ToString();
-            }                    
+            }
         }
 
         public static DateTime NumberToDateTime(double timestamp, bool local = false)
         {
             if (!s_TimestampToDateTimeDict.ContainsKey(timestamp))
-            {
                 s_TimestampToDateTimeDict[timestamp] = DateTimeUtil.GetDateTime(timestamp, local);
-            }
             return s_TimestampToDateTimeDict[timestamp];
         }
 
         public static TimeSpan NumberToTimeSpan(double timestamp)
         {
-            if(!s_NumberToTimeSpanDict.ContainsKey(timestamp))
-            {
+            if (!s_NumberToTimeSpanDict.ContainsKey(timestamp))
                 s_NumberToTimeSpanDict[timestamp] = TimeSpan.FromSeconds(timestamp);
-            }
             return s_NumberToTimeSpanDict[timestamp];
         }
 
         public static string ColorToStr(Color color)
         {
-            if (s_ColorToStr.ContainsKey(color))
-            {
-                return s_ColorToStr[color];
-            }
-            else
-            {
-                s_ColorToStr[color] = ColorUtility.ToHtmlStringRGBA(color);
-                return s_ColorToStr[color];
-            }
+            if (s_ColorToStr.ContainsKey(color)) return s_ColorToStr[color];
+
+            s_ColorToStr[color] = ColorUtility.ToHtmlStringRGBA(color);
+            return s_ColorToStr[color];
         }
 
         public static string ColorToDotStr(Color color)
         {
-            if (!s_ColorDotStr.ContainsKey(color))
-            {
-                s_ColorDotStr[color] = "<color=#" + ColorToStr(color) + ">●</color>";
-            }
+            if (!s_ColorDotStr.ContainsKey(color)) s_ColorDotStr[color] = "<color=#" + ColorToStr(color) + ">●</color>";
             return s_ColorDotStr[color];
         }
 
         public static string GetSerieLabelName(string prefix, int i, int j)
         {
-            int key = i * 10000000 + j;
-            if (s_SerieLabelName.ContainsKey(key))
-            {
-                return s_SerieLabelName[key];
-            }
-            else
-            {
-                string name = prefix + "_" + i + "_" + j;
-                s_SerieLabelName[key] = name;
-                return name;
-            }
+            var key = i * 10000000 + j;
+            if (s_SerieLabelName.ContainsKey(key)) return s_SerieLabelName[key];
+
+            var name = prefix + "_" + i + "_" + j;
+            s_SerieLabelName[key] = name;
+            return name;
         }
 
         public static string GetString(string prefix, int suffix)
         {
-            if (!s_StringIntDict.ContainsKey(prefix))
-            {
-                s_StringIntDict[prefix] = new Dictionary<int, string>();
-            }
-            if (!s_StringIntDict[prefix].ContainsKey(suffix))
-            {
-                s_StringIntDict[prefix][suffix] = prefix + suffix;
-            }
+            if (!s_StringIntDict.ContainsKey(prefix)) s_StringIntDict[prefix] = new Dictionary<int, string>();
+            if (!s_StringIntDict[prefix].ContainsKey(suffix)) s_StringIntDict[prefix][suffix] = prefix + suffix;
             return s_StringIntDict[prefix][suffix];
         }
 
@@ -212,6 +181,7 @@ namespace XCharts.Runtime
                     name = GetTypeName(type) + component.index;
                     dict[component.index] = name;
                 }
+
                 return name;
             }
             else
@@ -233,10 +203,8 @@ namespace XCharts.Runtime
                 s_AxisLabelName[index] = name;
                 return name;
             }
-            else
-            {
-                return name;
-            }
+
+            return name;
         }
 
         public static string GetTypeName<T>()
@@ -247,12 +215,9 @@ namespace XCharts.Runtime
         public static string GetTypeName(Type type)
         {
             if (s_TypeName.ContainsKey(type)) return s_TypeName[type];
-            else
-            {
-                var name = type.Name;
-                s_TypeName[type] = name;
-                return name;
-            }
+            var name = type.Name;
+            s_TypeName[type] = name;
+            return name;
         }
     }
 }

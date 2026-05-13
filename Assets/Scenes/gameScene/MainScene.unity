@@ -6534,7 +6534,7 @@ MonoBehaviour:
   gameOverCanvas: {fileID: 1759961492}
   aucunApportWarning: {fileID: 2130250620}
   gestionNourriture: {fileID: 1992462391}
-  panelBouff: {fileID: 0}
+  panelBouff: {fileID: 1992462390}
 --- !u!4 &1078041142
 Transform:
   m_ObjectHideFlags: 0

@@ -5,8 +5,8 @@ namespace XCharts.Runtime
 {
     public static class SerieLabelPool
     {
-        private static readonly Stack<GameObject> m_Stack = new Stack<GameObject>(200);
-        private static Dictionary<int, bool> m_ReleaseDic = new Dictionary<int, bool>(1000);
+        private static readonly Stack<GameObject> m_Stack = new(200);
+        private static readonly Dictionary<int, bool> m_ReleaseDic = new(1000);
 
         public static GameObject Get(string name, Transform parent, LabelStyle label, Color color,
             float iconWidth, float iconHeight, ThemeStyle theme)
@@ -20,9 +20,7 @@ namespace XCharts.Runtime
             {
                 element = m_Stack.Pop();
                 if (element == null)
-                {
                     element = CreateSerieLabel(name, parent, label, color, iconWidth, iconHeight, theme);
-                }
                 m_ReleaseDic.Remove(element.GetInstanceID());
                 element.name = name;
                 element.transform.SetParent(parent);
@@ -31,6 +29,7 @@ namespace XCharts.Runtime
                 text.SetFontAndSizeAndStyle(label.textStyle, theme.common);
                 ChartHelper.SetActive(element, true);
             }
+
             element.transform.localEulerAngles = new Vector3(0, 0, label.rotate);
             return element;
         }
@@ -49,11 +48,8 @@ namespace XCharts.Runtime
 
         public static void ReleaseAll(Transform parent)
         {
-            int count = parent.childCount;
-            for (int i = 0; i < count; i++)
-            {
-                Release(parent.GetChild(i).gameObject);
-            }
+            var count = parent.childCount;
+            for (var i = 0; i < count; i++) Release(parent.GetChild(i).gameObject);
         }
 
         public static void ClearAll()
@@ -66,7 +62,7 @@ namespace XCharts.Runtime
             float iconWidth, float iconHeight, ThemeStyle theme)
         {
             var label = ChartHelper.AddChartLabel(name, parent, labelStyle, theme.common,
-                "", color, TextAnchor.MiddleCenter);
+                "", color);
             label.SetActive(labelStyle.show, true);
             return label.gameObject;
         }

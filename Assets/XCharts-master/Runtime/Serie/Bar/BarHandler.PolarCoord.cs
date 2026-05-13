@@ -5,7 +5,7 @@ using XUGL;
 namespace XCharts.Runtime
 {
     /// <summary>
-    /// For polar coord
+    ///     For polar coord
     /// </summary>
     internal sealed partial class BarHandler
     {
@@ -35,6 +35,7 @@ namespace XCharts.Runtime
                         serieData.context.highlight = false;
                         serieData.interact.SetValue(ref needAnimation1, symbolSize);
                     }
+
                     if (needAnimation1)
                     {
                         if (SeriesHelper.IsStack(chart.series))
@@ -43,8 +44,10 @@ namespace XCharts.Runtime
                             chart.RefreshPainter(serie);
                     }
                 }
+
                 return;
             }
+
             m_LastCheckContextFlag = needCheck;
             var themeSymbolSize = chart.theme.serie.lineSymbolSize;
             lineWidth = serie.lineStyle.GetWidth(chart.theme.serie.lineWidth);
@@ -54,7 +57,7 @@ namespace XCharts.Runtime
             {
                 serie.context.pointerEnter = true;
                 serie.interact.SetValue(ref needInteract, serie.animation.interaction.GetWidth(lineWidth));
-                for (int i = 0; i < serie.dataCount; i++)
+                for (var i = 0; i < serie.dataCount; i++)
                 {
                     var serieData = serie.data[i];
                     var size = SerieHelper.GetSysmbolSize(serie, serieData, themeSymbolSize, SerieState.Emphasis);
@@ -70,7 +73,7 @@ namespace XCharts.Runtime
                 var pointerAngle = ChartHelper.GetAngle360(Vector2.up, dir);
                 var pointerRadius = Vector2.Distance(chart.pointerPos, m_SeriePolar.context.center);
                 Color32 color, toColor;
-                for (int i = 0; i < serie.dataCount; i++)
+                for (var i = 0; i < serie.dataCount; i++)
                 {
                     var serieData = serie.data[i];
                     if (pointerAngle >= serieData.context.startAngle &&
@@ -86,11 +89,13 @@ namespace XCharts.Runtime
                     {
                         serieData.context.highlight = false;
                     }
+
                     var state = SerieHelper.GetSerieState(serie, serieData, true);
                     SerieHelper.GetItemColor(out color, out toColor, serie, serieData, chart.theme, state);
                     serieData.interact.SetColor(ref needInteract, color, toColor);
                 }
             }
+
             if (needInteract)
             {
                 if (SeriesHelper.IsStack(chart.series))
@@ -126,16 +131,17 @@ namespace XCharts.Runtime
                 SeriesHelper.UpdateStackDataList(chart.series, serie, null, m_StackSerieData);
 
             var barCount = chart.GetSerieBarRealCount<Bar>(-1);
-            var categoryWidth = m_AngleAxis.IsCategory() ?
-                AxisHelper.GetDataWidth(m_AngleAxis, 360, datas.Count, null) :
-                AxisHelper.GetDataWidth(m_RadiusAxis, m_SeriePolar.context.radius, datas.Count, null);
+            var categoryWidth = m_AngleAxis.IsCategory()
+                ? AxisHelper.GetDataWidth(m_AngleAxis, 360, datas.Count, null)
+                : AxisHelper.GetDataWidth(m_RadiusAxis, m_SeriePolar.context.radius, datas.Count, null);
             var barGap = chart.GetSerieBarGap<Bar>(-1);
             var totalBarWidth = chart.GetSerieTotalWidth<Bar>(categoryWidth, barGap, barCount, -1);
             var barWidth = serie.GetBarWidth(categoryWidth, barCount);
             var offset = (categoryWidth - totalBarWidth) * 0.5f;
             var serieReadIndex = chart.GetSerieIndexIfStack<Bar>(serie, -1);
-            float gap = serie.barGap == -1 ? offset :
-                offset + chart.GetSerieTotalGap<Bar>(categoryWidth, barGap, serieReadIndex, -1);
+            var gap = serie.barGap == -1
+                ? offset
+                : offset + chart.GetSerieTotalGap<Bar>(categoryWidth, barGap, serieReadIndex, -1);
 
             var areaColor = ColorUtil.clearColor32;
             var areaToColor = ColorUtil.clearColor32;
@@ -145,7 +151,7 @@ namespace XCharts.Runtime
             float start, end;
             float inside, outside;
             double radiusValue, angleValue;
-            for (int i = 0; i < datas.Count; i++)
+            for (var i = 0; i < datas.Count; i++)
             {
                 if (serie.animation.CheckDetailBreak(i))
                     break;
@@ -162,10 +168,8 @@ namespace XCharts.Runtime
                     end = start + barWidth;
                     inside = m_SeriePolar.context.insideRadius;
                     if (isStack)
-                    {
-                        for (int n = 0; n < m_StackSerieData.Count - 1; n++)
+                        for (var n = 0; n < m_StackSerieData.Count - 1; n++)
                             inside += m_StackSerieData[n][i].context.stackHeight;
-                    }
                     outside = inside + m_RadiusAxis.GetValueLength(radiusValue, m_SeriePolar.context.radius);
                     serieData.context.stackHeight = outside - inside;
                 }
@@ -173,15 +177,14 @@ namespace XCharts.Runtime
                 {
                     start = startAngle;
                     if (isStack)
-                    {
-                        for (int n = 0; n < m_StackSerieData.Count - 1; n++)
+                        for (var n = 0; n < m_StackSerieData.Count - 1; n++)
                             start += m_StackSerieData[n][i].context.stackHeight;
-                    }
                     end = start + m_AngleAxis.GetValueLength(angleValue, 360);
                     serieData.context.stackHeight = end - start;
                     inside = m_SeriePolar.context.insideRadius + categoryWidth * (float)radiusValue + gap;
                     outside = inside + barWidth;
                 }
+
                 serieData.context.startAngle = start;
                 serieData.context.toAngle = end;
                 serieData.context.halfAngle = (start + end) / 2;
@@ -197,11 +200,13 @@ namespace XCharts.Runtime
                 serieData.context.insideRadius = inside;
                 serieData.context.outsideRadius = outside;
                 serieData.context.areaCenter = m_SeriePolar.context.center;
-                serieData.context.position = ChartHelper.GetPosition(m_SeriePolar.context.center, (start + end) / 2, (inside + outside) / 2);
+                serieData.context.position = ChartHelper.GetPosition(m_SeriePolar.context.center, (start + end) / 2,
+                    (inside + outside) / 2);
 
                 UGL.DrawDoughnut(vh, m_SeriePolar.context.center, inside, outside, areaColor, areaToColor,
-                    ColorUtil.clearColor32, start, end, borderWidth, borderColor, serie.gap / 2, chart.settings.cicleSmoothness,
-                    needRoundCap, true);
+                    ColorUtil.clearColor32, start, end, borderWidth, borderColor, serie.gap / 2,
+                    chart.settings.cicleSmoothness,
+                    needRoundCap);
             }
 
             if (!serie.animation.IsFinish())

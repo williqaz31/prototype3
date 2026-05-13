@@ -1,11 +1,12 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Scripting;
 using UnityEngine.UI;
 using XUGL;
 
 namespace XCharts.Runtime
 {
-    [UnityEngine.Scripting.Preserve]
+    [Preserve]
     internal sealed class MarkAreaHandler : MainComponentHandler<MarkArea>
     {
         private GameObject m_MarkLineLabelRoot;
@@ -13,7 +14,8 @@ namespace XCharts.Runtime
 
         public override void InitComponent()
         {
-            m_MarkLineLabelRoot = ChartHelper.AddObject("markarea" + component.index, chart.transform, chart.chartMinAnchor,
+            m_MarkLineLabelRoot = ChartHelper.AddObject("markarea" + component.index, chart.transform,
+                chart.chartMinAnchor,
                 chart.chartMaxAnchor, chart.chartPivot, chart.chartSizeDelta, -1, chart.childrenNodeNames);
             m_MarkLineLabelRoot.hideFlags = chart.chartHideFlags;
             ChartHelper.HideAllObject(m_MarkLineLabelRoot);
@@ -30,20 +32,18 @@ namespace XCharts.Runtime
             if (m_NeedUpdateLabelPosition)
             {
                 m_NeedUpdateLabelPosition = false;
-                if (component.runtimeLabel != null)
-                {
-                    component.runtimeLabel.SetPosition(component.runtimeLabelPosition);
-                }
+                if (component.runtimeLabel != null) component.runtimeLabel.SetPosition(component.runtimeLabelPosition);
             }
         }
 
         private void InitMarkArea(MarkArea markArea)
         {
             markArea.painter = chart.m_PainterUpper;
-            markArea.refreshComponent = delegate ()
+            markArea.refreshComponent = delegate
             {
-                var label = ChartHelper.AddChartLabel("label", m_MarkLineLabelRoot.transform, markArea.label, chart.theme.axis,
-                    component.text, Color.clear, TextAnchor.MiddleCenter);
+                var label = ChartHelper.AddChartLabel("label", m_MarkLineLabelRoot.transform, markArea.label,
+                    chart.theme.axis,
+                    component.text, Color.clear);
                 UpdateRuntimeData(component);
                 label.SetActive(markArea.label.show, true);
                 label.SetPosition(component.runtimeLabelPosition);
@@ -111,6 +111,7 @@ namespace XCharts.Runtime
                     markArea.runtimeLabelPosition = rect.center + new Vector2(0, rect.height / 2);
                     break;
             }
+
             markArea.runtimeLabelPosition += markArea.label.offset;
         }
 
@@ -139,32 +140,25 @@ namespace XCharts.Runtime
                         var pY = grid.context.y + data.yPosition;
                         return new Vector3(pX, pY);
                     }
-                    else if (data.yValue != 0)
+
+                    if (data.yValue != 0)
                     {
                         data.runtimeValue = data.yValue;
                         return GetPosition(yAxis, grid, data.runtimeValue, start);
                     }
-                    else
-                    {
-                        data.runtimeValue = data.xValue;
-                        return GetPosition(xAxis, grid, data.xValue, start);
-                    }
-                default:
-                    break;
+
+                    data.runtimeValue = data.xValue;
+                    return GetPosition(xAxis, grid, data.xValue, start);
             }
+
             return pos;
         }
 
         private Vector3 GetPosition(Axis xAxis, Axis yAxis, GridCoord grid, double value, bool start)
         {
-            if (yAxis.IsCategory())
-            {
-                return GetPosition(xAxis, grid, value, start);
-            }
-            else
-            {
-                return GetPosition(yAxis, grid, value, start);
-            }
+            if (yAxis.IsCategory()) return GetPosition(xAxis, grid, value, start);
+
+            return GetPosition(yAxis, grid, value, start);
         }
 
         private Vector3 GetPosition(Axis axis, GridCoord grid, double value, bool start)
@@ -172,17 +166,11 @@ namespace XCharts.Runtime
             if (axis is XAxis)
             {
                 var pX = AxisHelper.GetAxisPosition(grid, axis, value);
-                return start ?
-                    new Vector3(pX, grid.context.y + grid.context.height) :
-                    new Vector3(pX, grid.context.y);
+                return start ? new Vector3(pX, grid.context.y + grid.context.height) : new Vector3(pX, grid.context.y);
             }
-            else
-            {
-                var pY = AxisHelper.GetAxisPosition(grid, axis, value);
-                return start ?
-                    new Vector3(grid.context.x, pY) :
-                    new Vector3(grid.context.x + grid.context.width, pY);
-            }
+
+            var pY = AxisHelper.GetAxisPosition(grid, axis, value);
+            return start ? new Vector3(grid.context.x, pY) : new Vector3(grid.context.x + grid.context.width, pY);
         }
     }
 }

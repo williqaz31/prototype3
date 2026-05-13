@@ -1,11 +1,11 @@
-using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace XCharts.Runtime
 {
     /// <summary>
-    /// Polar coordinates are usually used in a circular layout.
-    /// || 极坐标系，可以用于散点图和折线图。
+    ///     Polar coordinates are usually used in a circular layout.
+    ///     || 极坐标系，可以用于散点图和折线图。
     /// </summary>
     [AddComponentMenu("XCharts/PolarChart", 23)]
     [ExecuteInEditMode]
@@ -30,7 +30,7 @@ namespace XCharts.Runtime
             serie.SetCoord<PolarCoord>();
             serie.ClearData();
             serie.symbol.show = false;
-            for (int i = 0; i <= 360; i++)
+            for (var i = 0; i <= 360; i++)
             {
                 var t = i / 180f * Mathf.PI;
                 var r = Mathf.Sin(2 * t) * Mathf.Cos(2 * t) * 2;
@@ -39,8 +39,8 @@ namespace XCharts.Runtime
         }
 
         /// <summary>
-        /// default radial bar polar chart.
-        /// || 默认径向柱状极坐标图。
+        ///     default radial bar polar chart.
+        ///     || 默认径向柱状极坐标图。
         /// </summary>
         public void DefaultRadialBarPolarChart()
         {
@@ -50,7 +50,7 @@ namespace XCharts.Runtime
             var polarCoord = GetChartComponent<PolarCoord>();
             polarCoord.radius[0] = 20;
 
-            var categorys = new string[] { "a", "b", "c", "d" };
+            var categorys = new[] { "a", "b", "c", "d" };
             var radiusAxis = GetChartComponent<RadiusAxis>();
             radiusAxis.splitNumber = 4;
 
@@ -67,17 +67,17 @@ namespace XCharts.Runtime
             serie.SetCoord<PolarCoord>();
             serie.ClearData();
             serie.symbol.show = false;
-            for (int i = 0; i < categorys.Length; i++)
+            for (var i = 0; i < categorys.Length; i++)
             {
-                var x = UnityEngine.Random.Range(0f, 4f);
+                var x = Random.Range(0f, 4f);
                 var y = i;
                 AddData(0, x, y, categorys[i]);
             }
         }
 
         /// <summary>
-        /// default tangential bar polar chart.
-        /// || 默认切向柱状极坐标图。
+        ///     default tangential bar polar chart.
+        ///     || 默认切向柱状极坐标图。
         /// </summary>
         public void DefaultTangentialBarPolarChart()
         {
@@ -87,7 +87,7 @@ namespace XCharts.Runtime
             var polarCoord = GetChartComponent<PolarCoord>();
             polarCoord.radius[0] = 20;
 
-            var categorys = new string[] { "a", "b", "c", "d" };
+            var categorys = new[] { "a", "b", "c", "d" };
             var radiusAxis = GetChartComponent<RadiusAxis>();
             radiusAxis.type = Axis.AxisType.Category;
             radiusAxis.splitNumber = 4;
@@ -106,17 +106,17 @@ namespace XCharts.Runtime
             serie.SetCoord<PolarCoord>();
             serie.ClearData();
             serie.symbol.show = false;
-            for (int i = 0; i < categorys.Length; i++)
+            for (var i = 0; i < categorys.Length; i++)
             {
-                var x = UnityEngine.Random.Range(0f, 4f);
+                var x = Random.Range(0f, 4f);
                 var y = i;
                 AddData(0, y, x, categorys[i]);
             }
         }
 
         /// <summary>
-        /// default heatmap polar chart.
-        /// || 默认极坐标色块图。 
+        ///     default heatmap polar chart.
+        ///     || 默认极坐标色块图。
         /// </summary>
         public void DefaultHeatmapPolarChart()
         {
@@ -131,7 +131,7 @@ namespace XCharts.Runtime
             var polarCoord = GetChartComponent<PolarCoord>();
             polarCoord.radius[0] = 20;
 
-            var categorys = new string[] { "a", "b", "c", "d" };
+            var categorys = new[] { "a", "b", "c", "d" };
             var radiusAxis = GetChartComponent<RadiusAxis>();
             radiusAxis.type = Axis.AxisType.Category;
             radiusAxis.splitNumber = 4;
@@ -147,22 +147,15 @@ namespace XCharts.Runtime
             foreach (var category in categorys)
                 radiusAxis.AddData(category);
 
-            for (int i = 0; i < 24; i++)
-            {
-                angleAxis.AddData(i + "h");
-            }
+            for (var i = 0; i < 24; i++) angleAxis.AddData(i + "h");
 
             var serie = AddSerie<Heatmap>(GenerateDefaultSerieName());
             serie.SetCoord<PolarCoord>();
             serie.ClearData();
             serie.symbol.show = false;
-            for (int x = 0; x < 4; x++)
-            {
-                for (int y = 0; y < 24; y++)
-                {
-                    AddData(0, x, y, UnityEngine.Random.Range(0f, 4f));
-                }
-            }
+            for (var x = 0; x < 4; x++)
+            for (var y = 0; y < 24; y++)
+                AddData(0, x, y, Random.Range(0f, 4f));
         }
     }
 }

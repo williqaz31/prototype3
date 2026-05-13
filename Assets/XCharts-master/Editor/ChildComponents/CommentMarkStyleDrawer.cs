@@ -7,7 +7,8 @@ namespace XCharts.Editor
     [CustomPropertyDrawer(typeof(CommentMarkStyle), true)]
     public class CommentMarkStyleDrawer : BasePropertyDrawer
     {
-        public override string ClassName { get { return "MarkStyle"; } }
+        public override string ClassName => "MarkStyle";
+
         public override void OnGUI(Rect pos, SerializedProperty prop, GUIContent label)
         {
             base.OnGUI(pos, prop, label);

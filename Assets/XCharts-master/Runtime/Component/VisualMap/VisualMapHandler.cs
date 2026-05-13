@@ -1,20 +1,22 @@
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Scripting;
 using UnityEngine.UI;
 using XUGL;
 #if INPUT_SYSTEM_ENABLED
 using Input = XCharts.Runtime.InputHelper;
 #endif
+
 namespace XCharts.Runtime
 {
-    [UnityEngine.Scripting.Preserve]
+    [Preserve]
     internal sealed class VisualMapHandler : MainComponentHandler<VisualMap>
     {
         public override void OnBeginDrag(PointerEventData eventData)
         {
             OnDragVisualMapStart(component);
         }
+
         public override void OnDrag(PointerEventData eventData)
         {
             OnDragVisualMap(component);
@@ -61,6 +63,7 @@ namespace XCharts.Runtime
                     visualMap.context.pointerIndex = -1;
                     chart.RefreshChart();
                 }
+
                 return;
             }
 
@@ -75,6 +78,7 @@ namespace XCharts.Runtime
                     visualMap.context.pointerIndex = -1;
                     chart.RefreshChart();
                 }
+
                 return;
             }
 
@@ -147,6 +151,7 @@ namespace XCharts.Runtime
                         color = visualMap.GetColor(visualMap.rangeMax);
                         UGL.DrawTriangle(vh, p1, p2, p3, color);
                     }
+
                     break;
 
                 case Orient.Vertical:
@@ -171,21 +176,22 @@ namespace XCharts.Runtime
                         color = visualMap.GetColor(visualMap.rangeMax);
                         UGL.DrawTriangle(vh, p1, p2, p3, color);
                     }
+
                     break;
             }
+
             if (visualMap.calculable &&
                 (visualMap.rangeMin > visualMap.min || visualMap.rangeMax < visualMap.max))
             {
                 var rangeMin = visualMap.rangeMin;
                 var rangeMax = visualMap.rangeMax;
                 var diff = (visualMap.max - visualMap.min) / (splitNum - 1);
-                for (int i = 1; i < splitNum; i++)
+                for (var i = 1; i < splitNum; i++)
                 {
                     var splitMin = visualMap.min + (i - 1) * diff;
                     var splitMax = splitMin + diff;
                     if (rangeMin > splitMax || rangeMax < splitMin)
                     {
-                        continue;
                     }
                     else if (rangeMin <= splitMin && rangeMax >= splitMax)
                     {
@@ -240,7 +246,7 @@ namespace XCharts.Runtime
             }
             else
             {
-                for (int i = 1; i < splitNum; i++)
+                for (var i = 1; i < splitNum; i++)
                 {
                     var splitPos = pos1 + dir * (i - 1 + 0.5f) * splitWid;
                     var startColor = colors[i - 1].color;
@@ -254,6 +260,7 @@ namespace XCharts.Runtime
                 var p0 = pos1 + dir * visualMap.runtimeRangeMinHeight;
                 UGL.DrawRectangle(vh, pos1, p0, visualMap.itemWidth / 2, chart.theme.visualMap.backgroundColor);
             }
+
             if (visualMap.rangeMax < visualMap.max)
             {
                 var p1 = pos1 + dir * visualMap.runtimeRangeMaxHeight;
@@ -261,7 +268,6 @@ namespace XCharts.Runtime
             }
 
             if (visualMap.hoverLink)
-            {
                 if (visualMap.context.pointerIndex >= 0)
                 {
                     var p0 = pos1 + dir * visualMap.runtimeRangeMinHeight;
@@ -270,20 +276,23 @@ namespace XCharts.Runtime
 
                     if (visualMap.orient == Orient.Vertical)
                     {
-                        var p2 = new Vector3(centerPos.x + halfWid, Mathf.Clamp(pointerPos.y + (triangeLen / 2), p0.y, p1.y));
-                        var p3 = new Vector3(centerPos.x + halfWid, Mathf.Clamp(pointerPos.y - (triangeLen / 2), p0.y, p1.y));
+                        var p2 = new Vector3(centerPos.x + halfWid,
+                            Mathf.Clamp(pointerPos.y + triangeLen / 2, p0.y, p1.y));
+                        var p3 = new Vector3(centerPos.x + halfWid,
+                            Mathf.Clamp(pointerPos.y - triangeLen / 2, p0.y, p1.y));
                         var p4 = new Vector3(centerPos.x + halfWid + triangeLen / 2, pointerPos.y);
                         UGL.DrawTriangle(vh, p2, p3, p4, colors[visualMap.context.pointerIndex].color);
                     }
                     else
                     {
-                        var p2 = new Vector3(Mathf.Clamp(pointerPos.x + (triangeLen / 2), p0.x, p1.x), centerPos.y + halfWid);
-                        var p3 = new Vector3(Mathf.Clamp(pointerPos.x - (triangeLen / 2), p0.x, p1.x), centerPos.y + halfWid);
+                        var p2 = new Vector3(Mathf.Clamp(pointerPos.x + triangeLen / 2, p0.x, p1.x),
+                            centerPos.y + halfWid);
+                        var p3 = new Vector3(Mathf.Clamp(pointerPos.x - triangeLen / 2, p0.x, p1.x),
+                            centerPos.y + halfWid);
                         var p4 = new Vector3(pointerPos.x, centerPos.y + halfWid + triangeLen / 2);
                         UGL.DrawTriangle(vh, p2, p3, p4, colors[visualMap.context.pointerIndex].color);
                     }
                 }
-            }
         }
 
         private void DrawPiecewiseVisualMap(VertexHelper vh, VisualMap visualMap)
@@ -298,20 +307,22 @@ namespace XCharts.Runtime
             switch (visualMap.orient)
             {
                 case Orient.Horizonal:
-                    for (int i = 0; i < visualMap.inRange.Count; i++)
+                    for (var i = 0; i < visualMap.inRange.Count; i++)
                     {
                         var piece = visualMap.inRange[i];
                     }
+
                     break;
 
                 case Orient.Vertical:
                     var each = visualMap.itemHeight + visualMap.itemGap;
-                    for (int i = 0; i < visualMap.inRange.Count; i++)
+                    for (var i = 0; i < visualMap.inRange.Count; i++)
                     {
                         var piece = visualMap.inRange[i];
                         var pos = new Vector3(centerPos.x, centerPos.y - each * i);
                         UGL.DrawRectangle(vh, pos, halfWid, halfHig, piece.color);
                     }
+
                     break;
             }
         }
@@ -321,19 +332,17 @@ namespace XCharts.Runtime
             if (!visualMap.show || !visualMap.showUI || !visualMap.calculable)
                 return;
 
-            var inMinRect = visualMap.IsInRangeMinRect(chart.pointerPos, chart.chartRect, chart.theme.visualMap.triangeLen);
-            var inMaxRect = visualMap.IsInRangeMaxRect(chart.pointerPos, chart.chartRect, chart.theme.visualMap.triangeLen);
+            var inMinRect =
+                visualMap.IsInRangeMinRect(chart.pointerPos, chart.chartRect, chart.theme.visualMap.triangeLen);
+            var inMaxRect =
+                visualMap.IsInRangeMaxRect(chart.pointerPos, chart.chartRect, chart.theme.visualMap.triangeLen);
 
             if (inMinRect || inMaxRect)
             {
                 if (inMinRect)
-                {
                     visualMap.context.minDrag = true;
-                }
                 else
-                {
                     visualMap.context.maxDrag = true;
-                }
             }
         }
 
@@ -347,13 +356,9 @@ namespace XCharts.Runtime
 
             var value = visualMap.GetValue(chart.pointerPos, chart.chartRect);
             if (visualMap.context.minDrag)
-            {
                 visualMap.rangeMin = value;
-            }
             else
-            {
                 visualMap.rangeMax = value;
-            }
             chart.RefreshChart();
         }
 

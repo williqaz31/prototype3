@@ -2,11 +2,8 @@ using System;
 
 namespace XCharts.Runtime
 {
-    [AttributeUsage(AttributeTargets.Field, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Field)]
     public class IgnoreDoc : Attribute
     {
-        public IgnoreDoc()
-        {
-        }
     }
 }

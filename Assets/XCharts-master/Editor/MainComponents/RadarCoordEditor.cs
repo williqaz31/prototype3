@@ -34,7 +34,8 @@ namespace XCharts.Editor
     [CustomPropertyDrawer(typeof(RadarCoord.Indicator), true)]
     public class RadarIndicatorDrawer : BasePropertyDrawer
     {
-        public override string ClassName { get { return "Indicator"; } }
+        public override string ClassName => "Indicator";
+
         public override void OnGUI(Rect pos, SerializedProperty prop, GUIContent label)
         {
             base.OnGUI(pos, prop, label);

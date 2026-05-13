@@ -1,11 +1,11 @@
-using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Scripting;
 using UnityEngine.UI;
 using XUGL;
 
 namespace XCharts.Runtime
 {
-    [UnityEngine.Scripting.Preserve]
+    [Preserve]
     internal sealed class ParallelHandler : SerieHandler<Parallel>
     {
         public override void Update()
@@ -36,13 +36,11 @@ namespace XCharts.Runtime
 
             var lineWidth = serie.lineStyle.GetWidth(chart.theme.serie.lineWidth);
 
-            float currDetailProgress = !isHorizonal ?
-                parallel.context.x :
-                parallel.context.y;
+            var currDetailProgress = !isHorizonal ? parallel.context.x : parallel.context.y;
 
-            float totalDetailProgress = !isHorizonal ?
-                parallel.context.x + parallel.context.width :
-                parallel.context.y + parallel.context.height;
+            var totalDetailProgress = !isHorizonal
+                ? parallel.context.x + parallel.context.width
+                : parallel.context.y + parallel.context.height;
 
             serie.animation.InitProgress(currDetailProgress, totalDetailProgress);
 
@@ -55,10 +53,10 @@ namespace XCharts.Runtime
             {
                 var count = Mathf.Min(axisCount, serieData.data.Count);
                 var lp = Vector3.zero;
-                var colorIndex = serie.colorByData?serieData.index : serie.context.colorIndex;
+                var colorIndex = serie.colorByData ? serieData.index : serie.context.colorIndex;
                 var lineColor = SerieHelper.GetLineColor(serie, serieData, chart.theme, colorIndex);
                 serieData.context.dataPoints.Clear();
-                for (int i = 0; i < count; i++)
+                for (var i = 0; i < count; i++)
                 {
                     if (animationIndex >= 0 && i > animationIndex) continue;
                     var pos = GetPos(parallel, i, serieData.data[i], isHorizonal);
@@ -75,10 +73,12 @@ namespace XCharts.Runtime
                         else
                         {
                             var currProgressStart = new Vector3(currProgress, parallel.context.y - 50);
-                            var currProgressEnd = new Vector3(currProgress, parallel.context.y + parallel.context.height + 50);
+                            var currProgressEnd = new Vector3(currProgress,
+                                parallel.context.y + parallel.context.height + 50);
                             var intersectionPos = Vector3.zero;
 
-                            if (UGLHelper.GetIntersection(lp, pos, currProgressStart, currProgressEnd, ref intersectionPos))
+                            if (UGLHelper.GetIntersection(lp, pos, currProgressStart, currProgressEnd,
+                                    ref intersectionPos))
                                 serieData.context.dataPoints.Add(intersectionPos);
                             else
                                 serieData.context.dataPoints.Add(pos);
@@ -98,18 +98,22 @@ namespace XCharts.Runtime
                         else
                         {
                             var currProgressStart = new Vector3(parallel.context.x - 50, currProgress);
-                            var currProgressEnd = new Vector3(parallel.context.x + parallel.context.width + 50, currProgress);
+                            var currProgressEnd = new Vector3(parallel.context.x + parallel.context.width + 50,
+                                currProgress);
                             var intersectionPos = Vector3.zero;
 
-                            if (UGLHelper.GetIntersection(lp, pos, currProgressStart, currProgressEnd, ref intersectionPos))
+                            if (UGLHelper.GetIntersection(lp, pos, currProgressStart, currProgressEnd,
+                                    ref intersectionPos))
                                 serieData.context.dataPoints.Add(intersectionPos);
                             else
                                 serieData.context.dataPoints.Add(pos);
                             break;
                         }
                     }
+
                     lp = pos;
                 }
+
                 if (isSmooth)
                     UGL.DrawCurves(vh, serieData.context.dataPoints, lineWidth, lineColor,
                         chart.settings.lineSmoothStyle,
@@ -118,6 +122,7 @@ namespace XCharts.Runtime
                 else
                     UGL.DrawLine(vh, serieData.context.dataPoints, lineWidth, lineColor, isSmooth);
             }
+
             if (!serie.animation.IsFinish())
             {
                 serie.animation.CheckProgress(totalDetailProgress - currDetailProgress);
@@ -129,8 +134,7 @@ namespace XCharts.Runtime
         {
             if (index >= 0 && index < parallel.context.parallelAxes.Count)
                 return parallel.context.parallelAxes[index];
-            else
-                return null;
+            return null;
         }
 
         private static Vector3 GetPos(ParallelCoord parallel, int axisIndex, double dataValue, bool isHorizonal)

@@ -4,6 +4,7 @@ using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
+
 #if dUI_TextMeshPro
 using TMPro;
 #endif
@@ -13,7 +14,7 @@ namespace XCharts.Runtime
     public static class XCThemeMgr
     {
         /// <summary>
-        /// 重新加载主题列表
+        ///     重新加载主题列表
         /// </summary>
         public static void ReloadThemeList()
         {
@@ -22,12 +23,8 @@ namespace XCharts.Runtime
             AddTheme(LoadTheme(ThemeType.Default));
             AddTheme(LoadTheme(ThemeType.Dark));
             if (XCSettings.Instance != null)
-            {
                 foreach (var theme in XCSettings.customThemes)
-                {
                     AddTheme(theme);
-                }
-            }
         }
 
         public static void CheckReloadTheme()
@@ -59,13 +56,10 @@ namespace XCharts.Runtime
                 ReloadThemeList();
                 if (XChartsMgr.themes.ContainsKey(themeName))
                     return XChartsMgr.themes[themeName];
-                else
-                    return null;
+                return null;
             }
-            else
-            {
-                return XChartsMgr.themes[themeName];
-            }
+
+            return XChartsMgr.themes[themeName];
         }
 
         public static Theme LoadTheme(ThemeType type)
@@ -89,10 +83,7 @@ namespace XCharts.Runtime
         public static List<Theme> GetThemeList()
         {
             var list = new List<Theme>();
-            foreach (var theme in XChartsMgr.themes.Values)
-            {
-                list.Add(theme);
-            }
+            foreach (var theme in XChartsMgr.themes.Values) list.Add(theme);
             return list;
         }
 
@@ -104,16 +95,14 @@ namespace XCharts.Runtime
         public static void SwitchTheme(BaseChart chart, string themeName)
         {
 #if UNITY_EDITOR
-            if (XChartsMgr.themes.Count == 0)
-            {
-                ReloadThemeList();
-            }
+            if (XChartsMgr.themes.Count == 0) ReloadThemeList();
 #endif
             if (!XChartsMgr.themes.ContainsKey(themeName))
             {
                 Debug.LogError("SwitchTheme ERROR: not exist theme:" + themeName);
                 return;
             }
+
             var target = XChartsMgr.themes[themeName];
             chart.UpdateTheme(target);
         }
@@ -137,10 +126,7 @@ namespace XCharts.Runtime
 #if UNITY_EDITOR
             var themeAssetName = XCSettings.THEME_ASSET_NAME_PREFIX + theme.themeName;
             var themeAssetPath = Application.dataPath + "/../" + XCSettings.THEME_ASSET_FOLDER;
-            if (!Directory.Exists(themeAssetPath))
-            {
-                Directory.CreateDirectory(themeAssetPath);
-            }
+            if (!Directory.Exists(themeAssetPath)) Directory.CreateDirectory(themeAssetPath);
             var themeAssetFilePath = string.Format("{0}/{1}.asset", XCSettings.THEME_ASSET_FOLDER, themeAssetName);
             AssetDatabase.CreateAsset(theme, themeAssetFilePath);
             AssetDatabase.SaveAssets();

@@ -7,20 +7,20 @@ using TMPro;
 namespace XCharts.Runtime
 {
     /// <summary>
-    /// Settings related to text.
-    /// ||文本的相关设置。
+    ///     Settings related to text.
+    ///     ||文本的相关设置。
     /// </summary>
     [Serializable]
     public class TextStyle : ChildComponent
     {
         [SerializeField] private bool m_Show = true;
         [SerializeField] private Font m_Font;
-        [SerializeField] private bool m_AutoWrap = false;
+        [SerializeField] private bool m_AutoWrap;
         [SerializeField] private bool m_AutoAlign = true;
-        [SerializeField] private float m_Rotate = 0;
-        [SerializeField] private bool m_AutoColor = false;
+        [SerializeField] private float m_Rotate;
+        [SerializeField] private bool m_AutoColor;
         [SerializeField] private Color m_Color = Color.clear;
-        [SerializeField] private int m_FontSize = 0;
+        [SerializeField] private int m_FontSize;
         [SerializeField] private FontStyle m_FontStyle = FontStyle.Normal;
         [SerializeField] private float m_LineSpacing = 1f;
         [SerializeField] private TextAnchor m_Alignment = TextAnchor.MiddleCenter;
@@ -31,100 +31,143 @@ namespace XCharts.Runtime
 #endif
         public bool show
         {
-            get { return m_Show; }
-            set { if (PropertyUtil.SetStruct(ref m_Show, value)) SetComponentDirty(); }
+            get => m_Show;
+            set
+            {
+                if (PropertyUtil.SetStruct(ref m_Show, value)) SetComponentDirty();
+            }
         }
+
         /// <summary>
-        /// Rotation of text.
-        /// ||文本的旋转。
-        /// [default: `0f`]
+        ///     Rotation of text.
+        ///     ||文本的旋转。
+        ///     [default: `0f`]
         /// </summary>
         public float rotate
         {
-            get { return m_Rotate; }
-            set { if (PropertyUtil.SetStruct(ref m_Rotate, value)) SetComponentDirty(); }
+            get => m_Rotate;
+            set
+            {
+                if (PropertyUtil.SetStruct(ref m_Rotate, value)) SetComponentDirty();
+            }
         }
+
         /// <summary>
-        /// 是否开启自动颜色。当开启时，会自动设置颜色。
+        ///     是否开启自动颜色。当开启时，会自动设置颜色。
         /// </summary>
         public bool autoColor
         {
-            get { return m_AutoColor; }
-            set { if (PropertyUtil.SetStruct(ref m_AutoColor, value)) SetAllDirty(); }
+            get => m_AutoColor;
+            set
+            {
+                if (PropertyUtil.SetStruct(ref m_AutoColor, value)) SetAllDirty();
+            }
         }
+
         /// <summary>
-        /// the color of text.
-        /// ||文本的颜色。
-        /// [default: `Color.clear`]
+        ///     the color of text.
+        ///     ||文本的颜色。
+        ///     [default: `Color.clear`]
         /// </summary>
         public Color color
         {
-            get { return m_Color; }
-            set { if (PropertyUtil.SetColor(ref m_Color, value)) SetComponentDirty(); }
+            get => m_Color;
+            set
+            {
+                if (PropertyUtil.SetColor(ref m_Color, value)) SetComponentDirty();
+            }
         }
+
         /// <summary>
-        /// the font of text. When `null`, the theme's font is used by default.
-        /// ||文本字体。
-        /// [default: null]
+        ///     the font of text. When `null`, the theme's font is used by default.
+        ///     ||文本字体。
+        ///     [default: null]
         /// </summary>
         public Font font
         {
-            get { return m_Font; }
-            set { if (PropertyUtil.SetClass(ref m_Font, value)) SetComponentDirty(); }
+            get => m_Font;
+            set
+            {
+                if (PropertyUtil.SetClass(ref m_Font, value)) SetComponentDirty();
+            }
         }
+
         /// <summary>
-        /// font size.
-        /// ||文本字体大小。
-        /// [default: 18]
+        ///     font size.
+        ///     ||文本字体大小。
+        ///     [default: 18]
         /// </summary>
         public int fontSize
         {
-            get { return m_FontSize; }
-            set { if (PropertyUtil.SetStruct(ref m_FontSize, value)) SetComponentDirty(); }
+            get => m_FontSize;
+            set
+            {
+                if (PropertyUtil.SetStruct(ref m_FontSize, value)) SetComponentDirty();
+            }
         }
+
         /// <summary>
-        /// font style.
-        /// ||文本字体的风格。
-        /// [default: FontStyle.Normal]
+        ///     font style.
+        ///     ||文本字体的风格。
+        ///     [default: FontStyle.Normal]
         /// </summary>
         public FontStyle fontStyle
         {
-            get { return m_FontStyle; }
-            set { if (PropertyUtil.SetStruct(ref m_FontStyle, value)) SetComponentDirty(); }
+            get => m_FontStyle;
+            set
+            {
+                if (PropertyUtil.SetStruct(ref m_FontStyle, value)) SetComponentDirty();
+            }
         }
+
         /// <summary>
-        /// text line spacing.
-        /// ||行间距。
-        /// [default: 1f]
+        ///     text line spacing.
+        ///     ||行间距。
+        ///     [default: 1f]
         /// </summary>
         public float lineSpacing
         {
-            get { return m_LineSpacing; }
-            set { if (PropertyUtil.SetStruct(ref m_LineSpacing, value)) SetComponentDirty(); }
+            get => m_LineSpacing;
+            set
+            {
+                if (PropertyUtil.SetStruct(ref m_LineSpacing, value)) SetComponentDirty();
+            }
         }
+
         /// <summary>
-        /// 是否自动换行。
+        ///     是否自动换行。
         /// </summary>
         public bool autoWrap
         {
-            get { return m_AutoWrap; }
-            set { if (PropertyUtil.SetStruct(ref m_AutoWrap, value)) SetComponentDirty(); }
+            get => m_AutoWrap;
+            set
+            {
+                if (PropertyUtil.SetStruct(ref m_AutoWrap, value)) SetComponentDirty();
+            }
         }
+
         /// <summary>
-        /// 文本是否让系统自动选对齐方式。为false时才会用alignment。
+        ///     文本是否让系统自动选对齐方式。为false时才会用alignment。
         /// </summary>
         public bool autoAlign
         {
-            get { return m_AutoAlign; }
-            set { if (PropertyUtil.SetStruct(ref m_AutoAlign, value)) SetComponentDirty(); }
+            get => m_AutoAlign;
+            set
+            {
+                if (PropertyUtil.SetStruct(ref m_AutoAlign, value)) SetComponentDirty();
+            }
         }
+
         /// <summary>
-        /// 对齐方式。
+        ///     对齐方式。
         /// </summary>
         public TextAnchor alignment
         {
-            get { return m_Alignment; }
-            set { if (PropertyUtil.SetStruct(ref m_Alignment, value)) SetComponentDirty(); }
+            get => m_Alignment;
+            set
+            {
+                if (PropertyUtil.SetStruct(ref m_Alignment, value)) SetComponentDirty();
+            }
         }
 #if dUI_TextMeshPro
         /// <summary>
@@ -156,7 +199,9 @@ namespace XCharts.Runtime
         }
 #endif
 
-        public TextStyle() { }
+        public TextStyle()
+        {
+        }
 
         public TextStyle(int fontSize)
         {
@@ -181,7 +226,7 @@ namespace XCharts.Runtime
             this.fontSize = fontSize;
             this.fontStyle = fontStyle;
             this.color = color;
-            this.rotate = rotate;
+            rotate = rotate;
         }
 
         public void Copy(TextStyle textStyle)
@@ -211,16 +256,14 @@ namespace XCharts.Runtime
         {
             if (ChartHelper.IsClearColor(color))
                 return defaultColor;
-            else
-                return color;
+            return color;
         }
 
         public int GetFontSize(ComponentTheme defaultTheme)
         {
             if (fontSize == 0)
                 return defaultTheme.fontSize;
-            else
-                return fontSize;
+            return fontSize;
         }
 
         public TextAnchor GetAlignment(TextAnchor defaultAlignment)

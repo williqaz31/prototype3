@@ -10,7 +10,7 @@ namespace XCharts.Example
     {
         private HeatmapChart chart;
 
-        void Awake()
+        private void Awake()
         {
             chart = gameObject.GetComponent<HeatmapChart>();
             if (chart == null)
@@ -18,6 +18,7 @@ namespace XCharts.Example
                 chart = gameObject.AddComponent<HeatmapChart>();
                 chart.Init();
             }
+
             chart.GetChartComponent<Title>().text = "HeatmapChart";
             chart.GetChartComponent<Tooltip>().type = Tooltip.Type.None;
 
@@ -67,8 +68,8 @@ namespace XCharts.Example
             //清空颜色重新添加
 
             var heatmapGridWid = 10f;
-            int xSplitNumber = (int) (grid.context.width / heatmapGridWid);
-            int ySplitNumber = (int) (grid.context.height / heatmapGridWid);
+            var xSplitNumber = (int)(grid.context.width / heatmapGridWid);
+            var ySplitNumber = (int)(grid.context.height / heatmapGridWid);
             var colors = new List<string>
             {
                 "#313695",
@@ -85,27 +86,19 @@ namespace XCharts.Example
             };
             visualMap.AddColors(colors);
             //添加xAxis的数据
-            for (int i = 0; i < xSplitNumber; i++)
-            {
-                chart.AddXAxisData((i + 1).ToString());
-            }
+            for (var i = 0; i < xSplitNumber; i++) chart.AddXAxisData((i + 1).ToString());
             //添加yAxis的数据
-            for (int i = 0; i < ySplitNumber; i++)
+            for (var i = 0; i < ySplitNumber; i++) chart.AddYAxisData((i + 1).ToString());
+            for (var i = 0; i < xSplitNumber; i++)
+            for (var j = 0; j < ySplitNumber; j++)
             {
-                chart.AddYAxisData((i + 1).ToString());
-            }
-            for (int i = 0; i < xSplitNumber; i++)
-            {
-                for (int j = 0; j < ySplitNumber; j++)
-                {
-                    var value = 0f;
-                    var rate = Random.Range(0, 101);
-                    if (rate > 70) value = Random.Range(8f, 10f);
-                    else value = Random.Range(1f, 8f);
-                    var list = new List<double> { i, j, value };
-                    //至少是一个三位数据：（x,y,value）
-                    chart.AddData(0, list);
-                }
+                var value = 0f;
+                var rate = Random.Range(0, 101);
+                if (rate > 70) value = Random.Range(8f, 10f);
+                else value = Random.Range(1f, 8f);
+                var list = new List<double> { i, j, value };
+                //至少是一个三位数据：（x,y,value）
+                chart.AddData(0, list);
             }
         }
     }

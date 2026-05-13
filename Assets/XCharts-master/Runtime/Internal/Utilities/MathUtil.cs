@@ -13,8 +13,8 @@ namespace XCharts.Runtime
         public static double Clamp(double d, double min, double max)
         {
             if (d >= min && d <= max) return d;
-            else if (d < min) return min;
-            else return max;
+            if (d < min) return min;
+            return max;
         }
 
         public static bool Approximately(double a, double b)
@@ -26,10 +26,9 @@ namespace XCharts.Runtime
         {
             if (value < 0F)
                 return 0F;
-            else if (value > 1F)
+            if (value > 1F)
                 return 1F;
-            else
-                return value;
+            return value;
         }
 
         public static double Lerp(double a, double b, double t)
@@ -41,19 +40,20 @@ namespace XCharts.Runtime
         {
             if (value == 0) return true;
             if (value >= -1 && value <= 1) return false;
-            return Math.Abs(value % 1) <= (Double.Epsilon * 100);
+            return Math.Abs(value % 1) <= double.Epsilon * 100;
         }
 
         public static int GetPrecision(double value)
         {
             if (IsInteger(value)) return 0;
-            int count = 1;
-            double intvalue = value * Mathf.Pow(10, count);
+            var count = 1;
+            var intvalue = value * Mathf.Pow(10, count);
             while (!IsInteger(intvalue) && count < 38)
             {
                 count++;
                 intvalue = value * Mathf.Pow(10, count);
             }
+
             return count;
         }
     }

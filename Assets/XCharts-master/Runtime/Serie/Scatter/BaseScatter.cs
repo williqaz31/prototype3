@@ -1,6 +1,8 @@
+using System;
+
 namespace XCharts.Runtime
 {
-    [System.Serializable]
+    [Serializable]
     public class BaseScatter : Serie, INeedSerieContainer
     {
         public int containerIndex { get; internal set; }

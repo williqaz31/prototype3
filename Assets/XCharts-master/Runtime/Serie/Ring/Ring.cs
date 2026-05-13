@@ -1,34 +1,41 @@
+using System;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace XCharts.Runtime
 {
-    [System.Serializable]
+    [Serializable]
     [SerieHandler(typeof(RingHandler), true)]
-    [SerieComponent(typeof(LabelStyle), typeof(LabelLine), typeof(TitleStyle), typeof(EmphasisStyle), typeof(BlurStyle), typeof(SelectStyle))]
-    [SerieDataComponent(typeof(ItemStyle), typeof(LabelStyle), typeof(LabelLine), typeof(TitleStyle), typeof(EmphasisStyle), typeof(BlurStyle), typeof(SelectStyle))]
-    [SerieDataExtraField()]
+    [SerieComponent(typeof(LabelStyle), typeof(LabelLine), typeof(TitleStyle), typeof(EmphasisStyle), typeof(BlurStyle),
+        typeof(SelectStyle))]
+    [SerieDataComponent(typeof(ItemStyle), typeof(LabelStyle), typeof(LabelLine), typeof(TitleStyle),
+        typeof(EmphasisStyle), typeof(BlurStyle), typeof(SelectStyle))]
+    [SerieDataExtraField]
     public class Ring : Serie
     {
-        [SerializeField][Since("v3.12.0")] private bool m_RadiusGradient = false;
+        [SerializeField] [Since("v3.12.0")] private bool m_RadiusGradient;
 
         /// <summary>
-        /// Whether to use gradient color in pie chart.
-        /// || 是否开启半径方向的渐变效果。
+        ///     Whether to use gradient color in pie chart.
+        ///     || 是否开启半径方向的渐变效果。
         /// </summary>
         public bool radiusGradient
         {
-            get { return m_RadiusGradient; }
-            set { if (PropertyUtil.SetStruct(ref m_RadiusGradient, value)) { SetVerticesDirty(); } }
+            get => m_RadiusGradient;
+            set
+            {
+                if (PropertyUtil.SetStruct(ref m_RadiusGradient, value)) SetVerticesDirty();
+            }
         }
 
-        public override SerieColorBy defaultColorBy { get { return SerieColorBy.Data; } }
+        public override SerieColorBy defaultColorBy => SerieColorBy.Data;
 
         public static Serie AddDefaultSerie(BaseChart chart, string serieName)
         {
             var serie = chart.AddSerie<Ring>(serieName);
             serie.roundCap = true;
             serie.gap = 10;
-            serie.radius = new float[] { 0.3f, 0.35f };
+            serie.radius = new[] { 0.3f, 0.35f };
 
             var label = serie.EnsureComponent<LabelStyle>();
             label.show = true;

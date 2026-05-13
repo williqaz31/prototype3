@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,98 +5,110 @@ namespace XCharts.Runtime
 {
     public class AxisContext : MainComponentContext
     {
-        public Orient orient;
         /// <summary>
-        /// 坐标轴的起点X
-        /// </summary>
-        public float x;
-        /// <summary>
-        /// 坐标轴的起点Y
-        /// </summary>
-        public float y;
-        public Vector3 start;
-        public Vector3 end;
-        public Vector3 dire;
-        /// <summary>
-        /// 坐标轴原点X
-        /// </summary>
-        public float zeroX;
-        /// <summary>
-        /// 坐标轴原点Y
-        /// </summary>
-        public float zeroY;
-        public float width;
-        public float height;
-        public float length;
-        public Vector3 position;
-        public float left;
-        public float right;
-        public float bottom;
-        public float top;
-        /// <summary>
-        /// the current minimun value.
-        /// ||当前最小值。
-        /// </summary>
-        public double minValue;
-        public double lastMinValue { get; internal set; }
-        public double destMinValue { get; internal set; }
-        /// <summary>
-        /// the current maximum value.
-        /// ||当前最大值。
-        /// </summary>
-        public double maxValue;
-        public double lastMaxValue { get; internal set; }
-        public double destMaxValue { get; internal set; }
-        public bool needAnimation { get; internal set; }
-        /// <summary>
-        /// the offset of zero position.
-        /// ||坐标轴原点在坐标轴的偏移。
-        /// </summary>
-        public float offset;
-        public double minMaxRange;
-        /// <summary>
-        /// the tick value of value axis.
-        /// ||数值轴时每个tick的数值。
-        /// </summary>
-        public double tickValue;
-        public float scaleWidth;
-        public float startAngle;
-        public double pointerValue;
-        public Vector3 pointerLabelPosition;
-        public double axisTooltipValue;
-        public TextAnchor aligment;
-        public List<string> runtimeData { get { return m_RuntimeData; } }
-        public List<double> labelValueList { get { return m_LabelValueList; } }
-        public List<ChartLabel> labelObjectList { get { return m_AxisLabelList; } }
-        public List<int> sortedDataIndices { get { return m_SortedDataIndices; } }
-        public int dataZoomStartIndex;
-        /// <summary>
-        /// 添加过的历史数据总数
+        ///     添加过的历史数据总数
         /// </summary>
         public int addedDataCount;
 
-        internal List<string> filterData;
-        internal bool lastCheckInverse;
-        internal bool isNeedUpdateFilterData;
+        public TextAnchor aligment;
+        public double axisTooltipValue;
+        public float bottom;
+        public int dataZoomStartIndex;
+        public Vector3 dire;
+        public Vector3 end;
 
-        private int filterStart;
+        internal List<string> filterData;
         private int filterEnd;
         private int filterMinShow;
 
-        private List<ChartLabel> m_AxisLabelList = new List<ChartLabel>();
-        private List<double> m_LabelValueList = new List<double>();
-        private List<string> m_RuntimeData = new List<string>();
-        private List<int> m_SortedDataIndices = new List<int>();
+        private int filterStart;
+        public float height;
+        internal bool isNeedUpdateFilterData;
+        internal bool lastCheckInverse;
+        public float left;
+        public float length;
+
+        private readonly List<string> m_EmptyFliter = new();
+
+        /// <summary>
+        ///     the current maximum value.
+        ///     ||当前最大值。
+        /// </summary>
+        public double maxValue;
+
+        public double minMaxRange;
+
+        /// <summary>
+        ///     the current minimun value.
+        ///     ||当前最小值。
+        /// </summary>
+        public double minValue;
+
+        /// <summary>
+        ///     the offset of zero position.
+        ///     ||坐标轴原点在坐标轴的偏移。
+        /// </summary>
+        public float offset;
+
+        public Orient orient;
+        public Vector3 pointerLabelPosition;
+        public double pointerValue;
+        public Vector3 position;
+        public float right;
+        public float scaleWidth;
+        public Vector3 start;
+        public float startAngle;
+
+        /// <summary>
+        ///     the tick value of value axis.
+        ///     ||数值轴时每个tick的数值。
+        /// </summary>
+        public double tickValue;
+
+        public float top;
+        public float width;
+
+        /// <summary>
+        ///     坐标轴的起点X
+        /// </summary>
+        public float x;
+
+        /// <summary>
+        ///     坐标轴的起点Y
+        /// </summary>
+        public float y;
+
+        /// <summary>
+        ///     坐标轴原点X
+        /// </summary>
+        public float zeroX;
+
+        /// <summary>
+        ///     坐标轴原点Y
+        /// </summary>
+        public float zeroY;
+
+        public double lastMinValue { get; internal set; }
+        public double destMinValue { get; internal set; }
+        public double lastMaxValue { get; internal set; }
+        public double destMaxValue { get; internal set; }
+        public bool needAnimation { get; internal set; }
+        public List<string> runtimeData { get; } = new();
+
+        public List<double> labelValueList { get; } = new();
+
+        public List<ChartLabel> labelObjectList { get; } = new();
+
+        public List<int> sortedDataIndices { get; } = new();
 
         internal void Clear()
         {
             addedDataCount = 0;
-            m_RuntimeData.Clear();
+            runtimeData.Clear();
         }
 
-        private List<string> m_EmptyFliter = new List<string>();
         /// <summary>
-        /// 更新dataZoom对应的类目数据列表
+        ///     更新dataZoom对应的类目数据列表
         /// </summary>
         /// <param name="dataZoom"></param>
         internal void UpdateFilterData(List<string> data, DataZoom dataZoom)
@@ -140,6 +151,7 @@ namespace XCharts.Runtime
                         else
                             range = minZoomRatio;
                     }
+
                     if (range > data.Count - start)
                         start = data.Count - range;
                     if (start >= 0)

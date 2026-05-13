@@ -22,6 +22,7 @@ namespace XCharts.Editor
                 PropertyField("m_SupportInsideScroll");
                 PropertyField("m_SupportInsideDrag");
             }
+
             PropertyField(m_SupportSlider);
             PropertyField(m_SupportMarquee);
             PropertyField("m_ZoomLock");
@@ -51,14 +52,15 @@ namespace XCharts.Editor
                 PropertyField("m_LineStyle");
                 PropertyField("m_AreaStyle");
                 PropertyField("m_LabelStyle");
-                PropertyListField("m_XAxisIndexs", true);
-                PropertyListField("m_YAxisIndexs", true);
+                PropertyListField("m_XAxisIndexs");
+                PropertyListField("m_YAxisIndexs");
             }
             else
             {
-                PropertyListField("m_XAxisIndexs", true);
-                PropertyListField("m_YAxisIndexs", true);
+                PropertyListField("m_XAxisIndexs");
+                PropertyListField("m_YAxisIndexs");
             }
+
             PropertyField("m_MarqueeStyle");
             --EditorGUI.indentLevel;
         }

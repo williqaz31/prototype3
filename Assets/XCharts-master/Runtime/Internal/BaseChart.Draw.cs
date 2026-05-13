@@ -16,7 +16,7 @@ namespace XCharts.Runtime
             bool clip, bool vertical, GridCoord grid)
         {
             if (!IsInChart(p)) return;
-            if (!clip || (clip && (grid.Contains(p))))
+            if (!clip || (clip && grid.Contains(p)))
                 UGL.DrawSquare(vh, p, radius, color);
         }
 
@@ -34,8 +34,9 @@ namespace XCharts.Runtime
                 p3 = ClampInGrid(grid, p3);
                 p4 = ClampInGrid(grid, p4);
             }
-            if (!clip || (clip && (grid.Contains(p1) && grid.Contains(p2) && grid.Contains(p3) &&
-                    grid.Contains(p4))))
+
+            if (!clip || (clip && grid.Contains(p1) && grid.Contains(p2) && grid.Contains(p3) &&
+                          grid.Contains(p4)))
                 UGL.DrawQuadrilateral(vh, p1, p2, p3, p4, startColor, toColor);
         }
 
@@ -53,9 +54,10 @@ namespace XCharts.Runtime
                 p3 = ClampInGrid(grid, p3);
                 p4 = ClampInGrid(grid, p4);
             }
+
             if (!clip ||
                 (clip && grid.Contains(p1) && grid.Contains(p2) && grid.Contains(p3) &&
-                    grid.Contains(p4)))
+                 grid.Contains(p4)))
                 UGL.DrawQuadrilateral(vh, p1, p2, p3, p4, startColor, toColor);
         }
 
@@ -86,7 +88,7 @@ namespace XCharts.Runtime
             bool clip, float[] cornerRadius, GridCoord grid, Vector3 startPos, float symbolSize2 = 0)
         {
             if (!IsInChart(pos)) return;
-            if (!clip || (clip && (grid.Contains(pos))))
+            if (!clip || (clip && grid.Contains(pos)))
                 DrawSymbol(vh, type, symbolSize, tickness, pos, color, toColor, emptyColor, borderColor,
                     gap, cornerRadius, startPos, symbolSize2);
         }

@@ -5,8 +5,8 @@ using UnityEngine;
 namespace XCharts.Runtime
 {
     /// <summary>
-    /// Split area of axis in grid area, not shown by default.
-    /// ||坐标轴在 grid 区域中的分隔区域，默认不显示。
+    ///     Split area of axis in grid area, not shown by default.
+    ///     ||坐标轴在 grid 区域中的分隔区域，默认不显示。
     /// </summary>
     [Serializable]
     public class AxisSplitArea : ChildComponent
@@ -15,37 +15,43 @@ namespace XCharts.Runtime
         [SerializeField] private List<Color32> m_Color;
 
         /// <summary>
-        /// Set this to true to show the splitArea.
-        /// ||是否显示分隔区域。
+        ///     Set this to true to show the splitArea.
+        ///     ||是否显示分隔区域。
         /// </summary>
         public bool show
         {
-            get { return m_Show; }
-            set { if (PropertyUtil.SetStruct(ref m_Show, value)) SetVerticesDirty(); }
+            get => m_Show;
+            set
+            {
+                if (PropertyUtil.SetStruct(ref m_Show, value)) SetVerticesDirty();
+            }
         }
+
         /// <summary>
-        /// Color of split area. SplitArea color could also be set in color array,
-        /// which the split lines would take as their colors in turns.
-        /// Dark and light colors in turns are used by default.
-        /// ||分隔区域颜色。分隔区域会按数组中颜色的顺序依次循环设置颜色。默认是一个深浅的间隔色。
+        ///     Color of split area. SplitArea color could also be set in color array,
+        ///     which the split lines would take as their colors in turns.
+        ///     Dark and light colors in turns are used by default.
+        ///     ||分隔区域颜色。分隔区域会按数组中颜色的顺序依次循环设置颜色。默认是一个深浅的间隔色。
         /// </summary>
         public List<Color32> color
         {
-            get { return m_Color; }
-            set { if (value != null) { m_Color = value; SetVerticesDirty(); } }
-        }
-
-        public static AxisSplitArea defaultSplitArea
-        {
-            get
+            get => m_Color;
+            set
             {
-                return new AxisSplitArea()
+                if (value != null)
                 {
-                    m_Show = false,
-                        m_Color = new List<Color32>() { }
-                };
+                    m_Color = value;
+                    SetVerticesDirty();
+                }
             }
         }
+
+        public static AxisSplitArea defaultSplitArea =>
+            new()
+            {
+                m_Show = false,
+                m_Color = new List<Color32>()
+            };
 
         public AxisSplitArea Clone()
         {

@@ -1,12 +1,13 @@
+using System;
 using System.Collections.Generic;
 
 namespace XCharts.Runtime
 {
     /// <summary>
-    /// Radial axis of polar coordinate.
-    /// ||极坐标系的径向轴。
+    ///     Radial axis of polar coordinate.
+    ///     ||极坐标系的径向轴。
     /// </summary>
-    [System.Serializable]
+    [Serializable]
     [RequireChartComponent(typeof(PolarCoord))]
     [ComponentHandler(typeof(RadiusAxisHandler), true)]
     public class RadiusAxis : Axis

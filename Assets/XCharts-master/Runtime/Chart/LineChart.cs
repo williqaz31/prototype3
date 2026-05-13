@@ -3,10 +3,10 @@ using UnityEngine;
 namespace XCharts.Runtime
 {
     /// <summary>
-    /// Line chart relates all the data points symbol by broken lines, which is used to show the trend of data changing. 
-    /// It could be used in both rectangular coordinate andpolar coordinate.
-    /// ||折线图是用折线将各个数据点标志连接起来的图表，用于展现数据的变化趋势。可用于直角坐标系和极坐标系上。
-    /// 设置 areaStyle 后可以绘制面积图。
+    ///     Line chart relates all the data points symbol by broken lines, which is used to show the trend of data changing.
+    ///     It could be used in both rectangular coordinate andpolar coordinate.
+    ///     ||折线图是用折线将各个数据点标志连接起来的图表，用于展现数据的变化趋势。可用于直角坐标系和极坐标系上。
+    ///     设置 areaStyle 后可以绘制面积图。
     /// </summary>
     [AddComponentMenu("XCharts/LineChart", 13)]
     [ExecuteInEditMode]
@@ -23,15 +23,12 @@ namespace XCharts.Runtime
 
             RemoveData();
             Line.AddDefaultSerie(this, GenerateDefaultSerieName());
-            for (int i = 0; i < 5; i++)
-            {
-                AddXAxisData("x" + (i + 1));
-            }
+            for (var i = 0; i < 5; i++) AddXAxisData("x" + (i + 1));
         }
 
         /// <summary>
-        /// default area line chart.
-        /// || 默认面积折线图。
+        ///     default area line chart.
+        ///     || 默认面积折线图。
         /// </summary>
         public void DefaultAreaLineChart()
         {
@@ -42,8 +39,8 @@ namespace XCharts.Runtime
         }
 
         /// <summary>
-        /// default smooth line chart.
-        /// || 默认平滑折线图。
+        ///     default smooth line chart.
+        ///     || 默认平滑折线图。
         /// </summary>
         public void DefaultSmoothLineChart()
         {
@@ -54,8 +51,8 @@ namespace XCharts.Runtime
         }
 
         /// <summary>
-        /// default smooth area line chart.
-        /// || 默认平滑面积折线图。
+        ///     default smooth area line chart.
+        ///     || 默认平滑面积折线图。
         /// </summary>
         public void DefaultSmoothAreaLineChart()
         {
@@ -67,8 +64,8 @@ namespace XCharts.Runtime
         }
 
         /// <summary>
-        /// default stack line chart.
-        /// || 默认堆叠折线图。
+        ///     default stack line chart.
+        ///     || 默认堆叠折线图。
         /// </summary>
         public void DefaultStackLineChart()
         {
@@ -81,8 +78,8 @@ namespace XCharts.Runtime
         }
 
         /// <summary>
-        /// default stack area line chart.
-        /// || 默认堆叠面积折线图。
+        ///     default stack area line chart.
+        ///     || 默认堆叠面积折线图。
         /// </summary>
         public void DefaultStackAreaLineChart()
         {
@@ -97,8 +94,8 @@ namespace XCharts.Runtime
         }
 
         /// <summary>
-        /// default step line chart.
-        /// || 默认阶梯折线图。
+        ///     default step line chart.
+        ///     || 默认阶梯折线图。
         /// </summary>
         public void DefaultStepLineChart()
         {
@@ -109,8 +106,8 @@ namespace XCharts.Runtime
         }
 
         /// <summary>
-        /// default dash line chart.
-        /// || 默认虚线折线图。
+        ///     default dash line chart.
+        ///     || 默认虚线折线图。
         /// </summary>
         public void DefaultDashLineChart()
         {
@@ -122,8 +119,8 @@ namespace XCharts.Runtime
         }
 
         /// <summary>
-        /// default time line chart.
-        /// || 默认时间折线图。
+        ///     default time line chart.
+        ///     || 默认时间折线图。
         /// </summary>
         public void DefaultTimeLineChart()
         {
@@ -133,8 +130,8 @@ namespace XCharts.Runtime
         }
 
         /// <summary>
-        /// default logarithmic line chart.
-        /// || 默认对数轴折线图。
+        ///     default logarithmic line chart.
+        ///     || 默认对数轴折线图。
         /// </summary>
         public void DefaultLogLineChart()
         {
