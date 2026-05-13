@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using UnityEditor.Callbacks;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 #if UNITY_EDITOR
@@ -134,7 +134,7 @@ namespace XCharts.Runtime
             return packagePath;
         }
 
-        [DidReloadScripts]
+        
         private static void OnEditorReload()
         {
             for (var i = chartList.Count - 1; i >= 0; i--)
