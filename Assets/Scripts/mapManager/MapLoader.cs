@@ -24,7 +24,7 @@ public class MapLoader : MonoBehaviour
     public TileBase Food;
     public TileBase Queen;
 
-    public string mapFile = "/Tiles/Maps.txt";
+    public string mapFilePath = "Tiles/Maps";
     public string expOddsFile = "/Tiles/ExpansionOdds.txt";
 
     public float updateInterval = 0.1f;
@@ -82,10 +82,17 @@ public class MapLoader : MonoBehaviour
     // Loads the map from the text file
     private void InitializeMap()
     {
-        var path = Application.dataPath + mapFile;
-        if (!File.Exists(path)) return;
+        // No file extension needed for Resources.Load
+        TextAsset mapAsset = Resources.Load<TextAsset>(mapFilePath);
 
-        var lines = File.ReadAllLines(path);
+        if (mapAsset == null)
+        {
+            Debug.LogError($"File not found at Assets/Resources/{mapFilePath}.txt");
+            return;
+        }
+
+        // Split the text into lines
+        string[] lines = mapAsset.text.Split(new[] { "\r\n", "\r", "\n" }, System.StringSplitOptions.RemoveEmptyEntries);
 
         Rows = lines.Length;
         Cols = lines[0].Length;

@@ -10416,7 +10416,7 @@ MonoBehaviour:
   Rock: {fileID: 11400000, guid: 52bd9f83b11dd92439c4f0990b9f5b1f, type: 2}
   Food: {fileID: 11400000, guid: 034f8065c10631248ac9115e5ed22985, type: 2}
   Queen: {fileID: 11400000, guid: fb432b1adcf018645806bf41e1eb8e1c, type: 2}
-  mapFile: /Tiles/Maps.txt
+  mapFilePath: Tiles/Maps
   expOddsFile: /Tiles/ExpansionOdds.txt
   updateInterval: 0.1
   debugMode: 1
